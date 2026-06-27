@@ -1,27 +1,28 @@
-# eclipse
-bin
-*.launch
-.settings
-.metadata
+# We don't want compiled stuff in here!
+/bin
+doc/info.txt
+/build
+/run
+
+# Ignore project specific files
 .classpath
 .project
-
-# idea
-out
+.settings
+.pydevproject
+eclipse/*
+.gradle/*
+repo/*
+*.iml
 *.ipr
 *.iws
-*.iml
+out/*
+keystore.jks
+
+# Ignore mac-specific file(s)
+.DS_Store
+
+# Ignore files specific to dev environments
+secrets.properties
+build_number.properties
+changelog.txt
 .idea
-
-# vscode
-.vscode
-
-# gradle
-build
-.gradle
-
-# other
-eclipse
-run
-local
-logs
