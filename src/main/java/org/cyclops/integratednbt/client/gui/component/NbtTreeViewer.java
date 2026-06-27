@@ -4,23 +4,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.nbt.ByteTag;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.FloatTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.IntTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.LongTag;
-import net.minecraft.nbt.TagTypes;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
-import net.minecraft.nbt.ShortTag;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
-import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
-import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 import org.cyclops.integratednbt.client.gui.FontHelper;
 import org.cyclops.integratednbt.client.gui.container.ExtendedContainerScreen;
+import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.helpers.Wrapper;
 
 import java.util.ArrayList;
@@ -268,50 +259,53 @@ public abstract class NbtTreeViewer {
                     SCROLL_BAR_COLOR
                 );
             }
-            if (this.hoveringPath != null) {
-                IValueType<? extends IValue> hoveringValueType =
+        } finally {
+            matrixStack.popPose();
+        }
+    }
+
+    public void renderTooltip(PoseStack matrixStack, int absMouseX, int absMouseY) {
+        if (this.hoveringPath != null) {
+            IValueType<? extends IValue> hoveringValueType =
                     NbtValueConverter.mapNBTToValueType(this.hoveringNBTNode);
-                ArrayList<String> list = new ArrayList<>(5);
-                list.add(this.hoveringPath.getDisplayText());
-                list.add(I18n.get(
+            ArrayList<String> list = new ArrayList<>(5);
+            list.add(this.hoveringPath.getDisplayText());
+            list.add(I18n.get(
                     "integratednbt:nbt_extractor.tooltip.nbt_type",
                     // Get NBT tag type from tag type id
                     TagTypes.getType(this.hoveringNBTNode.getId()).getPrettyName()
-                ));
-                list.add(I18n.get(
+            ));
+            list.add(I18n.get(
                     "integratednbt:nbt_extractor.tooltip.converted_type",
                     hoveringValueType.getDisplayColorFormat()
-                        + I18n.get(hoveringValueType.getTranslationKey())
-                ));
-                list.add(I18n.get(
+                            + I18n.get(hoveringValueType.getTranslationKey())
+            ));
+            list.add(I18n.get(
                     "integratednbt:nbt_extractor.tooltip.default_value",
                     NbtValueConverter.getDefaultValueDisplayText(this.hoveringNBTNode.getId())
-                ));
-                if (Objects.equals(this.getSelectedPath(), this.hoveringPath)) {
-                    list.add(I18n.get("integratednbt:nbt_extractor.tooltip.selected"));
-                } else if (Objects.equals(this.selecting, this.hoveringPath)) {
-                    list.add(I18n.get("integratednbt:nbt_extractor.tooltip.selecting"));
-                } else {
-                    list.add(I18n.get("integratednbt:nbt_extractor.tooltip.left_click"));
-                }
-                if (isNodeExpandable(this.hoveringNBTNode)) {
-                    if (this.expandedPaths.contains(this.hoveringPath)) {
-                        list.add(I18n.get("integratednbt:nbt_extractor.tooltip"
+            ));
+            if (Objects.equals(this.getSelectedPath(), this.hoveringPath)) {
+                list.add(I18n.get("integratednbt:nbt_extractor.tooltip.selected"));
+            } else if (Objects.equals(this.selecting, this.hoveringPath)) {
+                list.add(I18n.get("integratednbt:nbt_extractor.tooltip.selecting"));
+            } else {
+                list.add(I18n.get("integratednbt:nbt_extractor.tooltip.left_click"));
+            }
+            if (isNodeExpandable(this.hoveringNBTNode)) {
+                if (this.expandedPaths.contains(this.hoveringPath)) {
+                    list.add(I18n.get("integratednbt:nbt_extractor.tooltip"
                             + ".right_click_collapse"));
-                    } else {
-                        list.add(I18n.get(
+                } else {
+                    list.add(I18n.get(
                             "integratednbt:nbt_extractor.tooltip.right_click_expand"));
-                    }
                 }
-                this.gui.renderTooltip(
+            }
+            this.gui.renderTooltip(
                     matrixStack,
                     FontHelper.wrap(list.stream().map(s -> Component.literal(s)).collect(Collectors.toList()), 250),
                     this.mouseX,
                     (int) (this.mouseY - this.renderScroll)
-                );
-            }
-        } finally {
-            matrixStack.popPose();
+            );
         }
     }
 

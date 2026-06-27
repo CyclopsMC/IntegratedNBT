@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.cyclops.integratednbt.*;
+import org.cyclops.integratednbt.IntegratedNbt;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.client.gui.component.HoverTextImageButton;
 import org.cyclops.integratednbt.client.gui.component.NbtTreeViewer;
@@ -404,6 +404,12 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
             this.treeViewer.render(matrixStack, nbt, mouseX, mouseY);
         }
         glDisable(GL_SCISSOR_TEST);
+    }
+
+    @Override
+    protected void renderTooltip(PoseStack poseStack, int mouseX, int mouseY) {
+        super.renderTooltip(poseStack, mouseX, mouseY);
+        this.treeViewer.renderTooltip(poseStack, mouseX, mouseY);
     }
 
     @Override
