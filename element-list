@@ -1,5 +1,6 @@
 org.cyclops.integratednbt
 org.cyclops.integratednbt.block
 org.cyclops.integratednbt.helpers
+org.cyclops.integratednbt.item
 org.cyclops.integratednbt.network.packet
 org.cyclops.integratednbt.proxy
