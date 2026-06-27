@@ -14,6 +14,7 @@ import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.api.item.IVariableFacade;
+import org.cyclops.integrateddynamics.api.network.INetwork;
 import org.cyclops.integrateddynamics.api.network.IPartNetwork;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
@@ -107,18 +108,18 @@ public class NBTExtractedVariableFacade extends VariableFacadeBase {
     @Override
     @SuppressWarnings("unchecked")
     public <V extends IValue> IVariable<V> getVariable(
-        IPartNetwork network
+        INetwork network, IPartNetwork partNetwork
     ) {
         if (!this.isValid()) {
             return null;
         }
-        int newNetworkHash = network != null ? network.hashCode() : -1;
+        int newNetworkHash = partNetwork != null ? partNetwork.hashCode() : -1;
         if (this.variable == null || newNetworkHash != this.lastNetworkHash) {
             this.lastNetworkHash = newNetworkHash;
-            if (network == null || !network.hasVariableFacade(this.sourceNBTId)) {
+            if (partNetwork == null || !partNetwork.hasVariableFacade(this.sourceNBTId)) {
                 return null;
             }
-            IVariableFacade sourceNbtVariableFacade = network.getVariableFacade(this.sourceNBTId);
+            IVariableFacade sourceNbtVariableFacade = partNetwork.getVariableFacade(this.sourceNBTId);
             if (!sourceNbtVariableFacade.isValid() || sourceNbtVariableFacade == this) {
                 return null;
             }
@@ -126,7 +127,7 @@ public class NBTExtractedVariableFacade extends VariableFacadeBase {
                 return null;
             }
             this.gettingVariable = true;
-            IVariable<ValueNbt> sourceNbtVariable = sourceNbtVariableFacade.getVariable(network);
+            IVariable<ValueNbt> sourceNbtVariable = sourceNbtVariableFacade.getVariable(network, partNetwork);
             this.gettingVariable = false;
             if (sourceNbtVariable == null) {
                 return null;
@@ -142,20 +143,20 @@ public class NBTExtractedVariableFacade extends VariableFacadeBase {
 
     @Override
     public void validate(
-        IPartNetwork network, IValidator validator, IValueType containingValueType
+            INetwork network, IPartNetwork partNetwork, IValidator validator, IValueType containingValueType
     ) {
         if (!this.isValid()) {
             return;
         }
         if (this.sourceNBTId < 0) {
             validator.addError(Component.translatable(L10NValues.VARIABLE_ERROR_INVALIDITEM));
-        } else if (!network.hasVariableFacade(this.sourceNBTId)) {
+        } else if (!partNetwork.hasVariableFacade(this.sourceNBTId)) {
             validator.addError(Component.translatable(
                 L10NValues.OPERATOR_ERROR_VARIABLENOTINNETWORK,
                 Integer.toString(this.sourceNBTId)
             ));
         } else {
-            IVariableFacade sourceVariableFacade = network.getVariableFacade(this.sourceNBTId);
+            IVariableFacade sourceVariableFacade = partNetwork.getVariableFacade(this.sourceNBTId);
             if (sourceVariableFacade == this) {
                 validator.addError(Component.translatable(
                     L10NValues.OPERATOR_ERROR_CYCLICREFERENCE,
@@ -170,7 +171,7 @@ public class NBTExtractedVariableFacade extends VariableFacadeBase {
                     ));
                 }
                 this.validating = true;
-                sourceVariableFacade.validate(network, error -> {
+                sourceVariableFacade.validate(network, partNetwork, error -> {
                     validator.addError(error);
                     isValid.set(false);
                 }, ValueTypes.NBT);

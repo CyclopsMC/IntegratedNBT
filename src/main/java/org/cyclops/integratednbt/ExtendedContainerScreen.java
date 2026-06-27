@@ -1,7 +1,6 @@
 package org.cyclops.integratednbt;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.gui.Font;
