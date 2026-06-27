@@ -23,9 +23,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.cyclops.integrateddynamics.core.helper.WrenchHelpers;
-import org.cyclops.integratednbt.Additions;
 import org.cyclops.integratednbt.CabledHorizontalBlock;
 import org.cyclops.integratednbt.NBTExtractorBE;
+import org.cyclops.integratednbt.RegistryEntries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -114,7 +114,7 @@ public class BlockNbtExtractor extends CabledHorizontalBlock implements EntityBl
                 world.destroyBlock(blockPos, false);
                 return InteractionResult.SUCCESS;
             }
-            if (heldItem.getItem() == Additions.NBT_EXTRACTOR_REMOTE.get()) {
+            if (heldItem.getItem() == RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE) {
                 return InteractionResult.PASS;
             }
             if (!player.isCrouching()) {

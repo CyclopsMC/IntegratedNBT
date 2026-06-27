@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.item;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -22,17 +22,19 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.cyclops.integratednbt.IntegratedNbt;
+import org.cyclops.integratednbt.Reference;
+import org.cyclops.integratednbt.RegistryEntries;
 import org.cyclops.integratednbt.network.packet.OpenNbtExtractorRemoteGuiPacket;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class NBTExtractorRemote extends Item {
-    public static final String REGISTRY_NAME = "nbt_extractor_remote";
+public class ItemNbtExtractorRemote extends Item {
 
-    public NBTExtractorRemote() {
-        super(new Item.Properties().tab(IntegratedNBT._instance.getDefaultItemGroup()).stacksTo(1));
+    public ItemNbtExtractorRemote(Item.Properties properties) {
+        super(properties);
     }
 
     @Override
@@ -82,7 +84,7 @@ public class NBTExtractorRemote extends Item {
                 "integratednbt:nbt_extractor_remote.invalid_bind"));
             return;
         }
-        IntegratedNBT._instance.getPacketHandler().sendToServer(new OpenNbtExtractorRemoteGuiPacket());
+        IntegratedNbt._instance.getPacketHandler().sendToServer(new OpenNbtExtractorRemoteGuiPacket());
     }
 
     public CompoundTag getModNBT(ItemStack itemStack) {
@@ -139,7 +141,7 @@ public class NBTExtractorRemote extends Item {
         InteractionHand hand = itemUseContext.getHand();
         if (world.getBlockState(pos).getBlock() == RegistryEntries.BLOCK_NBT_EXTRACTOR) {
             if (!world.isClientSide) {
-                Additions.NBT_EXTRACTOR_REMOTE.get()
+                RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE
                     .bindBlock(player.getItemInHand(hand), world, pos);
                 player.sendSystemMessage(Component.translatable(
                     "integratednbt:nbt_extractor_remote.bind_successful",

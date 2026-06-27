@@ -179,7 +179,7 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
                 } catch (Exception exception) {
                     errorCode = UpdateClientNbtExtractorPacket.ErrorCode.UNEXPECTED_ERROR;
                     exception.printStackTrace();
-                    IntegratedNBT.clog("Unexpected error occurred while evaluating variable.");
+                    IntegratedNbt.clog("Unexpected error occurred while evaluating variable.");
                 }
             }
             UpdateClientNbtExtractorPacket message = new UpdateClientNbtExtractorPacket();
@@ -212,7 +212,7 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
             }
             if (!message.isEmpty()) {
                 ServerPlayer playerMP = (ServerPlayer) this.playerInventory.player;
-                IntegratedNBT._instance.getPacketHandler().sendToPlayer(message, playerMP);
+                IntegratedNbt._instance.getPacketHandler().sendToPlayer(message, playerMP);
             }
             if (errorCode == UpdateClientNbtExtractorPacket.ErrorCode.NO_ERROR) {
                 this.nbtExtractorEntity.updateLastEvaluatedNBT(newNBT.get());

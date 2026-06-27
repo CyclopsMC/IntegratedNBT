@@ -197,7 +197,7 @@ public class NBTPath {
             return Optional.of(new NBTPath(segments));
         } catch (Exception ex) {
             ex.printStackTrace();
-            IntegratedNBT.clog("Failed to decode NBT for ExtractionPath.");
+            IntegratedNbt.clog("Failed to decode NBT for ExtractionPath.");
             return Optional.empty();
         }
     }

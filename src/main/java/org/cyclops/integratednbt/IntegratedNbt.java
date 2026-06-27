@@ -13,20 +13,20 @@ import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.integratednbt.block.BlockNbtExtractorConfig;
+import org.cyclops.integratednbt.item.ItemNbtExtractorRemoteConfig;
 import org.cyclops.integratednbt.proxy.ClientProxy;
 import org.cyclops.integratednbt.proxy.CommonProxy;
 
 @Mod(Reference.MOD_ID)
-public class IntegratedNBT extends ModBase<IntegratedNBT> {
+public class IntegratedNbt extends ModBase<IntegratedNbt> {
 
-    public static IntegratedNBT _instance;
+    public static IntegratedNbt _instance;
 
-    public IntegratedNBT() {
+    public IntegratedNbt() {
         super(Reference.MOD_ID, (instance) -> _instance = instance);
 
         // TODO: migrate code below...
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        Additions.ITEMS.register(modEventBus);
         Additions.CONTAINER_TYPES.register(modEventBus);
         Additions.BLOCK_ENTITIES.register(modEventBus);
     }
@@ -43,6 +43,8 @@ public class IntegratedNBT extends ModBase<IntegratedNBT> {
         configHandler.addConfigurable(new GeneralConfig());
 
         configHandler.addConfigurable(new BlockNbtExtractorConfig());
+
+        configHandler.addConfigurable(new ItemNbtExtractorRemoteConfig());
     }
 
     @Override
@@ -70,6 +72,6 @@ public class IntegratedNBT extends ModBase<IntegratedNBT> {
      * @param message The message to show.
      */
     public static void clog(Level level, String message) {
-        IntegratedNBT._instance.getLoggerHelper().log(level, message);
+        IntegratedNbt._instance.getLoggerHelper().log(level, message);
     }
 }

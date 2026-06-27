@@ -2,7 +2,7 @@ package org.cyclops.integratednbt.proxy;
 
 import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.proxy.ClientProxyComponent;
-import org.cyclops.integratednbt.IntegratedNBT;
+import org.cyclops.integratednbt.IntegratedNbt;
 
 /**
  * Proxy for the client side.
@@ -18,7 +18,7 @@ public class ClientProxy extends ClientProxyComponent {
 
     @Override
     public ModBase getMod() {
-        return IntegratedNBT._instance;
+        return IntegratedNbt._instance;
     }
 
 }

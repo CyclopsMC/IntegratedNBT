@@ -10,7 +10,7 @@ import org.cyclops.cyclopscore.config.extendedconfig.DummyConfig;
 public class GeneralConfig extends DummyConfig {
 
     public GeneralConfig() {
-        super(IntegratedNBT._instance, "general");
+        super(IntegratedNbt._instance, "general");
     }
 
 }

@@ -134,7 +134,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
         ) {
             @Override
             public void onUpdateSelectedPath(NBTPath newPath, Tag nbt) {
-                IntegratedNBT._instance.getPacketHandler().sendToServer(new NbtExtractorSetExtractionPathPacket(
+                IntegratedNbt._instance.getPacketHandler().sendToServer(new NbtExtractorSetExtractionPathPacket(
                         NBTExtractorScreen.this.nbtExtractorContainer.getNbtExtractorEntity()
                                 .getBlockPos(),
                         newPath,
@@ -319,7 +319,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
         if (outputMode == null) {
             return;
         }
-        IntegratedNBT._instance.getPacketHandler().sendToServer(new NbtExtractorSetOutputModePacket(
+        IntegratedNbt._instance.getPacketHandler().sendToServer(new NbtExtractorSetOutputModePacket(
                 this.nbtExtractorContainer.getNbtExtractorEntity().getBlockPos(),
                 NBTExtractorOutputMode.values()[(outputMode.ordinal() + 1) %
                         NBTExtractorOutputMode.values().length]
@@ -330,7 +330,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
         if (autoRefresh == null) {
             return;
         }
-        IntegratedNBT._instance.getPacketHandler().sendToServer(new NbtExtractorUpdateAutoRefreshPacket(
+        IntegratedNbt._instance.getPacketHandler().sendToServer(new NbtExtractorUpdateAutoRefreshPacket(
                 this.nbtExtractorContainer.getNbtExtractorEntity().getBlockPos(),
                 !autoRefresh
         ));

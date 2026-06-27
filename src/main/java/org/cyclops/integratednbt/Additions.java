@@ -1,7 +1,6 @@
 package org.cyclops.integratednbt;
 
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.DeferredRegister;
@@ -9,16 +8,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 public abstract class Additions { // TODO: migrate to configs
-
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(
-        ForgeRegistries.ITEMS,
-        Reference.MOD_ID
-    );
-
-    public static final RegistryObject<NBTExtractorRemote> NBT_EXTRACTOR_REMOTE = ITEMS.register(
-        NBTExtractorRemote.REGISTRY_NAME,
-        NBTExtractorRemote::new
-    );
 
     public static final DeferredRegister<MenuType<?>> CONTAINER_TYPES = DeferredRegister.create(
         ForgeRegistries.MENU_TYPES,

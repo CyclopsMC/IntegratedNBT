@@ -5,8 +5,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.cyclops.cyclopscore.network.PacketCodec;
-import org.cyclops.integratednbt.Additions;
-import org.cyclops.integratednbt.NBTExtractorRemote;
+import org.cyclops.integratednbt.RegistryEntries;
+import org.cyclops.integratednbt.item.ItemNbtExtractorRemote;
 
 /**
  * Requests to open the GUI for an NBT Extractor at location.
@@ -30,7 +30,7 @@ public class OpenNbtExtractorRemoteGuiPacket extends PacketCodec {
 
     @Override
     public void actionServer(Level world, ServerPlayer player) {
-        NBTExtractorRemote remote = Additions.NBT_EXTRACTOR_REMOTE.get();
+        ItemNbtExtractorRemote remote = RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE;
         assert player != null;
         if (player.getItemInHand(InteractionHand.MAIN_HAND).getItem() == remote) {
             remote.serverUse(player.getItemInHand(InteractionHand.MAIN_HAND), player);

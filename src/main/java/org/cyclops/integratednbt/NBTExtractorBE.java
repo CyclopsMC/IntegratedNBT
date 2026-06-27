@@ -479,10 +479,10 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
         if (this.level == null) {
             return false;
         }
-        if (itemStack.getItem() != Additions.NBT_EXTRACTOR_REMOTE.get()) {
+        if (itemStack.getItem() != RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE) {
             return false;
         }
-        CompoundTag tag = Additions.NBT_EXTRACTOR_REMOTE.get().getModNBT(itemStack);
+        CompoundTag tag = RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE.getModNBT(itemStack);
         return (tag.contains("world")) &&
             (tag.getString("world").equals(this.level.dimension().location().toString())) &&
             (tag.getInt("x") == this.worldPosition.getX()) &&

@@ -3,7 +3,7 @@ package org.cyclops.integratednbt.proxy;
 import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.network.PacketHandler;
 import org.cyclops.cyclopscore.proxy.CommonProxyComponent;
-import org.cyclops.integratednbt.IntegratedNBT;
+import org.cyclops.integratednbt.IntegratedNbt;
 import org.cyclops.integratednbt.network.packet.*;
 
 /**
@@ -15,7 +15,7 @@ public class CommonProxy extends CommonProxyComponent {
 
     @Override
     public ModBase getMod() {
-        return IntegratedNBT._instance;
+        return IntegratedNbt._instance;
     }
 
     @Override
