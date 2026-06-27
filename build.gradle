@@ -15,7 +15,7 @@ apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remappe
 
 
 version = "1.6.0"
-group = "me.tepis.integratednbt" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "org.cyclops.integratednbt" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "integratednbt"
 
 configurations {
