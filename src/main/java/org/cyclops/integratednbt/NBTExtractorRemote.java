@@ -22,9 +22,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.PacketDistributor;
-import org.cyclops.integratednbt.network.PacketHandler;
-import org.cyclops.integratednbt.network.serverbound.NBTExtractorRemoteRequestMessage;
+import org.cyclops.integratednbt.network.packet.OpenNbtExtractorRemoteGuiPacket;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -84,10 +82,7 @@ public class NBTExtractorRemote extends Item {
                 "integratednbt:nbt_extractor_remote.invalid_bind"));
             return;
         }
-        PacketHandler.INSTANCE.send(
-            PacketDistributor.SERVER.noArg(),
-            new NBTExtractorRemoteRequestMessage()
-        );
+        IntegratedNBT._instance.getPacketHandler().sendToServer(new OpenNbtExtractorRemoteGuiPacket());
     }
 
     public CompoundTag getModNBT(ItemStack itemStack) {

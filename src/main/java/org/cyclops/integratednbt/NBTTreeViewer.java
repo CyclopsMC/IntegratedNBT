@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.ShortTag;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
-import org.cyclops.integratednbt.datastructure.Wrapper;
+import org.cyclops.integratednbt.helpers.Wrapper;
 
 import java.util.ArrayList;
 import java.util.Objects;

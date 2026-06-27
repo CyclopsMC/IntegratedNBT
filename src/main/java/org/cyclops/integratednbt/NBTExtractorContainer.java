@@ -12,17 +12,14 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.PacketDistributor;
 import org.cyclops.integrateddynamics.api.PartStateException;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
-import org.cyclops.integratednbt.datastructure.Wrapper;
+import org.cyclops.integratednbt.helpers.Wrapper;
 import org.cyclops.integratednbt.helpers.VariableHelpers;
-import org.cyclops.integratednbt.network.PacketHandler;
-import org.cyclops.integratednbt.network.clientbound.NBTExtractorUpdateClientMessage;
-import org.cyclops.integratednbt.network.clientbound.NBTExtractorUpdateClientMessage.ErrorCode;
+import org.cyclops.integratednbt.network.packet.UpdateClientNbtExtractorPacket;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -82,7 +79,7 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
     private static final int INVENTORY_END = 38; // Exclusive
     private Inventory playerInventory;
     private NBTExtractorBE nbtExtractorEntity;
-    private ErrorCode clientErrorCode = null;
+    private UpdateClientNbtExtractorPacket.ErrorCode clientErrorCode = null;
     private Wrapper<Tag> clientNBT = null;
     private NBTPath clientPath = null;
     private NBTExtractorOutputMode clientOutputMode = null;
@@ -146,7 +143,7 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
         super.broadcastChanges();
         Level world = this.nbtExtractorEntity.getLevel();
         if (world != null && !world.isClientSide) {
-            ErrorCode errorCode;
+            UpdateClientNbtExtractorPacket.ErrorCode errorCode;
             Wrapper<Tag> newNBT = this.clientNBT;
             Component errorMessage = null;
             if (!this.getSlot(SRC_NBT).hasItem()) {
@@ -160,32 +157,32 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
                         // on, but a value has not been evaluated yet.)
                         IVariable<?> variable = this.nbtExtractorEntity.getSrcNBTVariable();
                         if (variable == null) {
-                            errorCode = ErrorCode.EVAL_ERROR;
+                            errorCode = UpdateClientNbtExtractorPacket.ErrorCode.EVAL_ERROR;
                             errorMessage = this.nbtExtractorEntity.getFirstErrorMessage();
                         } else {
                             IValue value = variable.getValue();
                             if (value instanceof ValueNbt) {
                                 newNBT = Wrapper.of(((ValueNbt) value).getRawValue().orElse(null));
-                                errorCode = ErrorCode.NO_ERROR;
+                                errorCode = UpdateClientNbtExtractorPacket.ErrorCode.NO_ERROR;
                             } else {
-                                errorCode = ErrorCode.TYPE_ERROR;
+                                errorCode = UpdateClientNbtExtractorPacket.ErrorCode.TYPE_ERROR;
                             }
                         }
                     } else {
-                        errorCode = ErrorCode.NO_ERROR;
+                        errorCode = UpdateClientNbtExtractorPacket.ErrorCode.NO_ERROR;
                         newNBT = frozenValue;
                     }
                 } catch (EvaluationException | PartStateException exception) {
                     exception.printStackTrace();
-                    errorCode = ErrorCode.EVAL_ERROR;
+                    errorCode = UpdateClientNbtExtractorPacket.ErrorCode.EVAL_ERROR;
                     errorMessage = Component.literal(exception.getMessage());
                 } catch (Exception exception) {
-                    errorCode = ErrorCode.UNEXPECTED_ERROR;
+                    errorCode = UpdateClientNbtExtractorPacket.ErrorCode.UNEXPECTED_ERROR;
                     exception.printStackTrace();
                     IntegratedNBT.clog("Unexpected error occurred while evaluating variable.");
                 }
             }
-            NBTExtractorUpdateClientMessage message = new NBTExtractorUpdateClientMessage();
+            UpdateClientNbtExtractorPacket message = new UpdateClientNbtExtractorPacket();
             if (!Objects.equals(this.clientNBT, newNBT)) {
                 message.updateNBT(newNBT.get());
                 this.clientNBT = newNBT;
@@ -215,9 +212,9 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
             }
             if (!message.isEmpty()) {
                 ServerPlayer playerMP = (ServerPlayer) this.playerInventory.player;
-                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> playerMP), message);
+                IntegratedNBT._instance.getPacketHandler().sendToPlayer(message, playerMP);
             }
-            if (errorCode == ErrorCode.NO_ERROR) {
+            if (errorCode == UpdateClientNbtExtractorPacket.ErrorCode.NO_ERROR) {
                 this.nbtExtractorEntity.updateLastEvaluatedNBT(newNBT.get());
             } else {
                 this.nbtExtractorEntity.updateLastEvaluatedNBT(null);

@@ -12,7 +12,6 @@ import org.cyclops.cyclopscore.init.ItemGroupMod;
 import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
-import org.cyclops.integratednbt.network.PacketHandler;
 import org.cyclops.integratednbt.proxy.ClientProxy;
 import org.cyclops.integratednbt.proxy.CommonProxy;
 
@@ -30,7 +29,6 @@ public class IntegratedNBT extends ModBase<IntegratedNBT> {
         Additions.ITEMS.register(modEventBus);
         Additions.CONTAINER_TYPES.register(modEventBus);
         Additions.BLOCK_ENTITIES.register(modEventBus);
-        PacketHandler.register();
     }
 
     @Override

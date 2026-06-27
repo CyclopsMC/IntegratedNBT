@@ -1,32 +1,27 @@
 package org.cyclops.integratednbt;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import org.cyclops.integratednbt.network.PacketHandler;
-import org.cyclops.integratednbt.network.clientbound.NBTExtractorUpdateClientMessage.ErrorCode;
-import org.cyclops.integratednbt.network.serverbound.NBTExtractorUpdateAutoRefreshMessage;
-import org.cyclops.integratednbt.network.serverbound.NBTExtractorUpdateExtractionPathMessage;
-import org.cyclops.integratednbt.network.serverbound.NBTExtractorUpdateOutputModeMessage;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.ChatFormatting;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.PacketDistributor;
+import org.cyclops.integratednbt.network.packet.NbtExtractorSetExtractionPathPacket;
+import org.cyclops.integratednbt.network.packet.NbtExtractorSetOutputModePacket;
+import org.cyclops.integratednbt.network.packet.NbtExtractorUpdateAutoRefreshPacket;
+import org.cyclops.integratednbt.network.packet.UpdateClientNbtExtractorPacket;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.lwjgl.opengl.GL11.GL_SCISSOR_TEST;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glScissor;
+import static org.lwjgl.opengl.GL11.*;
 
 @OnlyIn(Dist.CLIENT)
 public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorContainer> {
@@ -94,7 +89,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
     // These are static because GUI sometimes after receiving the update packets.
     private static NBTExtractorScreen lastInstance = null;
     // Null signify that the first update packet has not arrived yet.
-    private static ErrorCode errorCode = null;
+    private static UpdateClientNbtExtractorPacket.ErrorCode errorCode = null;
     private static Tag nbt;
     private static NBTPath extractionPath = null;
     private static NBTExtractorOutputMode outputMode = null;
@@ -139,15 +134,12 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
         ) {
             @Override
             public void onUpdateSelectedPath(NBTPath newPath, Tag nbt) {
-                PacketHandler.INSTANCE.send(
-                    PacketDistributor.SERVER.noArg(),
-                    new NBTExtractorUpdateExtractionPathMessage(
+                IntegratedNBT._instance.getPacketHandler().sendToServer(new NbtExtractorSetExtractionPathPacket(
                         NBTExtractorScreen.this.nbtExtractorContainer.getNbtExtractorEntity()
-                            .getBlockPos(),
+                                .getBlockPos(),
                         newPath,
                         nbt.getId()
-                    )
-                );
+                ));
             }
 
             @Override
@@ -157,7 +149,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
         };
     }
 
-    public static void updateError(ErrorCode errorCode) {
+    public static void updateError(UpdateClientNbtExtractorPacket.ErrorCode errorCode) {
         NBTExtractorScreen.errorCode = errorCode;
     }
 
@@ -327,27 +319,21 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
         if (outputMode == null) {
             return;
         }
-        PacketHandler.INSTANCE.send(
-            PacketDistributor.SERVER.noArg(),
-            new NBTExtractorUpdateOutputModeMessage(
+        IntegratedNBT._instance.getPacketHandler().sendToServer(new NbtExtractorSetOutputModePacket(
                 this.nbtExtractorContainer.getNbtExtractorEntity().getBlockPos(),
                 NBTExtractorOutputMode.values()[(outputMode.ordinal() + 1) %
-                    NBTExtractorOutputMode.values().length]
-            )
-        );
+                        NBTExtractorOutputMode.values().length]
+        ));
     }
 
     public void onAutoRefreshButtonClick(Button ignored) {
         if (autoRefresh == null) {
             return;
         }
-        PacketHandler.INSTANCE.send(
-            PacketDistributor.SERVER.noArg(),
-            new NBTExtractorUpdateAutoRefreshMessage(
+        IntegratedNBT._instance.getPacketHandler().sendToServer(new NbtExtractorUpdateAutoRefreshPacket(
                 this.nbtExtractorContainer.getNbtExtractorEntity().getBlockPos(),
                 !autoRefresh
-            )
-        );
+        ));
     }
 
     @Override
@@ -357,7 +343,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
         double dWheel
     ) {
         super.mouseScrolled(mouseX, mouseY, dWheel);
-        if (errorCode == ErrorCode.NO_ERROR && nbt != null) {
+        if (errorCode == UpdateClientNbtExtractorPacket.ErrorCode.NO_ERROR && nbt != null) {
             this.treeViewer.mouseScrolled(dWheel);
         }
         return true;
@@ -403,7 +389,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
             this.renderWelcome(matrixStack);
         } else if (errorCode == null) {
             this.renderLoading(matrixStack);
-        } else if (!errorCode.equals(ErrorCode.NO_ERROR)) {
+        } else if (!errorCode.equals(UpdateClientNbtExtractorPacket.ErrorCode.NO_ERROR)) {
             this.renderError(matrixStack);
         } else {
             this.treeViewer.render(matrixStack, nbt, mouseX, mouseY);

@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt.datastructure;
+package org.cyclops.integratednbt.helpers;
 
 import java.util.Objects;
 

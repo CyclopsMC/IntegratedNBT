@@ -4,6 +4,7 @@ import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.network.PacketHandler;
 import org.cyclops.cyclopscore.proxy.CommonProxyComponent;
 import org.cyclops.integratednbt.IntegratedNBT;
+import org.cyclops.integratednbt.network.packet.*;
 
 /**
  * Proxy for server and client side.
@@ -22,7 +23,11 @@ public class CommonProxy extends CommonProxyComponent {
         super.registerPacketHandlers(packetHandler);
 
         // Register packets.
-        // TODO
+        packetHandler.register(UpdateClientNbtExtractorPacket.class);
+        packetHandler.register(OpenNbtExtractorRemoteGuiPacket.class);
+        packetHandler.register(NbtExtractorUpdateAutoRefreshPacket.class);
+        packetHandler.register(NbtExtractorSetExtractionPathPacket.class);
+        packetHandler.register(NbtExtractorSetOutputModePacket.class);
     }
 
 }
