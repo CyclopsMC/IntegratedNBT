@@ -1,10 +1,10 @@
 package org.cyclops.integratednbt;
 
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import org.cyclops.cyclopscore.helper.L10NHelpers;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.operator.IOperator;
@@ -22,7 +22,7 @@ import java.util.List;
 
 public class NBTExtractionOperator implements IOperator {
     public static ResourceLocation UNIQUE_NAME = new ResourceLocation(
-        IntegratedNBT.MODID,
+        Reference.MOD_ID,
         "nbt_extraction"
     );
     private NBTPath extractionPath;

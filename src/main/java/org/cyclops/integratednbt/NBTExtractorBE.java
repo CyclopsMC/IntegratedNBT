@@ -1,26 +1,25 @@
 package org.cyclops.integratednbt;
 
-import org.cyclops.integratednbt.NBTExtractorBE.NetworkElement;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.Container;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -31,12 +30,7 @@ import org.cyclops.cyclopscore.persist.nbt.NBTClassType;
 import org.cyclops.integrateddynamics.api.block.cable.ICable;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
-import org.cyclops.integrateddynamics.api.network.IEventListenableNetworkElement;
-import org.cyclops.integrateddynamics.api.network.INetwork;
-import org.cyclops.integrateddynamics.api.network.INetworkElement;
-import org.cyclops.integrateddynamics.api.network.INetworkEventListener;
-import org.cyclops.integrateddynamics.api.network.IPartNetwork;
-import org.cyclops.integrateddynamics.api.network.IPositionedAddonsNetwork;
+import org.cyclops.integrateddynamics.api.network.*;
 import org.cyclops.integrateddynamics.api.network.event.INetworkEvent;
 import org.cyclops.integrateddynamics.capability.network.NetworkCarrierDefault;
 import org.cyclops.integrateddynamics.capability.networkelementprovider.NetworkElementProviderSingleton;
@@ -47,14 +41,13 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.helper.CableHelpers;
 import org.cyclops.integrateddynamics.core.helper.NetworkHelpers;
 import org.cyclops.integrateddynamics.core.network.event.VariableContentsUpdatedEvent;
+import org.cyclops.integratednbt.NBTExtractorBE.NetworkElement;
+import org.cyclops.integratednbt.datastructure.Wrapper;
+import org.cyclops.integratednbt.helpers.VariableHelpers;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
     INetworkEventListener<NetworkElement>, MenuProvider,
@@ -387,13 +380,14 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
 
     @SuppressWarnings("ConstantConditions")
     public IVariable<?> getSrcNBTVariable() {
+        INetwork network = this.networkCarrierCapability.getNetwork();
         IPartNetwork partNetwork =
-            NetworkHelpers.getPartNetwork(this.networkCarrierCapability.getNetwork())
+            NetworkHelpers.getPartNetwork(network)
                 .orElse(null);
         if (partNetwork == null) {
             return null;
         }
-        return this.evaluator.getVariable(partNetwork);
+        return this.evaluator.getVariable(network, partNetwork);
     }
 
     public Component getFirstErrorMessage() {
@@ -508,7 +502,7 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
 
     @Override
     public boolean canPlaceItem(int index, @Nonnull ItemStack stack) {
-        return Integration.isVariable(stack);
+        return VariableHelpers.isVariable(stack);
     }
 
     public Wrapper<Tag> getFrozenValue() {

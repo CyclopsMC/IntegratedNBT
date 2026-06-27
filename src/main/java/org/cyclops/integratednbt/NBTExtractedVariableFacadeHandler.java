@@ -22,7 +22,7 @@ public class NBTExtractedVariableFacadeHandler
 
     @Override
     public ResourceLocation getUniqueName() {
-        return new ResourceLocation(IntegratedNBT.MODID, "nbt_extracted");
+        return new ResourceLocation(Reference.MOD_ID, "nbt_extracted");
     }
 
     @Override

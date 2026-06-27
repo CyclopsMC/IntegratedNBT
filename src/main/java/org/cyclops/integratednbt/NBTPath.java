@@ -2,8 +2,8 @@ package org.cyclops.integratednbt;
 
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -196,7 +196,8 @@ public class NBTPath {
             }
             return Optional.of(new NBTPath(segments));
         } catch (Exception ex) {
-            IntegratedNBT.LOGGER.error("Failed to decode NBT for ExtractionPath.", ex);
+            ex.printStackTrace();
+            IntegratedNBT.clog("Failed to decode NBT for ExtractionPath.");
             return Optional.empty();
         }
     }

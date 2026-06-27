@@ -1,26 +1,28 @@
 package org.cyclops.integratednbt;
 
-import org.cyclops.integratednbt.network.PacketHandler;
-import org.cyclops.integratednbt.network.clientbound.NBTExtractorUpdateClientMessage;
-import org.cyclops.integratednbt.network.clientbound.NBTExtractorUpdateClientMessage.ErrorCode;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.PacketDistributor;
 import org.cyclops.integrateddynamics.api.PartStateException;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
+import org.cyclops.integratednbt.datastructure.Wrapper;
+import org.cyclops.integratednbt.helpers.VariableHelpers;
+import org.cyclops.integratednbt.network.PacketHandler;
+import org.cyclops.integratednbt.network.clientbound.NBTExtractorUpdateClientMessage;
+import org.cyclops.integratednbt.network.clientbound.NBTExtractorUpdateClientMessage.ErrorCode;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -53,7 +55,7 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(ItemStack stack) {
-            return Integration.isVariable(stack);
+            return VariableHelpers.isVariable(stack);
         }
 
         @Override
@@ -179,10 +181,8 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
                     errorMessage = Component.literal(exception.getMessage());
                 } catch (Exception exception) {
                     errorCode = ErrorCode.UNEXPECTED_ERROR;
-                    IntegratedNBT.LOGGER.error(
-                        "Unexpected error occurred while evaluating variable.",
-                        exception
-                    );
+                    exception.printStackTrace();
+                    IntegratedNBT.clog("Unexpected error occurred while evaluating variable.");
                 }
             }
             NBTExtractorUpdateClientMessage message = new NBTExtractorUpdateClientMessage();
@@ -260,7 +260,7 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
             } else {
-                if (Integration.isVariable(fromSlot)) {
+                if (VariableHelpers.isVariable(fromSlot)) {
                     if (this.slots.get(SRC_NBT).hasItem()) {
                         if (this.slots.get(VAR_OUT).hasItem()) {
                             return ItemStack.EMPTY;
