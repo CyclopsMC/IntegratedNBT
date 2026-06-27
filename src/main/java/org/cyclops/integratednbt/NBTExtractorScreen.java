@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.network.packet.NbtExtractorSetExtractionPathPacket;
 import org.cyclops.integratednbt.network.packet.NbtExtractorSetOutputModePacket;
 import org.cyclops.integratednbt.network.packet.NbtExtractorUpdateAutoRefreshPacket;
@@ -126,7 +127,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
         super(screenContainer, inventory, title);
         NBTExtractorScreen.lastInstance = this;
         this.nbtExtractorContainer = screenContainer;
-        NBTExtractorBE tileEntity = this.nbtExtractorContainer.getNbtExtractorEntity();
+        BlockEntityNbtExtractor tileEntity = this.nbtExtractorContainer.getNbtExtractorEntity();
         this.treeViewer = new NBTTreeViewer(
             this,
             tileEntity.getExpandedPaths(),

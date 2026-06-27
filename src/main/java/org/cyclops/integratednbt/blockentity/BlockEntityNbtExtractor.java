@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.blockentity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -41,7 +41,8 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.helper.CableHelpers;
 import org.cyclops.integrateddynamics.core.helper.NetworkHelpers;
 import org.cyclops.integrateddynamics.core.network.event.VariableContentsUpdatedEvent;
-import org.cyclops.integratednbt.NBTExtractorBE.NetworkElement;
+import org.cyclops.integratednbt.*;
+import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor.NetworkElement;
 import org.cyclops.integratednbt.helpers.VariableHelpers;
 import org.cyclops.integratednbt.helpers.Wrapper;
 
@@ -49,9 +50,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
+public class BlockEntityNbtExtractor extends BlockEntity implements ICapabilityProvider,
     INetworkEventListener<NetworkElement>, MenuProvider,
-    Container {
+    Container { // TODO: cleanup capabilities
     class CableCapability implements ICable {
         @Override
         public boolean canConnect(ICable connector, Direction side) {
@@ -60,15 +61,15 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
 
         @Override
         public boolean isConnected(Direction side) {
-            if (NBTExtractorBE.this.connected.isEmpty()) {
+            if (BlockEntityNbtExtractor.this.connected.isEmpty()) {
                 this.updateConnections();
             }
-            return NBTExtractorBE.this.connected.get(side);
+            return BlockEntityNbtExtractor.this.connected.get(side);
         }
 
         @Override
         public void updateConnections() {
-            NBTExtractorBE entity = NBTExtractorBE.this;
+            BlockEntityNbtExtractor entity = BlockEntityNbtExtractor.this;
             Level world = entity.getLevel();
             if (world == null) {
                 return;
@@ -83,8 +84,8 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
                 entity.connected.put(side, cableConnected);
             }
             world.blockEntityChanged(entity.getBlockPos());
-            BlockState blockState = world.getBlockState(NBTExtractorBE.this.worldPosition);
-            world.sendBlockUpdated(NBTExtractorBE.this.worldPosition, blockState, blockState, 3);
+            BlockState blockState = world.getBlockState(BlockEntityNbtExtractor.this.worldPosition);
+            world.sendBlockUpdated(BlockEntityNbtExtractor.this.worldPosition, blockState, blockState, 3);
         }
 
         @Override
@@ -102,7 +103,7 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
         public void destroy() {}
     }
 
-    class NetworkElement implements IEventListenableNetworkElement<NBTExtractorBE> {
+    class NetworkElement implements IEventListenableNetworkElement<BlockEntityNbtExtractor> {
         @Override
         public int getUpdateInterval() {
             return 0;
@@ -124,7 +125,7 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
 
         @Override
         public void afterNetworkReAlive(INetwork network) {
-            NBTExtractorBE.this.afterNetworkReAlive();
+            BlockEntityNbtExtractor.this.afterNetworkReAlive();
         }
 
         @Override
@@ -136,26 +137,26 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
 
         @Override
         public boolean onNetworkAddition(INetwork network) {
-            if (NBTExtractorBE.this.level == null) {
+            if (BlockEntityNbtExtractor.this.level == null) {
                 return false;
             }
             return NetworkHelpers.getPartNetwork(network).map(partNetwork -> partNetwork
                 .addVariableContainer(DimPos.of(
-                    NBTExtractorBE.this.level,
-                    NBTExtractorBE.this.worldPosition
+                    BlockEntityNbtExtractor.this.level,
+                    BlockEntityNbtExtractor.this.worldPosition
                 ))
             ).orElse(false);
         }
 
         @Override
         public void onNetworkRemoval(INetwork network) {
-            if (NBTExtractorBE.this.level == null) {
+            if (BlockEntityNbtExtractor.this.level == null) {
                 return;
             }
             NetworkHelpers.getPartNetwork(network).ifPresent(partNetwork -> partNetwork
                 .removeVariableContainer(DimPos.of(
-                    NBTExtractorBE.this.level,
-                    NBTExtractorBE.this.worldPosition
+                    BlockEntityNbtExtractor.this.level,
+                    BlockEntityNbtExtractor.this.worldPosition
                 ))
             );
         }
@@ -195,11 +196,11 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
         @Override
         @SuppressWarnings("deprecation")
         public boolean canRevalidate(INetwork network) {
-            if (NBTExtractorBE.this.level == null) {
+            if (BlockEntityNbtExtractor.this.level == null) {
                 return false;
             }
-            return NBTExtractorBE.this.level
-                .hasChunkAt(NBTExtractorBE.this.getBlockPos());
+            return BlockEntityNbtExtractor.this.level
+                .hasChunkAt(BlockEntityNbtExtractor.this.getBlockPos());
         }
 
         @Override
@@ -216,8 +217,8 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
 
         @Nullable
         @Override
-        public Optional<NBTExtractorBE> getNetworkEventListener() {
-            return Optional.of(NBTExtractorBE.this);
+        public Optional<BlockEntityNbtExtractor> getNetworkEventListener() {
+            return Optional.of(BlockEntityNbtExtractor.this);
         }
     }
 
@@ -226,7 +227,7 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
     private EnumFacingMap<Boolean> connected = EnumFacingMap.newMap();
     private CableCapability cableCapability = new CableCapability();
     private NetworkCarrierDefault networkCarrierCapability = new NetworkCarrierDefault();
-    private PathElementTile<NBTExtractorBE> pathElementCapability = new PathElementTile<>(
+    private PathElementTile<BlockEntityNbtExtractor> pathElementCapability = new PathElementTile<>(
         this,
         this.cableCapability
     );
@@ -276,8 +277,8 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
      */
     private ItemStack frozenNBTItemStack = ItemStack.EMPTY;
 
-    public NBTExtractorBE(BlockPos pos, BlockState state) {
-        super(Additions.NBT_EXTRACTOR_BE.get(), pos, state);
+    public BlockEntityNbtExtractor(BlockPos pos, BlockState state) {
+        super(RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR, pos, state);
         this.expandedPaths = new HashSet<>();
         this.expandedPaths.add(new NBTPath());
     }
@@ -634,7 +635,7 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
             return;
         }
         if (!level.isClientSide) {
-            NBTExtractorBE self = (NBTExtractorBE) blockEntity;
+            BlockEntityNbtExtractor self = (BlockEntityNbtExtractor) blockEntity;
             if (self.shouldRefreshVariable && self.networkCarrierCapability.getNetwork() != null) {
                 self.shouldRefreshVariable = false;
                 self.refreshVariables(true);

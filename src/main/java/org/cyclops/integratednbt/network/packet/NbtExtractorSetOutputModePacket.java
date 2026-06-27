@@ -8,7 +8,7 @@ import net.minecraft.world.level.Level;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
 import org.cyclops.cyclopscore.network.CodecField;
 import org.cyclops.cyclopscore.network.PacketCodec;
-import org.cyclops.integratednbt.NBTExtractorBE;
+import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.NBTExtractorOutputMode;
 
 /**
@@ -54,7 +54,7 @@ public class NbtExtractorSetOutputModePacket extends PacketCodec {
 
     @Override
     public void actionServer(Level world, ServerPlayer player) {
-        BlockEntityHelpers.get(world, blockPos, NBTExtractorBE.class)
+        BlockEntityHelpers.get(world, blockPos, BlockEntityNbtExtractor.class)
                 .ifPresent(blockEntity -> blockEntity.setOutputMode(outputMode));
     }
 

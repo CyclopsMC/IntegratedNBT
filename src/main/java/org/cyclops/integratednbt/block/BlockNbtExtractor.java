@@ -24,13 +24,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.cyclops.integrateddynamics.core.helper.WrenchHelpers;
 import org.cyclops.integratednbt.CabledHorizontalBlock;
-import org.cyclops.integratednbt.NBTExtractorBE;
 import org.cyclops.integratednbt.RegistryEntries;
+import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import static org.cyclops.integratednbt.Additions.NBT_EXTRACTOR_BE;
 
 public class BlockNbtExtractor extends CabledHorizontalBlock implements EntityBlock { // TODO: extend BlockEntityActiveVariableBase, like BlockEntityProxy
 
@@ -45,7 +43,7 @@ public class BlockNbtExtractor extends CabledHorizontalBlock implements EntityBl
         if (level.isClientSide) {
             return null;
         }
-        return type == NBT_EXTRACTOR_BE.get() ? NBTExtractorBE::tick : null;
+        return type == RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR ? BlockEntityNbtExtractor::tick : null;
     }
 
     @Override
@@ -64,8 +62,8 @@ public class BlockNbtExtractor extends CabledHorizontalBlock implements EntityBl
     ) {
         if (oldState.getBlock() != newState.getBlock()) {
             BlockEntity tileEntity = worldIn.getBlockEntity(pos);
-            if (tileEntity instanceof NBTExtractorBE) {
-                Container inventory = (NBTExtractorBE) tileEntity;
+            if (tileEntity instanceof BlockEntityNbtExtractor) {
+                Container inventory = (BlockEntityNbtExtractor) tileEntity;
                 for (int slot = 0; slot < inventory.getContainerSize(); ++slot) {
                     Containers.dropItemStack(
                         worldIn,
@@ -127,8 +125,8 @@ public class BlockNbtExtractor extends CabledHorizontalBlock implements EntityBl
 
     public void playerAccess(Level world, BlockPos pos, ServerPlayer playerMP) {
         BlockEntity tileentity = world.getBlockEntity(pos);
-        if (tileentity instanceof NBTExtractorBE) {
-            NBTExtractorBE nbtExtractorTileEntity = (NBTExtractorBE) tileentity;
+        if (tileentity instanceof BlockEntityNbtExtractor) {
+            BlockEntityNbtExtractor nbtExtractorTileEntity = (BlockEntityNbtExtractor) tileentity;
             nbtExtractorTileEntity.refreshVariables(true);
             NetworkHooks.openScreen(playerMP, nbtExtractorTileEntity, pos);
         }
@@ -153,6 +151,6 @@ public class BlockNbtExtractor extends CabledHorizontalBlock implements EntityBl
     public BlockEntity newBlockEntity(
         BlockPos blockPos, BlockState blockState
     ) {
-        return new NBTExtractorBE(blockPos, blockState);
+        return new BlockEntityNbtExtractor(blockPos, blockState);
     }
 }

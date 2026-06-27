@@ -17,6 +17,7 @@ import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
+import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.helpers.Wrapper;
 import org.cyclops.integratednbt.helpers.VariableHelpers;
 import org.cyclops.integratednbt.network.packet.UpdateClientNbtExtractorPacket;
@@ -78,7 +79,7 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
     private static final int INVENTORY_START = 2;
     private static final int INVENTORY_END = 38; // Exclusive
     private Inventory playerInventory;
-    private NBTExtractorBE nbtExtractorEntity;
+    private BlockEntityNbtExtractor nbtExtractorEntity;
     private UpdateClientNbtExtractorPacket.ErrorCode clientErrorCode = null;
     private Wrapper<Tag> clientNBT = null;
     private NBTPath clientPath = null;
@@ -99,7 +100,7 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
     public NBTExtractorContainer(
         int windowId,
         Inventory playerInventory,
-        NBTExtractorBE nbtExtractorEntity
+        BlockEntityNbtExtractor nbtExtractorEntity
     ) {
         super(Additions.NBT_EXTRACTOR_CONTAINER.get(), windowId);
         this.playerInventory = playerInventory;
@@ -121,20 +122,20 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
         }
     }
 
-    private static NBTExtractorBE getTileEntity(
+    private static BlockEntityNbtExtractor getTileEntity(
         Inventory playerInventory,
         FriendlyByteBuf data
     ) {
         Objects.requireNonNull(playerInventory);
         Objects.requireNonNull(data);
         BlockEntity tileAtPos = playerInventory.player.level.getBlockEntity(data.readBlockPos());
-        if (tileAtPos instanceof NBTExtractorBE) {
-            return (NBTExtractorBE) tileAtPos;
+        if (tileAtPos instanceof BlockEntityNbtExtractor) {
+            return (BlockEntityNbtExtractor) tileAtPos;
         }
         throw new IllegalStateException("Tile entity is not correct: " + tileAtPos);
     }
 
-    public NBTExtractorBE getNbtExtractorEntity() {
+    public BlockEntityNbtExtractor getNbtExtractorEntity() {
         return this.nbtExtractorEntity;
     }
 

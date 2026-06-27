@@ -1,7 +1,6 @@
 package org.cyclops.integratednbt;
 
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -20,24 +19,4 @@ public abstract class Additions { // TODO: migrate to configs
             () -> IForgeMenuType.create(NBTExtractorContainer::new)
         );
 
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(
-        ForgeRegistries.BLOCK_ENTITY_TYPES,
-        Reference.MOD_ID
-    );
-
-    public static final RegistryObject<BlockEntityType<NBTExtractorBE>> NBT_EXTRACTOR_BE = BLOCK_ENTITIES.register(
-            "nbt_extractor",
-        () -> BlockEntityType.Builder.of(NBTExtractorBE::new, RegistryEntries.BLOCK_NBT_EXTRACTOR).build(null)
-    );
-//    public static final RegistryObject<BlockEntityType<?>> TILE_ENTITY_TYPES =
-//        DeferredRegister.create(
-//            ForgeRegistries.BLOCK_ENTITIES,
-//            Reference.MOD_ID
-//        );
-//
-//    @SuppressWarnings("ConstantConditions")
-//    public static final RegistryObject<BlockEntityType<NBTExtractorBE>> NBT_EXTRACTOR_TILE_ENTITY = TILE_ENTITY_TYPES
-//        .register(NBTExtractor.REGISTRY_NAME, () ->
-//            BlockEntityType.Builder.of(NBTExtractorBE::new, NBT_EXTRACTOR_BLOCK.get())
-//                .build(null));
 }

@@ -8,8 +8,8 @@ import net.minecraft.world.level.Level;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
 import org.cyclops.cyclopscore.network.CodecField;
 import org.cyclops.cyclopscore.network.PacketCodec;
-import org.cyclops.integratednbt.NBTExtractorBE;
 import org.cyclops.integratednbt.NBTPath;
+import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 
 /**
  * Sets the extraction path in the NBT Extractor.
@@ -20,14 +20,14 @@ public class NbtExtractorSetExtractionPathPacket extends PacketCodec {
     @CodecField
     private BlockPos blockPos;
     @CodecField
-    private byte defaultNBTId;
+    private int defaultNBTId;
     private NBTPath path;
 
     public NbtExtractorSetExtractionPathPacket() {
 
     }
 
-    public NbtExtractorSetExtractionPathPacket(BlockPos blockPos, NBTPath path, byte defaultNBTId) {
+    public NbtExtractorSetExtractionPathPacket(BlockPos blockPos, NBTPath path, int defaultNBTId) {
         this.blockPos = blockPos;
         this.path = path;
         this.defaultNBTId = defaultNBTId;
@@ -57,10 +57,10 @@ public class NbtExtractorSetExtractionPathPacket extends PacketCodec {
 
     @Override
     public void actionServer(Level world, ServerPlayer player) {
-        BlockEntityHelpers.get(world, blockPos, NBTExtractorBE.class)
+        BlockEntityHelpers.get(world, blockPos, BlockEntityNbtExtractor.class)
                 .ifPresent(blockEntity -> {
                     blockEntity.setExtractionPath(path);
-                    blockEntity.setDefaultNBTId(defaultNBTId);
+                    blockEntity.setDefaultNBTId((byte) defaultNBTId);
                 });
     }
 
