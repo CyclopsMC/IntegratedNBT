@@ -1,30 +1,45 @@
 modLoader="javafml"
-loaderVersion="[31.1,)"
+loaderVersion="[43,)"
+issueTrackerURL="https://github.com/CyclopsMC/IntegratedTerminals/issues"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/integrated-nbt"
 license="MIT"
-
+logoFile="logo.png"
+authors="Rin Tepis, rubensworks (aka kroeser)"
 [[mods]]
 modId="integratednbt"
-version="1.6.0"
-displayName="Integrated NBT"
-authors="Rin Tepis"
+version="${file.jarVersion}"
+displayName="IntegratedNBT"
+updateJSONURL="https://raw.githubusercontent.com/CyclopsMC/Versions/master/forge_update/integrated-nbt.json"
 description='''
 Integrated NBT is an addon for Integrated Dynamics. It offers a simpler way of extracting deeply nested NBT values.
 '''
 [[dependencies.integratednbt]]
-    modId="integrateddynamics"
-    mandatory=true
-    versionRange="[1.11.9,)"
-    ordering="AFTER"
-    side="BOTH"
+modId="cyclopscore"
+mandatory=true
+versionRange="[1.19.4,)"
+ordering="NONE"
+side="BOTH"
 [[dependencies.integratednbt]]
-    modId="forge"
-    mandatory=true
-    versionRange="[43.1,)"
-    ordering="NONE"
-    side="BOTH"
+modId="integrateddynamics"
+mandatory=true
+versionRange="[1.15.2,)"
+ordering="NONE"
+side="BOTH"
 [[dependencies.integratednbt]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[1.19.2]"
-    ordering="NONE"
-    side="BOTH"
+modId="commoncapabilities"
+mandatory=true
+versionRange="[2.9.0,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.integratednbt]]
+modId="forge"
+mandatory=true
+versionRange="[43.0.8,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.integratednbt]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.19.2,]"
+ordering="NONE"
+side="BOTH"
