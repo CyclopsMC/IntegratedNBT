@@ -43,6 +43,8 @@ import org.cyclops.integrateddynamics.core.helper.NetworkHelpers;
 import org.cyclops.integrateddynamics.core.network.event.VariableContentsUpdatedEvent;
 import org.cyclops.integratednbt.*;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor.NetworkElement;
+import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.helpers.VariableHelpers;
 import org.cyclops.integratednbt.helpers.Wrapper;
 import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractor;
@@ -251,7 +253,7 @@ public class BlockEntityNbtExtractor extends BlockEntity implements ICapabilityP
      * <p>
      * This is client-side only and it is not persisted.
      */
-    private HashSet<NBTPath> expandedPaths;
+    private HashSet<SegmentedNbtPath> expandedPaths;
     /**
      * How much has the user scrolled in this extractor;
      * <p>
@@ -266,9 +268,9 @@ public class BlockEntityNbtExtractor extends BlockEntity implements ICapabilityP
      * Whether should send update on next tick
      */
     private boolean shouldUpdateOutVariable = false;
-    private NBTPath extractionPath = new NBTPath();
+    private SegmentedNbtPath extractionPath = new SegmentedNbtPath();
     private byte defaultNBTId = 1;
-    private NBTExtractorOutputMode outputMode = NBTExtractorOutputMode.REFERENCE;
+    private NbtExtractorOutputMode outputMode = NbtExtractorOutputMode.REFERENCE;
     private Tag lastEvaluatedNBT = null;
     // If null, then there is no frozen value available
     private Wrapper<Tag> frozenNBT = null;
@@ -281,14 +283,14 @@ public class BlockEntityNbtExtractor extends BlockEntity implements ICapabilityP
     public BlockEntityNbtExtractor(BlockPos pos, BlockState state) {
         super(RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR, pos, state);
         this.expandedPaths = new HashSet<>();
-        this.expandedPaths.add(new NBTPath());
+        this.expandedPaths.add(new SegmentedNbtPath());
     }
 
-    public NBTExtractorOutputMode getOutputMode() {
+    public NbtExtractorOutputMode getOutputMode() {
         return this.outputMode;
     }
 
-    public void setOutputMode(NBTExtractorOutputMode outputMode) {
+    public void setOutputMode(NbtExtractorOutputMode outputMode) {
         this.outputMode = outputMode;
         this.setChanged();
     }
@@ -339,11 +341,11 @@ public class BlockEntityNbtExtractor extends BlockEntity implements ICapabilityP
         this.setChanged();
     }
 
-    public NBTPath getExtractionPath() {
+    public SegmentedNbtPath getExtractionPath() {
         return this.extractionPath;
     }
 
-    public void setExtractionPath(NBTPath extractionPath) {
+    public void setExtractionPath(SegmentedNbtPath extractionPath) {
         this.extractionPath = extractionPath;
         this.setChanged();
     }
@@ -372,7 +374,7 @@ public class BlockEntityNbtExtractor extends BlockEntity implements ICapabilityP
         }
     }
 
-    public HashSet<NBTPath> getExpandedPaths() {
+    public HashSet<SegmentedNbtPath> getExpandedPaths() {
         return this.expandedPaths;
     }
 
@@ -594,13 +596,13 @@ public class BlockEntityNbtExtractor extends BlockEntity implements ICapabilityP
             this.evaluator.setErrors(NBTClassType.readNbt(List.class, "errors", tag));
         }
         if (tag.contains("path")) {
-            this.extractionPath = NBTPath.fromNBT(tag.get("path")).orElse(new NBTPath());
+            this.extractionPath = SegmentedNbtPath.fromNBT(tag.get("path")).orElse(new SegmentedNbtPath());
         }
         if (tag.contains("defaultNBTId")) {
             this.defaultNBTId = tag.getByte("defaultNBTId");
         }
         if (tag.contains("outputMode")) {
-            this.outputMode = NBTExtractorOutputMode.values()[tag.getByte("outputMode")];
+            this.outputMode = NbtExtractorOutputMode.values()[tag.getByte("outputMode")];
         }
         if (tag.contains("isAutoRefresh")) {
             this.autoRefresh = tag.getBoolean("isAutoRefresh");

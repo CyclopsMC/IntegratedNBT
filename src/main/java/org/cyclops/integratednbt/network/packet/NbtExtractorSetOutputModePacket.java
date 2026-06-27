@@ -9,7 +9,7 @@ import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
 import org.cyclops.cyclopscore.network.CodecField;
 import org.cyclops.cyclopscore.network.PacketCodec;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
-import org.cyclops.integratednbt.NBTExtractorOutputMode;
+import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
 
 /**
  * Sets the extraction path in the NBT Extractor.
@@ -19,13 +19,13 @@ public class NbtExtractorSetOutputModePacket extends PacketCodec {
 
     @CodecField
     private BlockPos blockPos;
-    private NBTExtractorOutputMode outputMode;
+    private NbtExtractorOutputMode outputMode;
 
     public NbtExtractorSetOutputModePacket() {
 
     }
 
-    public NbtExtractorSetOutputModePacket(BlockPos blockPos, NBTExtractorOutputMode outputMode) {
+    public NbtExtractorSetOutputModePacket(BlockPos blockPos, NbtExtractorOutputMode outputMode) {
         this.blockPos = blockPos;
         this.outputMode = outputMode;
     }
@@ -39,7 +39,7 @@ public class NbtExtractorSetOutputModePacket extends PacketCodec {
     @Override
     public void decode(FriendlyByteBuf input) {
         super.decode(input);
-        this.outputMode = NBTExtractorOutputMode.values()[input.readByte()];
+        this.outputMode = NbtExtractorOutputMode.values()[input.readByte()];
     }
 
     @Override

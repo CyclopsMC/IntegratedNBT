@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.evaluate.operator;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -7,20 +7,21 @@ import net.minecraft.resources.ResourceLocation;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.operator.IOperator;
 import org.cyclops.integrateddynamics.api.evaluate.operator.IOperatorSerializer;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 
-public class NBTExtractionOperatorSerializer implements IOperatorSerializer<NBTExtractionOperator> {
+public class NbtExtractionOperatorSerializer implements IOperatorSerializer<NbtExtractionOperator> {
     @Override
     public boolean canHandle(IOperator operator) {
-        return operator instanceof NBTExtractionOperator;
+        return operator instanceof NbtExtractionOperator;
     }
 
     @Override
     public ResourceLocation getUniqueName() {
-        return NBTExtractionOperator.UNIQUE_NAME;
+        return NbtExtractionOperator.UNIQUE_NAME;
     }
 
     @Override
-    public Tag serialize(NBTExtractionOperator operator) {
+    public Tag serialize(NbtExtractionOperator operator) {
         CompoundTag data = new CompoundTag();
         data.put("path", operator.getExtractionPath().toNBT());
         data.putByte("defaultNBTId", operator.getDefaultNBTId());
@@ -28,11 +29,11 @@ public class NBTExtractionOperatorSerializer implements IOperatorSerializer<NBTE
     }
 
     @Override
-    public NBTExtractionOperator deserialize(Tag nbt) throws EvaluationException {
+    public NbtExtractionOperator deserialize(Tag nbt) throws EvaluationException {
         try {
             CompoundTag tag = (CompoundTag) nbt;
-            return new NBTExtractionOperator(NBTPath.fromNBT(tag.get("path"))
-                .orElse(new NBTPath()), tag.getByte("defaultNBTId"));
+            return new NbtExtractionOperator(SegmentedNbtPath.fromNBT(tag.get("path"))
+                .orElse(new SegmentedNbtPath()), tag.getByte("defaultNBTId"));
         } catch (Exception e) {
             e.printStackTrace();
             throw new EvaluationException(Component.literal(e.getMessage()));

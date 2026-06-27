@@ -1,21 +1,23 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.evaluate.variable;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.cyclops.integrateddynamics.api.item.IVariableFacadeHandler;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
+import org.cyclops.integratednbt.Reference;
 
 import java.util.Optional;
 
-public class NBTExtractedVariableFacadeHandler
-    implements IVariableFacadeHandler<NBTExtractedVariableFacade> {
+public class NbtExtractedVariableFacadeHandler
+    implements IVariableFacadeHandler<NbtExtractedVariableFacade> {
     private static final String KEY_SOURCE_NBT_ID = "sourceNBTId";
     private static final String KEY_EXTRACTION_PATH = "extractionPath";
     private static final String KEY_DEFAULT_NBT_ID = "defaultNBTId";
-    private static NBTExtractedVariableFacadeHandler instance;
+    private static NbtExtractedVariableFacadeHandler instance;
 
-    public static NBTExtractedVariableFacadeHandler getInstance() {
+    public static NbtExtractedVariableFacadeHandler getInstance() {
         if (instance == null) {
-            instance = new NBTExtractedVariableFacadeHandler();
+            instance = new NbtExtractedVariableFacadeHandler();
         }
         return instance;
     }
@@ -26,11 +28,11 @@ public class NBTExtractedVariableFacadeHandler
     }
 
     @Override
-    public NBTExtractedVariableFacade getVariableFacade(int id, CompoundTag tag) {
+    public NbtExtractedVariableFacade getVariableFacade(int id, CompoundTag tag) {
         int sourceNBTId = tag.getInt(KEY_SOURCE_NBT_ID);
-        Optional<NBTPath> extractionPath = NBTPath.fromNBT(tag.get(KEY_EXTRACTION_PATH));
+        Optional<SegmentedNbtPath> extractionPath = SegmentedNbtPath.fromNBT(tag.get(KEY_EXTRACTION_PATH));
         byte defaultNBTId = tag.getByte(KEY_DEFAULT_NBT_ID);
-        return new NBTExtractedVariableFacade(
+        return new NbtExtractedVariableFacade(
             id,
             sourceNBTId,
             extractionPath.orElse(null),
@@ -39,9 +41,9 @@ public class NBTExtractedVariableFacadeHandler
     }
 
     @Override
-    public void setVariableFacade(CompoundTag tag, NBTExtractedVariableFacade facade) {
-        tag.putInt(KEY_SOURCE_NBT_ID, facade.getSourceNBTId());
+    public void setVariableFacade(CompoundTag tag, NbtExtractedVariableFacade facade) {
+        tag.putInt(KEY_SOURCE_NBT_ID, facade.getSourceNbtId());
         tag.put(KEY_EXTRACTION_PATH, facade.getExtractionPath().toNBT());
-        tag.putByte(KEY_DEFAULT_NBT_ID, facade.getDefaultNBTId());
+        tag.putByte(KEY_DEFAULT_NBT_ID, facade.getDefaultNbtId());
     }
 }

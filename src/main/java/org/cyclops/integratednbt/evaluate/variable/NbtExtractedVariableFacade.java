@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.evaluate.variable;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.network.chat.Component;
@@ -20,52 +20,54 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueN
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.helper.L10NValues;
 import org.cyclops.integrateddynamics.core.item.VariableFacadeBase;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
+import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class NBTExtractedVariableFacade extends VariableFacadeBase {
-    private int sourceNBTId;
-    private NBTPath extractionPath;
-    private byte defaultNBTId;
+public class NbtExtractedVariableFacade extends VariableFacadeBase {
+    private int sourceNbtId;
+    private SegmentedNbtPath extractionPath;
+    private byte defaultNbtId;
     private boolean validating;
     private boolean gettingVariable;
     private int lastNetworkHash;
-    private NBTExtractedVariable variable;
+    private NbtExtractedVariable variable;
 
-    public NBTExtractedVariableFacade(
+    public NbtExtractedVariableFacade(
         boolean generateId,
-        int sourceNBTId,
-        @Nullable NBTPath extractionPath,
-        byte defaultNBTId
+        int sourceNbtId,
+        @Nullable SegmentedNbtPath extractionPath,
+        byte defaultNbtId
     ) {
         super(generateId);
-        this.sourceNBTId = sourceNBTId;
+        this.sourceNbtId = sourceNbtId;
         this.extractionPath = extractionPath;
-        this.defaultNBTId = defaultNBTId;
+        this.defaultNbtId = defaultNbtId;
     }
 
-    public NBTExtractedVariableFacade(
+    public NbtExtractedVariableFacade(
         int id,
-        int sourceNBTId,
-        @Nullable NBTPath extractionPath,
-        byte defaultNBTId
+        int sourceNbtId,
+        @Nullable SegmentedNbtPath extractionPath,
+        byte defaultNbtId
     ) {
         super(id);
-        this.sourceNBTId = sourceNBTId;
+        this.sourceNbtId = sourceNbtId;
         this.extractionPath = extractionPath;
-        this.defaultNBTId = defaultNBTId;
+        this.defaultNbtId = defaultNbtId;
     }
 
-    public byte getDefaultNBTId() {
-        return this.defaultNBTId;
+    public byte getDefaultNbtId() {
+        return this.defaultNbtId;
     }
 
-    public int getSourceNBTId() {
-        return this.sourceNBTId;
+    public int getSourceNbtId() {
+        return this.sourceNbtId;
     }
 
-    public NBTPath getExtractionPath() {
+    public SegmentedNbtPath getExtractionPath() {
         return this.extractionPath;
     }
 
@@ -77,7 +79,7 @@ public class NBTExtractedVariableFacade extends VariableFacadeBase {
         }
         list.add(Component.translatable(
             "integratednbt:nbt_extracted_variable.tooltip.source_nbt_id",
-            this.sourceNBTId
+            this.sourceNbtId
         ));
         list.add(Component.translatable(
             "integratednbt:nbt_extracted_variable.tooltip.path",
@@ -85,7 +87,7 @@ public class NBTExtractedVariableFacade extends VariableFacadeBase {
         ));
         list.add(Component.translatable(
             "integratednbt:nbt_extracted_variable.tooltip.default_value",
-            NBTValueConverter.getDefaultValueDisplayText(this.defaultNBTId)
+            NbtValueConverter.getDefaultValueDisplayText(this.defaultNbtId)
         ));
         super.appendHoverText(list, world);
     }
@@ -116,10 +118,10 @@ public class NBTExtractedVariableFacade extends VariableFacadeBase {
         int newNetworkHash = partNetwork != null ? partNetwork.hashCode() : -1;
         if (this.variable == null || newNetworkHash != this.lastNetworkHash) {
             this.lastNetworkHash = newNetworkHash;
-            if (partNetwork == null || !partNetwork.hasVariableFacade(this.sourceNBTId)) {
+            if (partNetwork == null || !partNetwork.hasVariableFacade(this.sourceNbtId)) {
                 return null;
             }
-            IVariableFacade sourceNbtVariableFacade = partNetwork.getVariableFacade(this.sourceNBTId);
+            IVariableFacade sourceNbtVariableFacade = partNetwork.getVariableFacade(this.sourceNbtId);
             if (!sourceNbtVariableFacade.isValid() || sourceNbtVariableFacade == this) {
                 return null;
             }
@@ -132,10 +134,10 @@ public class NBTExtractedVariableFacade extends VariableFacadeBase {
             if (sourceNbtVariable == null) {
                 return null;
             }
-            this.variable = new NBTExtractedVariable(
+            this.variable = new NbtExtractedVariable(
                 sourceNbtVariable,
                 this.extractionPath,
-                this.defaultNBTId
+                this.defaultNbtId
             );
         }
         return (IVariable<V>) this.variable;
@@ -148,19 +150,19 @@ public class NBTExtractedVariableFacade extends VariableFacadeBase {
         if (!this.isValid()) {
             return;
         }
-        if (this.sourceNBTId < 0) {
+        if (this.sourceNbtId < 0) {
             validator.addError(Component.translatable(L10NValues.VARIABLE_ERROR_INVALIDITEM));
-        } else if (!partNetwork.hasVariableFacade(this.sourceNBTId)) {
+        } else if (!partNetwork.hasVariableFacade(this.sourceNbtId)) {
             validator.addError(Component.translatable(
                 L10NValues.OPERATOR_ERROR_VARIABLENOTINNETWORK,
-                Integer.toString(this.sourceNBTId)
+                Integer.toString(this.sourceNbtId)
             ));
         } else {
-            IVariableFacade sourceVariableFacade = partNetwork.getVariableFacade(this.sourceNBTId);
+            IVariableFacade sourceVariableFacade = partNetwork.getVariableFacade(this.sourceNbtId);
             if (sourceVariableFacade == this) {
                 validator.addError(Component.translatable(
                     L10NValues.OPERATOR_ERROR_CYCLICREFERENCE,
-                    Integer.toString(this.sourceNBTId)
+                    Integer.toString(this.sourceNbtId)
                 ));
             } else if (sourceVariableFacade != null) {
                 final Wrapper<Boolean> isValid = new Wrapper<>(true);

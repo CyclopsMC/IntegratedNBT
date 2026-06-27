@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.evaluate.variable;
 
 import net.minecraft.nbt.Tag;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
@@ -7,16 +7,18 @@ import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
+import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 
-public class NBTExtractedVariable extends VariableAdapter<IValue> {
+public class NbtExtractedVariable extends VariableAdapter<IValue> {
     private IVariable<ValueNbt> sourceNBTVariable;
-    private NBTPath extractionPath;
+    private SegmentedNbtPath extractionPath;
     private Tag cachedValue;
     private byte defaultNBTId;
 
-    public NBTExtractedVariable(
+    public NbtExtractedVariable(
         IVariable<ValueNbt> sourceNBTVariable,
-        NBTPath extractionPath,
+        SegmentedNbtPath extractionPath,
         byte defaultNBTId
     ) {
         this.sourceNBTVariable = sourceNBTVariable;
@@ -30,11 +32,11 @@ public class NBTExtractedVariable extends VariableAdapter<IValue> {
         try {
             this.ensureCachedValue();
             if (this.cachedValue == null) {
-                return NBTValueConverter.getDefaultValue(this.defaultNBTId).getType();
+                return NbtValueConverter.getDefaultValue(this.defaultNBTId).getType();
             }
-            return (IValueType<IValue>) NBTValueConverter.mapNBTToValueType(this.cachedValue);
+            return (IValueType<IValue>) NbtValueConverter.mapNBTToValueType(this.cachedValue);
         } catch (EvaluationException ex) {
-            return NBTValueConverter.getDefaultValue(this.defaultNBTId).getType();
+            return NbtValueConverter.getDefaultValue(this.defaultNBTId).getType();
         }
     }
 
@@ -52,9 +54,9 @@ public class NBTExtractedVariable extends VariableAdapter<IValue> {
     public IValue getValue() throws EvaluationException {
         this.ensureCachedValue();
         if (this.cachedValue == null) {
-            return NBTValueConverter.getDefaultValue(this.defaultNBTId);
+            return NbtValueConverter.getDefaultValue(this.defaultNBTId);
         }
-        return NBTValueConverter.mapNBTToValue(this.cachedValue);
+        return NbtValueConverter.mapNBTToValue(this.cachedValue);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.evaluate;
 
 
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,13 +17,18 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeOperator.V
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeString.ValueString;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.item.ValueTypeVariableFacade;
+import org.cyclops.integratednbt.evaluate.operator.NbtExtractionOperator;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
+import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 import org.cyclops.integratednbt.client.gui.component.Texture;
 import org.cyclops.integratednbt.client.gui.component.TexturePart;
+import org.cyclops.integratednbt.evaluate.variable.NbtExtractedVariableFacade;
+import org.cyclops.integratednbt.evaluate.variable.NbtExtractedVariableFacadeHandler;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
-public enum NBTExtractorOutputMode {
+public enum NbtExtractorOutputMode {
     REFERENCE(
         "reference",
         ChatFormatting.YELLOW,
@@ -35,7 +40,7 @@ public enum NBTExtractorOutputMode {
             Supplier<IVariableFacade> sourceVariableFacadeSupplier,
             ItemStack outputVariableItemStack,
             Tag currentNBT,
-            NBTPath extractionPath,
+            SegmentedNbtPath extractionPath,
             byte defaultNBTId,
             BlockState blockState
         ) {
@@ -45,11 +50,11 @@ public enum NBTExtractorOutputMode {
             IVariableFacade variableFacade = sourceVariableFacadeSupplier.get();
             if (variableFacade != null) {
                 int sourceNBTId = variableFacade.getId();
-                IVariableFacadeFactory<NBTExtractedVariableFacade> factory =
-                    new IVariableFacadeFactory<NBTExtractedVariableFacade>() {
+                IVariableFacadeFactory<NbtExtractedVariableFacade> factory =
+                    new IVariableFacadeFactory<NbtExtractedVariableFacade>() {
                         @Override
-                        public NBTExtractedVariableFacade create(boolean generateId) {
-                            return new NBTExtractedVariableFacade(
+                        public NbtExtractedVariableFacade create(boolean generateId) {
+                            return new NbtExtractedVariableFacade(
                                 generateId,
                                 sourceNBTId,
                                 extractionPath,
@@ -58,8 +63,8 @@ public enum NBTExtractorOutputMode {
                         }
 
                         @Override
-                        public NBTExtractedVariableFacade create(int id) {
-                            return new NBTExtractedVariableFacade(
+                        public NbtExtractedVariableFacade create(int id) {
+                            return new NbtExtractedVariableFacade(
                                 id,
                                 sourceNBTId,
                                 extractionPath,
@@ -70,7 +75,7 @@ public enum NBTExtractorOutputMode {
                 return registry.writeVariableFacadeItem(
                     true,
                     outputVariableItemStack,
-                    NBTExtractedVariableFacadeHandler.getInstance(),
+                    NbtExtractedVariableFacadeHandler.getInstance(),
                     factory,
                     null,
                     blockState
@@ -91,11 +96,11 @@ public enum NBTExtractorOutputMode {
             Supplier<IVariableFacade> sourceVariableFacadeSupplier,
             ItemStack outputVariableItemStack,
             Tag currentNBT,
-            NBTPath extractionPath,
+            SegmentedNbtPath extractionPath,
             byte defaultNBTId,
             BlockState blockState
         ) {
-            return getVariableUsingValue(ValueOperator.of(new NBTExtractionOperator(
+            return getVariableUsingValue(ValueOperator.of(new NbtExtractionOperator(
                 extractionPath,
                 defaultNBTId
             )), outputVariableItemStack, blockState);
@@ -112,15 +117,15 @@ public enum NBTExtractorOutputMode {
             Supplier<IVariableFacade> sourceVariableFacadeSupplier,
             ItemStack outputVariableItemStack,
             Tag currentNBT,
-            NBTPath extractionPath,
+            SegmentedNbtPath extractionPath,
             byte defaultNBTId,
             BlockState blockState
         ) {
             sourceVariableFacadeSupplier.get(); // Refresh variable
             Tag extractedNBT = extractionPath.extract(currentNBT);
             IValue value = extractedNBT == null
-                ? NBTValueConverter.getDefaultValue(defaultNBTId)
-                : NBTValueConverter.mapNBTToValue(extractedNBT);
+                ? NbtValueConverter.getDefaultValue(defaultNBTId)
+                : NbtValueConverter.mapNBTToValue(extractedNBT);
             return getVariableUsingValue(value, outputVariableItemStack, blockState);
         }
     },
@@ -135,7 +140,7 @@ public enum NBTExtractorOutputMode {
             Supplier<IVariableFacade> sourceVariableFacadeSupplier,
             ItemStack outputVariableItemStack,
             Tag currentNBT,
-            NBTPath extractionPath,
+            SegmentedNbtPath extractionPath,
             byte defaultNBTId,
             BlockState blockState
         ) {
@@ -160,7 +165,7 @@ public enum NBTExtractorOutputMode {
     private TexturePart buttonTextureNormal;
     private TexturePart buttonTextureHover;
 
-    NBTExtractorOutputMode(
+    NbtExtractorOutputMode(
         String translationId,
         ChatFormatting color,
         TexturePart buttonTextureNormal,
@@ -216,7 +221,7 @@ public enum NBTExtractorOutputMode {
         Supplier<IVariableFacade> sourceVariableFacadeSupplier,
         ItemStack outputVariableItemStack,
         Tag currentNBT,
-        NBTPath extractionPath,
+        SegmentedNbtPath extractionPath,
         byte defaultNBTId,
         BlockState blockState
     );

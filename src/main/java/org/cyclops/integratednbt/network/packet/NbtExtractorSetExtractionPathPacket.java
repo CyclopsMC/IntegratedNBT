@@ -8,7 +8,7 @@ import net.minecraft.world.level.Level;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
 import org.cyclops.cyclopscore.network.CodecField;
 import org.cyclops.cyclopscore.network.PacketCodec;
-import org.cyclops.integratednbt.NBTPath;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 
 /**
@@ -21,13 +21,13 @@ public class NbtExtractorSetExtractionPathPacket extends PacketCodec {
     private BlockPos blockPos;
     @CodecField
     private int defaultNBTId;
-    private NBTPath path;
+    private SegmentedNbtPath path;
 
     public NbtExtractorSetExtractionPathPacket() {
 
     }
 
-    public NbtExtractorSetExtractionPathPacket(BlockPos blockPos, NBTPath path, int defaultNBTId) {
+    public NbtExtractorSetExtractionPathPacket(BlockPos blockPos, SegmentedNbtPath path, int defaultNBTId) {
         this.blockPos = blockPos;
         this.path = path;
         this.defaultNBTId = defaultNBTId;
@@ -42,7 +42,7 @@ public class NbtExtractorSetExtractionPathPacket extends PacketCodec {
     @Override
     public void decode(FriendlyByteBuf input) {
         super.decode(input);
-        this.path = NBTPath.fromNBT(input.readNbt()).orElse(new NBTPath());
+        this.path = SegmentedNbtPath.fromNBT(input.readNbt()).orElse(new SegmentedNbtPath());
     }
 
     @Override

@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.cyclops.integrateddynamics.core.helper.WrenchHelpers;
-import org.cyclops.integratednbt.CabledHorizontalBlock;
 import org.cyclops.integratednbt.RegistryEntries;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 

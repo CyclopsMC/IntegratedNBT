@@ -15,6 +15,8 @@ import org.cyclops.integrateddynamics.core.evaluate.operator.OperatorRegistry;
 import org.cyclops.integrateddynamics.core.item.VariableFacadeHandlerRegistry;
 import org.cyclops.integratednbt.block.BlockNbtExtractorConfig;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractorConfig;
+import org.cyclops.integratednbt.evaluate.variable.NbtExtractedVariableFacadeHandler;
+import org.cyclops.integratednbt.evaluate.operator.NbtExtractionOperatorSerializer;
 import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractorConfig;
 import org.cyclops.integratednbt.item.ItemNbtExtractorRemoteConfig;
 import org.cyclops.integratednbt.proxy.ClientProxy;
@@ -35,9 +37,9 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
 
         event.enqueueWork(() -> {
             VariableFacadeHandlerRegistry.getInstance()
-                    .registerHandler(new NBTExtractedVariableFacadeHandler());
+                    .registerHandler(new NbtExtractedVariableFacadeHandler());
             OperatorRegistry.getInstance()
-                    .registerSerializer(new NBTExtractionOperatorSerializer());
+                    .registerSerializer(new NbtExtractionOperatorSerializer());
         });
     }
 

@@ -1,152 +1,16 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.evaluate.nbt.path;
 
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import org.apache.commons.lang3.StringUtils;
+import org.cyclops.integratednbt.IntegratedNbt;
 
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class NBTPath {
-    private interface Segment {
-        String getDisplayText();
-
-        String getCompactDisplayText();
-
-        Tag access(Tag parent);
-
-        void buildCyclopsNBTPath(StringBuilder stringBuilder);
-    }
-
-    private static class KeySegment implements Segment {
-        private final String key;
-        private static final Pattern NON_SPECIAL = Pattern.compile("^[a-zA-Z_0-9]+$");
-
-        public KeySegment(String key) {
-            this.key = key;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || this.getClass() != o.getClass()) {
-                return false;
-            }
-
-            KeySegment that = (KeySegment) o;
-
-            return this.key.equals(that.key);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.key.hashCode();
-        }
-
-        @Override
-        public String getDisplayText() {
-            return this.key;
-        }
-
-        @Override
-        public String getCompactDisplayText() {
-            return "." + this.key;
-        }
-
-        @Override
-        public Tag access(Tag parent) {
-            if (parent instanceof CompoundTag) {
-                return ((CompoundTag) parent).get(this.key);
-            } else {
-                return null;
-            }
-        }
-
-        @Override
-        public void buildCyclopsNBTPath(StringBuilder stringBuilder) {
-            // .length is reserved in Cyclops NBT Path
-            if (NON_SPECIAL.matcher(this.key).matches() && !this.key.equals("length")) {
-                stringBuilder.append('.').append(this.key);
-            } else {
-                // Cyclops NBT Path currently does not support escaping
-                stringBuilder.append("[\"").append(
-                    StringUtils.replace(
-                        StringUtils.replace(this.key, "\\", "\\\\"),
-                        "\"",
-                        "\\\""
-                    )
-                ).append("\"]");
-            }
-        }
-    }
-
-    private static class IndexSegment implements Segment {
-        private final int index;
-
-        private IndexSegment(int index) {
-            this.index = index;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || this.getClass() != o.getClass()) {
-                return false;
-            }
-
-            IndexSegment that = (IndexSegment) o;
-
-            return this.index == that.index;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.index;
-        }
-
-        @Override
-        public String getDisplayText() {
-            return I18n.get(
-                "integratednbt:nbt_extractor.index",
-                String.valueOf(index)
-            );
-        }
-
-        @Override
-        public String getCompactDisplayText() {
-            return "[" + this.index + "]";
-        }
-
-        @Override
-        public Tag access(Tag parent) {
-            if (parent instanceof ListTag) {
-                ListTag parentList = ((ListTag) parent);
-                if (parentList.size() <= this.index || this.index < 0) {
-                    return null;
-                }
-                Tag base = parentList.get(this.index);
-                if (base.getId() == 0 /* TagEnd */) {
-                    return null;
-                }
-                return base;
-            } else {
-                return null;
-            }
-        }
-
-        @Override
-        public void buildCyclopsNBTPath(StringBuilder stringBuilder) {
-            stringBuilder.append("[").append(this.index).append("]");
-        }
-    }
+public class SegmentedNbtPath {
 
     private static final int MAX_EXTRACTION_DEPTH = 128;
     private static final String KEY_PATH = "path";
@@ -159,15 +23,15 @@ public class NBTPath {
     // array lists should be better than linked lists.
     private final ArrayList<Segment> segments;
 
-    public NBTPath(ArrayList<Segment> segments) {
+    public SegmentedNbtPath(ArrayList<Segment> segments) {
         this.segments = segments;
     }
 
-    public NBTPath() {
+    public SegmentedNbtPath() {
         this.segments = new ArrayList<>();
     }
 
-    public static Optional<NBTPath> fromNBT(Tag nbt) {
+    public static Optional<SegmentedNbtPath> fromNBT(Tag nbt) {
         try {
             if (nbt instanceof CompoundTag) {
                 nbt = ((CompoundTag) nbt).get(KEY_PATH);
@@ -194,7 +58,7 @@ public class NBTPath {
                     segments.add(new IndexSegment(index));
                 }
             }
-            return Optional.of(new NBTPath(segments));
+            return Optional.of(new SegmentedNbtPath(segments));
         } catch (Exception ex) {
             ex.printStackTrace();
             IntegratedNbt.clog("Failed to decode NBT for ExtractionPath.");
@@ -222,8 +86,8 @@ public class NBTPath {
     }
 
     @SuppressWarnings("unchecked")
-    public NBTPath copy() {
-        return new NBTPath((ArrayList<Segment>) this.segments.clone());
+    public SegmentedNbtPath copy() {
+        return new SegmentedNbtPath((ArrayList<Segment>) this.segments.clone());
     }
 
     @Override
@@ -235,7 +99,7 @@ public class NBTPath {
             return false;
         }
 
-        NBTPath that = (NBTPath) o;
+        SegmentedNbtPath that = (SegmentedNbtPath) o;
 
         return this.segments.equals(that.segments);
     }
@@ -257,12 +121,12 @@ public class NBTPath {
             if (segment instanceof KeySegment) {
                 CompoundTag tag = new CompoundTag();
                 tag.putString(KEY_TYPE, TYPE_KEY);
-                tag.putString(KEY_KEY, ((KeySegment) segment).key);
+                tag.putString(KEY_KEY, ((KeySegment) segment).getKey());
                 list.add(tag);
             } else {
                 CompoundTag tag = new CompoundTag();
                 tag.putString(KEY_TYPE, TYPE_INDEX);
-                tag.putInt(KEY_INDEX, ((IndexSegment) segment).index);
+                tag.putInt(KEY_INDEX, ((IndexSegment) segment).getIndex());
                 list.add(tag);
             }
         }

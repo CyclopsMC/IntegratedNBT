@@ -8,9 +8,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.cyclops.cyclopscore.network.PacketCodec;
-import org.cyclops.integratednbt.NBTExtractorOutputMode;
+import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
 import org.cyclops.integratednbt.client.gui.container.ContainerScreenNbtExtractor;
-import org.cyclops.integratednbt.NBTPath;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 
 /**
  * Packet for updating a live crafting plan gui.
@@ -29,8 +29,8 @@ public class UpdateClientNbtExtractorPacket extends PacketCodec {
     private byte updated = 0;
     private UpdateClientNbtExtractorPacket.ErrorCode errorCode;
     private Tag nbt;
-    private NBTPath path;
-    private NBTExtractorOutputMode outputMode;
+    private SegmentedNbtPath path;
+    private NbtExtractorOutputMode outputMode;
     private Component errorMessage;
     private boolean autoRefresh;
 
@@ -48,12 +48,12 @@ public class UpdateClientNbtExtractorPacket extends PacketCodec {
         this.updated |= MASK_ERROR_CODE;
     }
 
-    public void updateExtractionPath(NBTPath path) {
+    public void updateExtractionPath(SegmentedNbtPath path) {
         this.path = path;
         this.updated |= MASK_EXTRACTION_PATH;
     }
 
-    public void updateOutputMode(NBTExtractorOutputMode outputMode) {
+    public void updateOutputMode(NbtExtractorOutputMode outputMode) {
         this.outputMode = outputMode;
         this.updated |= MASK_OUTPUT_MODE;
     }
@@ -124,10 +124,10 @@ public class UpdateClientNbtExtractorPacket extends PacketCodec {
             this.errorCode = UpdateClientNbtExtractorPacket.ErrorCode.values()[buf.readByte()];
         }
         if (this.isUpdated(MASK_EXTRACTION_PATH)) {
-            this.path = NBTPath.fromNBT(buf.readNbt()).orElse(new NBTPath());
+            this.path = SegmentedNbtPath.fromNBT(buf.readNbt()).orElse(new SegmentedNbtPath());
         }
         if (this.isUpdated(MASK_OUTPUT_MODE)) {
-            this.outputMode = NBTExtractorOutputMode.values()[buf.readByte()];
+            this.outputMode = NbtExtractorOutputMode.values()[buf.readByte()];
         }
         if (this.isUpdated(MASK_ERROR_MESSAGE)) {
             if (buf.readBoolean()) { // Is null

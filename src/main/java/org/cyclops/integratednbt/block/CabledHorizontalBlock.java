@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.block;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,8 +19,6 @@ import org.cyclops.integrateddynamics.core.blockentity.BlockEntityCableConnectab
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 
 public abstract class CabledHorizontalBlock extends HorizontalDirectionalBlock {
     public CabledHorizontalBlock(Properties properties) {

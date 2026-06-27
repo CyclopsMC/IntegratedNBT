@@ -19,6 +19,8 @@ import org.cyclops.integratednbt.client.gui.component.HoverTextImageButton;
 import org.cyclops.integratednbt.client.gui.component.NbtTreeViewer;
 import org.cyclops.integratednbt.client.gui.component.Texture;
 import org.cyclops.integratednbt.client.gui.component.TexturePart;
+import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractor;
 import org.cyclops.integratednbt.network.packet.NbtExtractorSetExtractionPathPacket;
 import org.cyclops.integratednbt.network.packet.NbtExtractorSetOutputModePacket;
@@ -98,8 +100,8 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
     // Null signify that the first update packet has not arrived yet.
     private static UpdateClientNbtExtractorPacket.ErrorCode errorCode = null;
     private static Tag nbt;
-    private static NBTPath extractionPath = null;
-    private static NBTExtractorOutputMode outputMode = null;
+    private static SegmentedNbtPath extractionPath = null;
+    private static NbtExtractorOutputMode outputMode = null;
     private static Component errorMessage = null;
     private static Boolean autoRefresh = null;
 
@@ -140,7 +142,7 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
             tileEntity.getScrollTop()
         ) {
             @Override
-            public void onUpdateSelectedPath(NBTPath newPath, Tag nbt) {
+            public void onUpdateSelectedPath(SegmentedNbtPath newPath, Tag nbt) {
                 IntegratedNbt._instance.getPacketHandler().sendToServer(new NbtExtractorSetExtractionPathPacket(
                         ContainerScreenNbtExtractor.this.nbtExtractorContainer.getNbtExtractorEntity()
                                 .getBlockPos(),
@@ -150,7 +152,7 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
             }
 
             @Override
-            public NBTPath getSelectedPath() {
+            public SegmentedNbtPath getSelectedPath() {
                 return extractionPath;
             }
         };
@@ -164,11 +166,11 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
         ContainerScreenNbtExtractor.nbt = nbt;
     }
 
-    public static void updateExtractionPath(NBTPath extractionPath) {
+    public static void updateExtractionPath(SegmentedNbtPath extractionPath) {
         ContainerScreenNbtExtractor.extractionPath = extractionPath;
     }
 
-    public static void updateOutputMode(NBTExtractorOutputMode outputMode) {
+    public static void updateOutputMode(NbtExtractorOutputMode outputMode) {
         ContainerScreenNbtExtractor.outputMode = outputMode;
         if (lastInstance != null) {
             lastInstance.updateOutputModeButton();
@@ -203,13 +205,13 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
             "integratednbt:nbt_extractor.output_mode.description.begin").setStyle(Style.EMPTY.withColor(
             ChatFormatting.GRAY)));
         messages.add(Component.literal(" "));
-        Arrays.stream(NBTExtractorOutputMode.values())
+        Arrays.stream(NbtExtractorOutputMode.values())
             .forEach(describingOutputMode -> messages.add(describingOutputMode.getDescription(
                 describingOutputMode.equals(outputMode))));
         messages.add(Component.literal(" "));
         messages.add(Component.translatable(
             "integratednbt:nbt_extractor.output_mode.description.end",
-            NBTExtractorOutputMode.REFERENCE.getName()
+            NbtExtractorOutputMode.REFERENCE.getName()
         ).setStyle(Style.EMPTY.withColor(
             ChatFormatting.GRAY)));
         this.outputModeButton.setHoverText(messages);
@@ -328,8 +330,8 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
         }
         IntegratedNbt._instance.getPacketHandler().sendToServer(new NbtExtractorSetOutputModePacket(
                 this.nbtExtractorContainer.getNbtExtractorEntity().getBlockPos(),
-                NBTExtractorOutputMode.values()[(outputMode.ordinal() + 1) %
-                        NBTExtractorOutputMode.values().length]
+                NbtExtractorOutputMode.values()[(outputMode.ordinal() + 1) %
+                        NbtExtractorOutputMode.values().length]
         ));
     }
 

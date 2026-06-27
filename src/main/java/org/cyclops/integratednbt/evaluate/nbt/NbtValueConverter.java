@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.evaluate.nbt;
 
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.ByteTag;
@@ -27,7 +27,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public abstract class NBTValueConverter {
+/**
+ * Converts NBT tags to and from values.
+ * TODO: can we reuse code from ID instead of having this here?
+ */
+public abstract class NbtValueConverter {
     public static IValueType<? extends IValue> mapNBTToValueType(Tag nbt) {
         return mapNBTIDToValueType(nbt.getId());
     }
@@ -132,7 +136,7 @@ public abstract class NBTValueConverter {
             case 9: // List
                 return ValueList.ofAll(
                     ((ListTag) nbt).stream()
-                        .map(NBTValueConverter::mapNBTToValue)
+                        .map(NbtValueConverter::mapNBTToValue)
                         .toArray(IValue[]::new)
                 );
             case 10: // Compound

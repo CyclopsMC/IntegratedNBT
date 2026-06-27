@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.evaluate.operator;
 
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -16,24 +16,27 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueHelpers;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.helper.L10NValues;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
+import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
+import org.cyclops.integratednbt.Reference;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class NBTExtractionOperator implements IOperator {
+public class NbtExtractionOperator implements IOperator {
     public static ResourceLocation UNIQUE_NAME = new ResourceLocation(
         Reference.MOD_ID,
         "nbt_extraction"
     );
-    private NBTPath extractionPath;
+    private SegmentedNbtPath extractionPath;
     private byte defaultNBTId;
 
-    public NBTExtractionOperator(NBTPath extractionPath, byte defaultNBTId) {
+    public NbtExtractionOperator(SegmentedNbtPath extractionPath, byte defaultNBTId) {
         this.extractionPath = extractionPath;
         this.defaultNBTId = defaultNBTId;
     }
 
-    public NBTPath getExtractionPath() {
+    public SegmentedNbtPath getExtractionPath() {
         return this.extractionPath;
     }
 
@@ -128,13 +131,13 @@ public class NBTExtractionOperator implements IOperator {
                     Tag extracted =
                         this.extractionPath.extract(((ValueNbt) value).getRawValue().orElse(null));
                     if (extracted != null) {
-                        return NBTValueConverter.mapNBTToValueType(extracted);
+                        return NbtValueConverter.mapNBTToValueType(extracted);
                     }
                 }
             }
         } catch (EvaluationException ignored) {
         }
-        return NBTValueConverter.mapNBTIDToValueType(this.defaultNBTId);
+        return NbtValueConverter.mapNBTIDToValueType(this.defaultNBTId);
     }
 
     @Override
@@ -145,11 +148,11 @@ public class NBTExtractionOperator implements IOperator {
                 Tag extracted =
                     this.extractionPath.extract(((ValueNbt) value).getRawValue().orElse(null));
                 if (extracted != null) {
-                    return NBTValueConverter.mapNBTToValue(extracted);
+                    return NbtValueConverter.mapNBTToValue(extracted);
                 }
             }
         }
-        return NBTValueConverter.getDefaultValue(this.defaultNBTId);
+        return NbtValueConverter.getDefaultValue(this.defaultNBTId);
     }
 
     @Override

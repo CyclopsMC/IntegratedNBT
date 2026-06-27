@@ -17,8 +17,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.ShortTag;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
-import org.cyclops.integratednbt.NBTPath;
-import org.cyclops.integratednbt.NBTValueConverter;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
+import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 import org.cyclops.integratednbt.client.gui.FontHelper;
 import org.cyclops.integratednbt.client.gui.container.ExtendedContainerScreen;
 import org.cyclops.integratednbt.helpers.Wrapper;
@@ -79,7 +79,7 @@ public abstract class NbtTreeViewer {
         "textures/gui/1x1.png"
     ).createPart(0, 0, 1, 1);
 
-    private final Set<NBTPath> expandedPaths;
+    private final Set<SegmentedNbtPath> expandedPaths;
     private final Wrapper<Integer> scrollTop;
     private final Font fontRenderer = Minecraft.getInstance().font;
     private ExtendedContainerScreen<?> gui;
@@ -93,10 +93,10 @@ public abstract class NbtTreeViewer {
     private int maxScroll = 0;
     private int currentY;
     private int currentX;
-    private NBTPath currentPath;
-    private NBTPath hoveringPath;
+    private SegmentedNbtPath currentPath;
+    private SegmentedNbtPath hoveringPath;
     private Tag hoveringNBTNode;
-    private NBTPath selecting;
+    private SegmentedNbtPath selecting;
     /**
      * X coordinate of mouse in the screen
      */
@@ -105,11 +105,11 @@ public abstract class NbtTreeViewer {
      * Y coordinate of mouse in the screen
      */
     private int mouseY;
-    private NBTPath hoveringExpandableButton;
+    private SegmentedNbtPath hoveringExpandableButton;
 
     public NbtTreeViewer(
         ExtendedContainerScreen<?> gui,
-        Set<NBTPath> expandedPaths,
+        Set<SegmentedNbtPath> expandedPaths,
         Wrapper<Integer> scrollTop
     ) {
         this.gui = gui;
@@ -217,7 +217,7 @@ public abstract class NbtTreeViewer {
         this.hoveringPath = null;
         this.hoveringNBTNode = null;
         this.hoveringExpandableButton = null;
-        this.currentPath = new NBTPath();
+        this.currentPath = new SegmentedNbtPath();
         this.currentY = SCREEN_EDGE;
         this.updateScroll();
         this.mouseX = absMouseX - this.left;
@@ -270,7 +270,7 @@ public abstract class NbtTreeViewer {
             }
             if (this.hoveringPath != null) {
                 IValueType<? extends IValue> hoveringValueType =
-                    NBTValueConverter.mapNBTToValueType(this.hoveringNBTNode);
+                    NbtValueConverter.mapNBTToValueType(this.hoveringNBTNode);
                 ArrayList<String> list = new ArrayList<>(5);
                 list.add(this.hoveringPath.getDisplayText());
                 list.add(I18n.get(
@@ -285,7 +285,7 @@ public abstract class NbtTreeViewer {
                 ));
                 list.add(I18n.get(
                     "integratednbt:nbt_extractor.tooltip.default_value",
-                    NBTValueConverter.getDefaultValueDisplayText(this.hoveringNBTNode.getId())
+                    NbtValueConverter.getDefaultValueDisplayText(this.hoveringNBTNode.getId())
                 ));
                 if (Objects.equals(this.getSelectedPath(), this.hoveringPath)) {
                     list.add(I18n.get("integratednbt:nbt_extractor.tooltip.selected"));
@@ -343,7 +343,7 @@ public abstract class NbtTreeViewer {
         }
     }
 
-    private void toggleExpanded(NBTPath path) {
+    private void toggleExpanded(SegmentedNbtPath path) {
         if (this.expandedPaths.contains(path)) {
             this.expandedPaths.remove(path);
         } else {
@@ -351,7 +351,7 @@ public abstract class NbtTreeViewer {
         }
     }
 
-    public abstract void onUpdateSelectedPath(NBTPath newPath, Tag nbt);
+    public abstract void onUpdateSelectedPath(SegmentedNbtPath newPath, Tag nbt);
 
     private static boolean isNodeExpandable(Tag nbt) {
         int nbtId = nbt.getId();
@@ -505,5 +505,5 @@ public abstract class NbtTreeViewer {
         }
     }
 
-    public abstract NBTPath getSelectedPath();
+    public abstract SegmentedNbtPath getSelectedPath();
 }

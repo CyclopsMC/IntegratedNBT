@@ -18,8 +18,8 @@ import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
 import org.cyclops.integratednbt.IntegratedNbt;
-import org.cyclops.integratednbt.NBTExtractorOutputMode;
-import org.cyclops.integratednbt.NBTPath;
+import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.RegistryEntries;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.helpers.VariableHelpers;
@@ -86,8 +86,8 @@ public class ContainerNbtExtractor extends AbstractContainerMenu {
     private BlockEntityNbtExtractor nbtExtractorEntity;
     private UpdateClientNbtExtractorPacket.ErrorCode clientErrorCode = null;
     private Wrapper<Tag> clientNBT = null;
-    private NBTPath clientPath = null;
-    private NBTExtractorOutputMode clientOutputMode = null;
+    private SegmentedNbtPath clientPath = null;
+    private NbtExtractorOutputMode clientOutputMode = null;
     private Component clientErrorMessage = null;
     private Boolean clientAutoRefresh = null;
 
@@ -186,12 +186,12 @@ public class ContainerNbtExtractor extends AbstractContainerMenu {
                 message.updateErrorCode(errorCode);
                 this.clientErrorCode = errorCode;
             }
-            NBTPath nbtPath = this.nbtExtractorEntity.getExtractionPath();
+            SegmentedNbtPath nbtPath = this.nbtExtractorEntity.getExtractionPath();
             if (this.clientPath != nbtPath) {
                 message.updateExtractionPath(nbtPath);
                 this.clientPath = nbtPath;
             }
-            NBTExtractorOutputMode outputMode = this.nbtExtractorEntity.getOutputMode();
+            NbtExtractorOutputMode outputMode = this.nbtExtractorEntity.getOutputMode();
             if (this.clientOutputMode != outputMode) {
                 message.updateOutputMode(outputMode);
                 this.clientOutputMode = outputMode;
