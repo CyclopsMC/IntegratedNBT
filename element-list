@@ -1,6 +1,16 @@
 org.cyclops.integratednbt
 org.cyclops.integratednbt.block
+org.cyclops.integratednbt.blockentity
+org.cyclops.integratednbt.client.gui
+org.cyclops.integratednbt.client.gui.component
+org.cyclops.integratednbt.client.gui.container
+org.cyclops.integratednbt.evaluate
+org.cyclops.integratednbt.evaluate.nbt
+org.cyclops.integratednbt.evaluate.nbt.path
+org.cyclops.integratednbt.evaluate.operator
+org.cyclops.integratednbt.evaluate.variable
 org.cyclops.integratednbt.helpers
+org.cyclops.integratednbt.inventory.container
 org.cyclops.integratednbt.item
 org.cyclops.integratednbt.network.packet
 org.cyclops.integratednbt.proxy
