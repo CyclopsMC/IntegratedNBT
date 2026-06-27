@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.network.packet;
 
 public class ByteMaskMaker {
     private byte mask = 1;

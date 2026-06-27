@@ -8,9 +8,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.cyclops.cyclopscore.network.PacketCodec;
-import org.cyclops.integratednbt.ByteMaskMaker;
 import org.cyclops.integratednbt.NBTExtractorOutputMode;
-import org.cyclops.integratednbt.NBTExtractorScreen;
+import org.cyclops.integratednbt.client.gui.container.ContainerScreenNbtExtractor;
 import org.cyclops.integratednbt.NBTPath;
 
 /**
@@ -150,22 +149,22 @@ public class UpdateClientNbtExtractorPacket extends PacketCodec {
     @Override
     public void actionClient(Level world, Player player) {
         if (isUpdated(MASK_NBT)) {
-            NBTExtractorScreen.updateNBT(nbt);
+            ContainerScreenNbtExtractor.updateNBT(nbt);
         }
         if (isUpdated(MASK_ERROR_CODE)) {
-            NBTExtractorScreen.updateError(errorCode);
+            ContainerScreenNbtExtractor.updateError(errorCode);
         }
         if (isUpdated(MASK_EXTRACTION_PATH)) {
-            NBTExtractorScreen.updateExtractionPath(path);
+            ContainerScreenNbtExtractor.updateExtractionPath(path);
         }
         if (isUpdated(MASK_OUTPUT_MODE)) {
-            NBTExtractorScreen.updateOutputMode(outputMode);
+            ContainerScreenNbtExtractor.updateOutputMode(outputMode);
         }
         if (isUpdated(MASK_ERROR_MESSAGE)) {
-            NBTExtractorScreen.updateErrorMessage(errorMessage);
+            ContainerScreenNbtExtractor.updateErrorMessage(errorMessage);
         }
         if (isUpdated(MASK_AUTO_REFRESH)) {
-            NBTExtractorScreen.updateAutoRefresh(autoRefresh);
+            ContainerScreenNbtExtractor.updateAutoRefresh(autoRefresh);
         }
     }
 

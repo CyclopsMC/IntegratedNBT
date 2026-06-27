@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.client.gui.component;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -17,6 +17,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.ShortTag;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
+import org.cyclops.integratednbt.NBTPath;
+import org.cyclops.integratednbt.NBTValueConverter;
+import org.cyclops.integratednbt.client.gui.FontHelper;
+import org.cyclops.integratednbt.client.gui.container.ExtendedContainerScreen;
 import org.cyclops.integratednbt.helpers.Wrapper;
 
 import java.util.ArrayList;
@@ -24,10 +28,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.cyclops.integratednbt.NBTExtractorScreen.GUI_TEXTURE;
-import static org.cyclops.integratednbt.NBTExtractorScreen.SCREEN_EDGE;
+import static org.cyclops.integratednbt.client.gui.container.ContainerScreenNbtExtractor.GUI_TEXTURE;
+import static org.cyclops.integratednbt.client.gui.container.ContainerScreenNbtExtractor.SCREEN_EDGE;
 
-public abstract class NBTTreeViewer {
+public abstract class NbtTreeViewer {
     private static final long SMOOTH_SCROLLING_TRANSITION_TIME_MS = 75;
     private static final double SCROLL_SPEED = 30;
     private static final int LINE_SPACE = 1;
@@ -103,7 +107,7 @@ public abstract class NBTTreeViewer {
     private int mouseY;
     private NBTPath hoveringExpandableButton;
 
-    public NBTTreeViewer(
+    public NbtTreeViewer(
         ExtendedContainerScreen<?> gui,
         Set<NBTPath> expandedPaths,
         Wrapper<Integer> scrollTop

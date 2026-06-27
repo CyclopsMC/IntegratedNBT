@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.client.gui.container;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
@@ -13,7 +13,13 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.cyclops.integratednbt.*;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
+import org.cyclops.integratednbt.client.gui.component.HoverTextImageButton;
+import org.cyclops.integratednbt.client.gui.component.NbtTreeViewer;
+import org.cyclops.integratednbt.client.gui.component.Texture;
+import org.cyclops.integratednbt.client.gui.component.TexturePart;
+import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractor;
 import org.cyclops.integratednbt.network.packet.NbtExtractorSetExtractionPathPacket;
 import org.cyclops.integratednbt.network.packet.NbtExtractorSetOutputModePacket;
 import org.cyclops.integratednbt.network.packet.NbtExtractorUpdateAutoRefreshPacket;
@@ -25,7 +31,7 @@ import java.util.Arrays;
 import static org.lwjgl.opengl.GL11.*;
 
 @OnlyIn(Dist.CLIENT)
-public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorContainer> {
+public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<ContainerNbtExtractor> {
     public static final int SCREEN_EDGE = 4;
     public static final Texture GUI_TEXTURE = new Texture(
         "integratednbt",
@@ -88,7 +94,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
     private static final int BUTTON_SPACING = 2;
 
     // These are static because GUI sometimes after receiving the update packets.
-    private static NBTExtractorScreen lastInstance = null;
+    private static ContainerScreenNbtExtractor lastInstance = null;
     // Null signify that the first update packet has not arrived yet.
     private static UpdateClientNbtExtractorPacket.ErrorCode errorCode = null;
     private static Tag nbt;
@@ -97,8 +103,8 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
     private static Component errorMessage = null;
     private static Boolean autoRefresh = null;
 
-    private NBTTreeViewer treeViewer;
-    private NBTExtractorContainer nbtExtractorContainer;
+    private NbtTreeViewer treeViewer;
+    private ContainerNbtExtractor nbtExtractorContainer;
     private Font fontRenderer = Minecraft.getInstance().font;
     /**
      * Padding outside the GUI; Responsive; Updated by updateCalculations
@@ -119,16 +125,16 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
     private HoverTextImageButton outputModeButton;
     private HoverTextImageButton autoRefreshButton;
 
-    public NBTExtractorScreen(
-        NBTExtractorContainer screenContainer,
+    public ContainerScreenNbtExtractor(
+        ContainerNbtExtractor screenContainer,
         Inventory inventory,
         Component title
     ) {
         super(screenContainer, inventory, title);
-        NBTExtractorScreen.lastInstance = this;
+        ContainerScreenNbtExtractor.lastInstance = this;
         this.nbtExtractorContainer = screenContainer;
         BlockEntityNbtExtractor tileEntity = this.nbtExtractorContainer.getNbtExtractorEntity();
-        this.treeViewer = new NBTTreeViewer(
+        this.treeViewer = new NbtTreeViewer(
             this,
             tileEntity.getExpandedPaths(),
             tileEntity.getScrollTop()
@@ -136,7 +142,7 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
             @Override
             public void onUpdateSelectedPath(NBTPath newPath, Tag nbt) {
                 IntegratedNbt._instance.getPacketHandler().sendToServer(new NbtExtractorSetExtractionPathPacket(
-                        NBTExtractorScreen.this.nbtExtractorContainer.getNbtExtractorEntity()
+                        ContainerScreenNbtExtractor.this.nbtExtractorContainer.getNbtExtractorEntity()
                                 .getBlockPos(),
                         newPath,
                         nbt.getId()
@@ -151,19 +157,19 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
     }
 
     public static void updateError(UpdateClientNbtExtractorPacket.ErrorCode errorCode) {
-        NBTExtractorScreen.errorCode = errorCode;
+        ContainerScreenNbtExtractor.errorCode = errorCode;
     }
 
     public static void updateNBT(Tag nbt) {
-        NBTExtractorScreen.nbt = nbt;
+        ContainerScreenNbtExtractor.nbt = nbt;
     }
 
     public static void updateExtractionPath(NBTPath extractionPath) {
-        NBTExtractorScreen.extractionPath = extractionPath;
+        ContainerScreenNbtExtractor.extractionPath = extractionPath;
     }
 
     public static void updateOutputMode(NBTExtractorOutputMode outputMode) {
-        NBTExtractorScreen.outputMode = outputMode;
+        ContainerScreenNbtExtractor.outputMode = outputMode;
         if (lastInstance != null) {
             lastInstance.updateOutputModeButton();
         }
@@ -210,11 +216,11 @@ public class NBTExtractorScreen extends ExtendedContainerScreen<NBTExtractorCont
     }
 
     public static void updateErrorMessage(Component errorMessage) {
-        NBTExtractorScreen.errorMessage = errorMessage;
+        ContainerScreenNbtExtractor.errorMessage = errorMessage;
     }
 
     public static void updateAutoRefresh(Boolean autoRefresh) {
-        NBTExtractorScreen.autoRefresh = autoRefresh;
+        ContainerScreenNbtExtractor.autoRefresh = autoRefresh;
         if (lastInstance != null) {
             lastInstance.updateAutoRefreshButton();
         }

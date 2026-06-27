@@ -45,6 +45,7 @@ import org.cyclops.integratednbt.*;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor.NetworkElement;
 import org.cyclops.integratednbt.helpers.VariableHelpers;
 import org.cyclops.integratednbt.helpers.Wrapper;
+import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -627,7 +628,7 @@ public class BlockEntityNbtExtractor extends BlockEntity implements ICapabilityP
         @Nonnull Inventory inventory,
         @Nonnull Player player
     ) {
-        return new NBTExtractorContainer(windowId, inventory, this);
+        return new ContainerNbtExtractor(windowId, inventory, this);
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T blockEntity) {

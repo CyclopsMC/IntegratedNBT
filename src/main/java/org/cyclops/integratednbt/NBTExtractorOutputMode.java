@@ -17,6 +17,8 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeOperator.V
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeString.ValueString;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.item.ValueTypeVariableFacade;
+import org.cyclops.integratednbt.client.gui.component.Texture;
+import org.cyclops.integratednbt.client.gui.component.TexturePart;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;

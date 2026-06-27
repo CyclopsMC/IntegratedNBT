@@ -1,10 +1,11 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.client.gui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
+import org.cyclops.integratednbt.client.gui.container.ExtendedContainerScreen;
 
 /**
  * Represents a part in a texture; Offers help method for quick rendering

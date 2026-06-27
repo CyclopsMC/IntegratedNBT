@@ -1,10 +1,12 @@
 package org.cyclops.integratednbt;
 
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.ObjectHolder;
 import org.cyclops.integratednbt.block.BlockNbtExtractor;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
+import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractor;
 import org.cyclops.integratednbt.item.ItemNbtExtractorRemote;
 
 /**
@@ -23,5 +25,8 @@ public class RegistryEntries {
 
     @ObjectHolder(registryName = "block_entity_type", value = "integratednbt:nbt_extractor")
     public static final BlockEntityType<BlockEntityNbtExtractor> BLOCK_ENTITY_NBT_EXTRACTOR = null;
+
+    @ObjectHolder(registryName = "menu", value = "integratednbt:nbt_extractor")
+    public static final MenuType<ContainerNbtExtractor> CONTAINER_NBT_EXTRACTOR = null;
 
 }

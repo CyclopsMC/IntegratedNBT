@@ -3,9 +3,7 @@ package org.cyclops.integratednbt;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.cyclopscore.init.ItemGroupMod;
@@ -14,6 +12,7 @@ import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.integratednbt.block.BlockNbtExtractorConfig;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractorConfig;
+import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractorConfig;
 import org.cyclops.integratednbt.item.ItemNbtExtractorRemoteConfig;
 import org.cyclops.integratednbt.proxy.ClientProxy;
 import org.cyclops.integratednbt.proxy.CommonProxy;
@@ -25,10 +24,6 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
 
     public IntegratedNbt() {
         super(Reference.MOD_ID, (instance) -> _instance = instance);
-
-        // TODO: migrate code below...
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        Additions.CONTAINER_TYPES.register(modEventBus);
     }
 
     @Override
@@ -47,6 +42,8 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
         configHandler.addConfigurable(new BlockNbtExtractorConfig());
 
         configHandler.addConfigurable(new BlockEntityNbtExtractorConfig());
+
+        configHandler.addConfigurable(new ContainerNbtExtractorConfig());
     }
 
     @Override

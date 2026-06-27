@@ -1,4 +1,4 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.inventory.container;
 
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,16 +17,20 @@ import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
+import org.cyclops.integratednbt.IntegratedNbt;
+import org.cyclops.integratednbt.NBTExtractorOutputMode;
+import org.cyclops.integratednbt.NBTPath;
+import org.cyclops.integratednbt.RegistryEntries;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
-import org.cyclops.integratednbt.helpers.Wrapper;
 import org.cyclops.integratednbt.helpers.VariableHelpers;
+import org.cyclops.integratednbt.helpers.Wrapper;
 import org.cyclops.integratednbt.network.packet.UpdateClientNbtExtractorPacket;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
 
-public class NBTExtractorContainer extends AbstractContainerMenu {
+public class ContainerNbtExtractor extends AbstractContainerMenu {
     /**
      * A slot whose position is determined later.
      */
@@ -87,22 +91,12 @@ public class NBTExtractorContainer extends AbstractContainerMenu {
     private Component clientErrorMessage = null;
     private Boolean clientAutoRefresh = null;
 
-    // Logic-client
-    public NBTExtractorContainer(
-        int windowId,
-        Inventory playerInventory,
-        FriendlyByteBuf data
-    ) {
-        this(windowId, playerInventory, getTileEntity(playerInventory, data));
+    public ContainerNbtExtractor(int id, Inventory playerInventory, FriendlyByteBuf data) {
+        this(id, playerInventory, getTileEntity(playerInventory, data));
     }
 
-    // Logic-server
-    public NBTExtractorContainer(
-        int windowId,
-        Inventory playerInventory,
-        BlockEntityNbtExtractor nbtExtractorEntity
-    ) {
-        super(Additions.NBT_EXTRACTOR_CONTAINER.get(), windowId);
+    public ContainerNbtExtractor(int id, Inventory playerInventory, BlockEntityNbtExtractor nbtExtractorEntity) {
+        super(RegistryEntries.CONTAINER_NBT_EXTRACTOR, id);
         this.playerInventory = playerInventory;
         this.nbtExtractorEntity = nbtExtractorEntity;
         this.addSlot(new SrcNBTSlot(nbtExtractorEntity, SRC_NBT, 9, 6));
