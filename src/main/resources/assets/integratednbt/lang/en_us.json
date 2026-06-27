@@ -1,6 +1,10 @@
 {
   "itemGroup.integratednbt": "Integrated NBT",
+
+  "_comment": "Blocks",
   "block.integratednbt.nbt_extractor": "NBT Extractor",
+  "block.integratednbt.nbt_extractor.info": "Allows extraction of deeply nested values from a NBT typed variable.",
+
   "item.integratednbt.nbt_extractor_remote": "NBT Extractor Remote",
 
   "integratednbt:nbt_extractor.welcome": "Welcome",
@@ -15,7 +19,6 @@
   "integratednbt:nbt_extractor.root": "§e§l<root>",
   "integratednbt:nbt_extractor.arrow": " §7➡§r ",
   "integratednbt:nbt_extractor.index": "§7#§r%s",
-  "integratednbt:nbt_extractor.tooltip": "§7Allows extraction of deeply nested values from a NBT typed variable.",
   "integratednbt:nbt_extractor.tooltip.nbt_type": "§eNBT Type: §r%s",
   "integratednbt:nbt_extractor.tooltip.converted_type": "§eConverted Type: §r%s",
   "integratednbt:nbt_extractor.tooltip.default_value": "§eDefault Value: §r%s",

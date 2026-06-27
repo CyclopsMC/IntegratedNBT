@@ -77,7 +77,7 @@ public class NBTExtractorRemote extends Item {
                 "integratednbt:nbt_extractor_remote.require_load_client"));
             return;
         }
-        if (world.getBlockState(pos).getBlock() != Additions.NBT_EXTRACTOR_BLOCK.get()) {
+        if (world.getBlockState(pos).getBlock() != RegistryEntries.BLOCK_NBT_EXTRACTOR) {
             player.sendSystemMessage(Component.translatable(
                 "integratednbt:nbt_extractor_remote.invalid_bind"));
             return;
@@ -119,12 +119,12 @@ public class NBTExtractorRemote extends Item {
                 "integratednbt:nbt_extractor_remote.require_load_server"));
             return;
         }
-        if (world.getBlockState(pos).getBlock() != Additions.NBT_EXTRACTOR_BLOCK.get()) {
+        if (world.getBlockState(pos).getBlock() != RegistryEntries.BLOCK_NBT_EXTRACTOR) {
             player.sendSystemMessage(Component.translatable(
                 "integratednbt:nbt_extractor_remote.invalid_bind"));
             return;
         }
-        Additions.NBT_EXTRACTOR_BLOCK.get().playerAccess(world, pos, player);
+        RegistryEntries.BLOCK_NBT_EXTRACTOR.playerAccess(world, pos, player);
     }
 
     @Override
@@ -137,7 +137,7 @@ public class NBTExtractorRemote extends Item {
             return InteractionResult.FAIL;
         }
         InteractionHand hand = itemUseContext.getHand();
-        if (world.getBlockState(pos).getBlock() == Additions.NBT_EXTRACTOR_BLOCK.get()) {
+        if (world.getBlockState(pos).getBlock() == RegistryEntries.BLOCK_NBT_EXTRACTOR) {
             if (!world.isClientSide) {
                 Additions.NBT_EXTRACTOR_REMOTE.get()
                     .bindBlock(player.getItemInHand(hand), world, pos);

@@ -1,18 +1,14 @@
-package org.cyclops.integratednbt;
+package org.cyclops.integratednbt.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -27,35 +23,18 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.cyclops.integrateddynamics.core.helper.WrenchHelpers;
+import org.cyclops.integratednbt.Additions;
+import org.cyclops.integratednbt.CabledHorizontalBlock;
+import org.cyclops.integratednbt.NBTExtractorBE;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 import static org.cyclops.integratednbt.Additions.NBT_EXTRACTOR_BE;
-import static org.cyclops.integratednbt.Additions.NBT_EXTRACTOR_BLOCK;
 
-public class NBTExtractor extends CabledHorizontalBlock implements EntityBlock {
-    public static class NBTExtractorBlockItem extends BlockItem {
-        public NBTExtractorBlockItem() {
-            super(NBT_EXTRACTOR_BLOCK.get(), new Item.Properties().tab(IntegratedNBT._instance.getDefaultItemGroup()));
-        }
+public class BlockNbtExtractor extends CabledHorizontalBlock implements EntityBlock { // TODO: extend BlockEntityActiveVariableBase, like BlockEntityProxy
 
-        @Override
-        public void appendHoverText(
-            @Nonnull ItemStack itemStack,
-            @Nullable Level world,
-            @Nonnull List<Component> tooltip,
-            @Nonnull TooltipFlag flag
-        ) {
-            super.appendHoverText(itemStack, world, tooltip, flag);
-            tooltip.add(Component.translatable("integratednbt:nbt_extractor.tooltip"));
-        }
-    }
-
-    public static final String REGISTRY_NAME = "nbt_extractor";
-
-    public NBTExtractor(Properties properties) {
+    public BlockNbtExtractor(Properties properties) {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
     }

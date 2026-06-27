@@ -42,8 +42,8 @@ import org.cyclops.integrateddynamics.core.helper.CableHelpers;
 import org.cyclops.integrateddynamics.core.helper.NetworkHelpers;
 import org.cyclops.integrateddynamics.core.network.event.VariableContentsUpdatedEvent;
 import org.cyclops.integratednbt.NBTExtractorBE.NetworkElement;
-import org.cyclops.integratednbt.helpers.Wrapper;
 import org.cyclops.integratednbt.helpers.VariableHelpers;
+import org.cyclops.integratednbt.helpers.Wrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -95,7 +95,7 @@ public class NBTExtractorBE extends BlockEntity implements ICapabilityProvider,
 
         @Override
         public ItemStack getItemStack() {
-            return new ItemStack(Additions.NBT_EXTRACTOR_BLOCK_ITEM.get());
+            return new ItemStack(RegistryEntries.ITEM_NBT_EXTRACTOR);
         }
 
         @Override

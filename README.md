@@ -21,7 +21,7 @@ GUI is responsive and usable across all GUI scales and screen resolutions:
 
 ![](./screenshots/4.png)
 
-See [GitHub Wiki](https://github.com/SCLeoX/IntegratedNBT/wiki) for a brief tutorial on how to use this mod.
+See [GitHub Wiki](https://github.com/CyclopsMC/IntegratedNBT/wiki) for a brief tutorial on how to use this mod.
 
 All stable releases (including deobfuscated builds) can be found on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/integrated-nbt).
 

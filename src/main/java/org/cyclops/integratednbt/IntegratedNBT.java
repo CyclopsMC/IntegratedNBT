@@ -12,6 +12,7 @@ import org.cyclops.cyclopscore.init.ItemGroupMod;
 import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
+import org.cyclops.integratednbt.block.BlockNbtExtractorConfig;
 import org.cyclops.integratednbt.proxy.ClientProxy;
 import org.cyclops.integratednbt.proxy.CommonProxy;
 
@@ -25,7 +26,6 @@ public class IntegratedNBT extends ModBase<IntegratedNBT> {
 
         // TODO: migrate code below...
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        Additions.BLOCKS.register(modEventBus);
         Additions.ITEMS.register(modEventBus);
         Additions.CONTAINER_TYPES.register(modEventBus);
         Additions.BLOCK_ENTITIES.register(modEventBus);
@@ -41,6 +41,8 @@ public class IntegratedNBT extends ModBase<IntegratedNBT> {
         super.onConfigsRegister(configHandler);
 
         configHandler.addConfigurable(new GeneralConfig());
+
+        configHandler.addConfigurable(new BlockNbtExtractorConfig());
     }
 
     @Override
