@@ -1,4 +1,4 @@
 org.cyclops.integratednbt
-org.cyclops.integratednbt.network
-org.cyclops.integratednbt.network.clientbound
-org.cyclops.integratednbt.network.serverbound
+org.cyclops.integratednbt.helpers
+org.cyclops.integratednbt.network.packet
+org.cyclops.integratednbt.proxy
