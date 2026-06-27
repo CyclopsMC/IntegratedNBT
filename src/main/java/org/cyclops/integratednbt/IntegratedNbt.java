@@ -4,12 +4,15 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.cyclopscore.init.ItemGroupMod;
 import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
+import org.cyclops.integrateddynamics.core.evaluate.operator.OperatorRegistry;
+import org.cyclops.integrateddynamics.core.item.VariableFacadeHandlerRegistry;
 import org.cyclops.integratednbt.block.BlockNbtExtractorConfig;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractorConfig;
 import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractorConfig;
@@ -24,6 +27,18 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
 
     public IntegratedNbt() {
         super(Reference.MOD_ID, (instance) -> _instance = instance);
+    }
+
+    @Override
+    protected void setup(FMLCommonSetupEvent event) {
+        super.setup(event);
+
+        event.enqueueWork(() -> {
+            VariableFacadeHandlerRegistry.getInstance()
+                    .registerHandler(new NBTExtractedVariableFacadeHandler());
+            OperatorRegistry.getInstance()
+                    .registerSerializer(new NBTExtractionOperatorSerializer());
+        });
     }
 
     @Override
