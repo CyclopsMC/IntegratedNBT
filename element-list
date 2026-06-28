@@ -12,5 +12,6 @@ org.cyclops.integratednbt.evaluate.variable
 org.cyclops.integratednbt.helpers
 org.cyclops.integratednbt.inventory.container
 org.cyclops.integratednbt.item
+org.cyclops.integratednbt.network
 org.cyclops.integratednbt.network.packet
 org.cyclops.integratednbt.proxy
