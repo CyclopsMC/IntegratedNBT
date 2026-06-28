@@ -18,10 +18,10 @@ import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
 import org.cyclops.integratednbt.IntegratedNbt;
-import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
-import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.RegistryEntries;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
+import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.helpers.VariableHelpers;
 import org.cyclops.integratednbt.helpers.Wrapper;
 import org.cyclops.integratednbt.network.packet.UpdateClientNbtExtractorPacket;
@@ -99,8 +99,8 @@ public class ContainerNbtExtractor extends AbstractContainerMenu {
         super(RegistryEntries.CONTAINER_NBT_EXTRACTOR, id);
         this.playerInventory = playerInventory;
         this.nbtExtractorEntity = nbtExtractorEntity;
-        this.addSlot(new SrcNBTSlot(nbtExtractorEntity, SRC_NBT, 9, 6));
-        this.addSlot(new VarOutSlot(nbtExtractorEntity, VAR_OUT, 153, 6));
+        this.addSlot(new SrcNBTSlot(nbtExtractorEntity.getInventory(), SRC_NBT, 9, 6));
+        this.addSlot(new VarOutSlot(nbtExtractorEntity.getInventory(), VAR_OUT, 153, 6));
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; ++j) {
                 this.addSlot(new ResponsiveSlot(

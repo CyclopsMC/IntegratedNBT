@@ -22,9 +22,12 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.NetworkHooks;
+import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
 import org.cyclops.integratednbt.IntegratedNbt;
 import org.cyclops.integratednbt.Reference;
 import org.cyclops.integratednbt.RegistryEntries;
+import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.network.packet.OpenNbtExtractorRemoteGuiPacket;
 
 import javax.annotation.Nonnull;
@@ -126,7 +129,15 @@ public class ItemNbtExtractorRemote extends Item {
                 "integratednbt:nbt_extractor_remote.invalid_bind"));
             return;
         }
-        RegistryEntries.BLOCK_NBT_EXTRACTOR.playerAccess(world, pos, player);
+        playerAccess(world, pos, player);
+    }
+
+    public void playerAccess(Level level, BlockPos pos, ServerPlayer playerMP) {
+        BlockEntityHelpers.get(level, pos, BlockEntityNbtExtractor.class)
+                .ifPresent(blockEntity -> {
+                    blockEntity.refreshVariables(true);
+                    NetworkHooks.openScreen(playerMP, blockEntity, pos);
+                });
     }
 
     @Override

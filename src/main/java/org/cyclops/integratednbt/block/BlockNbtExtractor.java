@@ -2,90 +2,54 @@ package org.cyclops.integratednbt.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
-import net.minecraft.world.Containers;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
-import org.cyclops.integrateddynamics.core.helper.WrenchHelpers;
+import org.cyclops.integrateddynamics.core.block.BlockWithEntityGuiCabled;
 import org.cyclops.integratednbt.RegistryEntries;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class BlockNbtExtractor extends CabledHorizontalBlock implements EntityBlock { // TODO: extend BlockEntityActiveVariableBase, like BlockEntityProxy
+public class BlockNbtExtractor extends BlockWithEntityGuiCabled {
+
+    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public BlockNbtExtractor(Properties properties) {
-        super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
+        super(properties, BlockEntityNbtExtractor::new);
+        this.registerDefaultState(this.stateDefinition.any()
+                .setValue(FACING, Direction.NORTH));
     }
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        if (level.isClientSide) {
-            return null;
-        }
-        return type == RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR ? BlockEntityNbtExtractor::tick : null;
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
+        return level.isClientSide ? null : createTickerHelper(blockEntityType, RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR, new BlockEntityNbtExtractor.Ticker<>());
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
         builder.add(FACING);
     }
 
     @Override
-    public void onRemove(
-        BlockState oldState,
-        @Nonnull Level worldIn,
-        @Nonnull BlockPos pos,
-        BlockState newState,
-        boolean isMoving
-    ) {
-        if (oldState.getBlock() != newState.getBlock()) {
-            BlockEntity tileEntity = worldIn.getBlockEntity(pos);
-            if (tileEntity instanceof BlockEntityNbtExtractor) {
-                Container inventory = (BlockEntityNbtExtractor) tileEntity;
-                for (int slot = 0; slot < inventory.getContainerSize(); ++slot) {
-                    Containers.dropItemStack(
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ(),
-                        inventory.getItem(slot)
-                    );
-                }
-            }
-        }
-        super.onRemove(oldState, worldIn, pos, newState, isMoving);
-    }
-
-    @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState()
-            .setValue(FACING, context.getHorizontalDirection().getOpposite());
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection());
     }
 
     @Override
-    @Nonnull
-    @SuppressWarnings("deprecation")
     public InteractionResult use(
         BlockState blockState,
         Level world,
@@ -94,62 +58,15 @@ public class BlockNbtExtractor extends CabledHorizontalBlock implements EntityBl
         InteractionHand hand,
         BlockHitResult rayTraceResult
     ) {
-        ItemStack heldItem = player.getItemInHand(hand);
-        if (!world.isClientSide) {
-            ServerPlayer playerMP = (ServerPlayer) player;
-            if (WrenchHelpers.isWrench(player, heldItem, world, blockPos, rayTraceResult.getDirection())
-                && player.isCrouching()
-            ) {
-                Block.dropResources(
-                    blockState,
-                    world,
-                    blockPos,
-                    world.getBlockEntity(blockPos),
-                    player,
-                    heldItem
-                );
-                world.destroyBlock(blockPos, false);
-                return InteractionResult.SUCCESS;
-            }
-            if (heldItem.getItem() == RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE) {
-                return InteractionResult.PASS;
-            }
-            if (!player.isCrouching()) {
-                this.playerAccess(world, blockPos, playerMP);
-                return InteractionResult.SUCCESS;
-            }
+        if (!world.isClientSide() && player.getItemInHand(hand).getItem() == RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE) {
+            return InteractionResult.PASS;
         }
-        return InteractionResult.SUCCESS;
-    }
-
-    public void playerAccess(Level world, BlockPos pos, ServerPlayer playerMP) {
-        BlockEntity tileentity = world.getBlockEntity(pos);
-        if (tileentity instanceof BlockEntityNbtExtractor) {
-            BlockEntityNbtExtractor nbtExtractorTileEntity = (BlockEntityNbtExtractor) tileentity;
-            nbtExtractorTileEntity.refreshVariables(true);
-            NetworkHooks.openScreen(playerMP, nbtExtractorTileEntity, pos);
-        }
+        return super.use(blockState, world, blockPos, player, hand, rayTraceResult);
     }
 
     @Override
-    @Nonnull
-    @SuppressWarnings("deprecation")
-    public BlockState rotate(BlockState state, Rotation rot) {
-        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
-    }
-
-    @Override
-    @Nonnull
-    @SuppressWarnings("deprecation")
-    public BlockState mirror(BlockState state, Mirror mirrorIn) {
-        return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
-    }
-
-    @org.jetbrains.annotations.Nullable
-    @Override
-    public BlockEntity newBlockEntity(
-        BlockPos blockPos, BlockState blockState
-    ) {
-        return new BlockEntityNbtExtractor(blockPos, blockState);
+    public void writeExtraGuiData(FriendlyByteBuf packetBuffer, Level world, Player player, BlockPos blockPos, InteractionHand hand, BlockHitResult rayTraceResult) {
+        super.writeExtraGuiData(packetBuffer, world, player, blockPos, hand, rayTraceResult);
+        packetBuffer.writeBlockPos(blockPos);
     }
 }
