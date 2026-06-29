@@ -7,6 +7,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigHandler;
+import org.cyclops.cyclopscore.helper.MinecraftHelpers;
 import org.cyclops.cyclopscore.init.ItemGroupMod;
 import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
@@ -15,8 +16,9 @@ import org.cyclops.integrateddynamics.core.evaluate.operator.OperatorRegistry;
 import org.cyclops.integrateddynamics.core.item.VariableFacadeHandlerRegistry;
 import org.cyclops.integratednbt.block.BlockNbtExtractorConfig;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractorConfig;
-import org.cyclops.integratednbt.evaluate.variable.NbtExtractedVariableFacadeHandler;
+import org.cyclops.integratednbt.client.model.VariableModelProviders;
 import org.cyclops.integratednbt.evaluate.operator.NbtExtractionOperatorSerializer;
+import org.cyclops.integratednbt.evaluate.variable.NbtExtractedVariableFacadeHandler;
 import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractorConfig;
 import org.cyclops.integratednbt.item.ItemNbtExtractorRemoteConfig;
 import org.cyclops.integratednbt.proxy.ClientProxy;
@@ -40,6 +42,10 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
                     .registerHandler(new NbtExtractedVariableFacadeHandler());
             OperatorRegistry.getInstance()
                     .registerSerializer(new NbtExtractionOperatorSerializer());
+
+            if (MinecraftHelpers.isClientSide()) {
+                VariableModelProviders.load();
+            }
         });
     }
 

@@ -7,7 +7,6 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.ModelData;
-
 import org.cyclops.cyclopscore.datastructure.Wrapper;
 import org.cyclops.integrateddynamics.api.client.model.IVariableModelBaked;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
@@ -20,8 +19,9 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueN
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.helper.L10NValues;
 import org.cyclops.integrateddynamics.core.item.VariableFacadeBase;
-import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
+import org.cyclops.integratednbt.client.model.VariableModelProviders;
 import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
+import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -104,7 +104,9 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
         RandomSource random,
         ModelData modelData
     ) {
-
+        if(isValid()) {
+            quads.addAll(variableModelBaked.getSubModels(VariableModelProviders.NBT_EXTRACTED).getBakedModel().getQuads(null, null, random, modelData, null));
+        }
     }
 
     @Override
