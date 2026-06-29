@@ -4,6 +4,7 @@ org.cyclops.integratednbt.blockentity
 org.cyclops.integratednbt.client.gui
 org.cyclops.integratednbt.client.gui.component
 org.cyclops.integratednbt.client.gui.container
+org.cyclops.integratednbt.client.model
 org.cyclops.integratednbt.evaluate
 org.cyclops.integratednbt.evaluate.nbt
 org.cyclops.integratednbt.evaluate.nbt.path
