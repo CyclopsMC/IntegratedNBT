@@ -7,7 +7,6 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.ModelData;
-import org.cyclops.cyclopscore.datastructure.Wrapper;
 import org.cyclops.integrateddynamics.api.client.model.IVariableModelBaked;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
@@ -18,6 +17,7 @@ import org.cyclops.integrateddynamics.api.network.IPartNetwork;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.helper.L10NValues;
+import org.cyclops.integrateddynamics.core.item.ProxyVariableFacade;
 import org.cyclops.integrateddynamics.core.item.VariableFacadeBase;
 import org.cyclops.integratednbt.client.model.VariableModelProviders;
 import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
@@ -30,10 +30,8 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
     private int sourceNbtId;
     private SegmentedNbtPath extractionPath;
     private byte defaultNbtId;
-    private boolean validating;
-    private boolean gettingVariable;
-    private int lastNetworkHash;
-    private NbtExtractedVariable variable;
+    private boolean isValidatingVariable = false;
+    private boolean isGettingVariable = false;
 
     public NbtExtractedVariableFacade(
         boolean generateId,
@@ -111,44 +109,30 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends IValue> IVariable<V> getVariable(
-        INetwork network, IPartNetwork partNetwork
-    ) {
-        if (!this.isValid()) {
-            return null;
-        }
-        int newNetworkHash = partNetwork != null ? partNetwork.hashCode() : -1;
-        if (this.variable == null || newNetworkHash != this.lastNetworkHash) {
-            this.lastNetworkHash = newNetworkHash;
-            if (partNetwork == null || !partNetwork.hasVariableFacade(this.sourceNbtId)) {
-                return null;
+    public <V extends IValue> IVariable<V> getVariable(INetwork network, IPartNetwork partNetwork) {
+        if(isValid()) {
+            // Check if we are entering an infinite recursion
+            if(this.isGettingVariable) {
+                throw new ProxyVariableFacade.VariableRecursionException("Detected infinite recursion for variable references.");
             }
+            this.isGettingVariable = true;
             IVariableFacade sourceNbtVariableFacade = partNetwork.getVariableFacade(this.sourceNbtId);
             if (!sourceNbtVariableFacade.isValid() || sourceNbtVariableFacade == this) {
                 return null;
             }
-            if (this.gettingVariable) {
-                return null;
-            }
-            this.gettingVariable = true;
             IVariable<ValueNbt> sourceNbtVariable = sourceNbtVariableFacade.getVariable(network, partNetwork);
-            this.gettingVariable = false;
-            if (sourceNbtVariable == null) {
-                return null;
-            }
-            this.variable = new NbtExtractedVariable(
-                sourceNbtVariable,
-                this.extractionPath,
-                this.defaultNbtId
+            this.isGettingVariable = false;
+            return (IVariable<V>) new NbtExtractedVariable(
+                    sourceNbtVariable,
+                    this.extractionPath,
+                    this.defaultNbtId
             );
         }
-        return (IVariable<V>) this.variable;
+        return null;
     }
 
     @Override
-    public void validate(
-            INetwork network, IPartNetwork partNetwork, IValidator validator, IValueType containingValueType
-    ) {
+    public void validate(INetwork network, IPartNetwork partNetwork, IValidator validator, IValueType containingValueType) {
         if (!this.isValid()) {
             return;
         }
@@ -167,19 +151,13 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
                     Integer.toString(this.sourceNbtId)
                 ));
             } else if (sourceVariableFacade != null) {
-                final Wrapper<Boolean> isValid = new Wrapper<>(true);
-                if (this.validating) {
-                    validator.addError(Component.translatable(
-                        L10NValues.OPERATOR_ERROR_CYCLICREFERENCE,
-                        this.getId()
-                    ));
+                // Check if we are entering an infinite recursion
+                if(this.isValidatingVariable) {
+                    throw new ProxyVariableFacade.VariableRecursionException("Detected infinite recursion for variable references.");
                 }
-                this.validating = true;
-                sourceVariableFacade.validate(network, partNetwork, error -> {
-                    validator.addError(error);
-                    isValid.set(false);
-                }, ValueTypes.NBT);
-                this.validating = false;
+                this.isValidatingVariable = true;
+                getVariable(network, partNetwork);
+                this.isValidatingVariable = false;
             }
         }
     }
