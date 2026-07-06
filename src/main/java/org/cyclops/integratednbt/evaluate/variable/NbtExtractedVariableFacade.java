@@ -112,16 +112,16 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
     public <V extends IValue> IVariable<V> getVariable(INetwork network, IPartNetwork partNetwork) {
         if(isValid()) {
             // Check if we are entering an infinite recursion
-            if(this.isGettingVariable) {
+            if (this.isGettingVariable) {
                 throw new ProxyVariableFacade.VariableRecursionException("Detected infinite recursion for variable references.");
             }
             this.isGettingVariable = true;
             IVariableFacade sourceNbtVariableFacade = partNetwork.getVariableFacade(this.sourceNbtId);
-            if (!sourceNbtVariableFacade.isValid() || sourceNbtVariableFacade == this) {
+            this.isGettingVariable = false;
+            if (sourceNbtVariableFacade == null || !sourceNbtVariableFacade.isValid() || sourceNbtVariableFacade == this) {
                 return null;
             }
             IVariable<ValueNbt> sourceNbtVariable = sourceNbtVariableFacade.getVariable(network, partNetwork);
-            this.isGettingVariable = false;
             return (IVariable<V>) new NbtExtractedVariable(
                     sourceNbtVariable,
                     this.extractionPath,

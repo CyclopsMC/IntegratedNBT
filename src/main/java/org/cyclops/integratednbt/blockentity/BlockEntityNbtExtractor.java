@@ -76,6 +76,7 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
      * The item stack that yielded the current frozen NBT
      */
     private ItemStack frozenNBTItemStack = ItemStack.EMPTY;
+    private Player lastPlayer;
 
     public BlockEntityNbtExtractor(BlockPos pos, BlockState state) {
         this(RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR, pos, state, 2);
@@ -93,6 +94,10 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
             }
         }));
         addCapabilityInternal(VariableContainerConfig.CAPABILITY, LazyOptional.of(() -> variableContainerCapability));
+    }
+
+    public void setLastPlayer(Player player) {
+        this.lastPlayer = player;
     }
 
     @Override
@@ -324,7 +329,8 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
                     : this.lastEvaluatedNBT,
                 this.extractionPath,
                 this.defaultNBTId,
-                this.getBlockState()
+                this.getBlockState(),
+                this.lastPlayer
             );
             if (result != null) {
                 this.getInventory().setItem(VAR_OUT_SLOT, result);

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<section name="info_book.integratednbt.section.tutorials">
+    <section name="info_book.integratednbt.tutorials.introduction">
+        <paragraph>info_book.integratednbt.tutorials.introduction.text1</paragraph>
+    </section>
+
+    <section name="info_book.integratednbt.tutorials.entity_nbt_variable">
+        <paragraph>info_book.integratednbt.tutorials.entity_nbt_variable.text1</paragraph>
+        <paragraph>info_book.integratednbt.tutorials.entity_nbt_variable.text2</paragraph>
+        <paragraph>info_book.integratednbt.tutorials.entity_nbt_variable.text3</paragraph>
+        <appendix type="integrateddynamics:aspect">integrateddynamics:read_entity_entity</appendix>
+        <appendix type="integrateddynamics:operator">integrateddynamics:entity_nbt</appendix>
+        <appendix type="advancement_rewards" id="integratednbt:nbt_extractor">
+            <advancements>
+                <advancement id="integratednbt:nbt_extractor/entity_nbt_variable" />
+            </advancements>
+            <rewards>
+                <reward type="item" amount="1">integratednbt:nbt_extractor</reward>
+                <reward type="item" amount="8">integrateddynamics:variable</reward>
+            </rewards>
+        </appendix>
+    </section>
+
+    <section name="info_book.integratednbt.tutorials.display_entity_position">
+        <paragraph>info_book.integratednbt.tutorials.display_entity_position.text1</paragraph>
+        <paragraph>info_book.integratednbt.tutorials.display_entity_position.text2</paragraph>
+        <appendix type="advancement_rewards" id="integratednbt:display_entity_position">
+            <advancements>
+                <advancement id="integratednbt:display_entity_position/display_entity_position" />
+            </advancements>
+            <rewards>
+                <reward type="item" amount="4">integrateddynamics:variable</reward>
+            </rewards>
+        </appendix>
+    </section>
+
+</section>

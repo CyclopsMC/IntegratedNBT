@@ -99,6 +99,7 @@ public class ContainerNbtExtractor extends AbstractContainerMenu {
         super(RegistryEntries.CONTAINER_NBT_EXTRACTOR, id);
         this.playerInventory = playerInventory;
         this.nbtExtractorEntity = nbtExtractorEntity;
+        nbtExtractorEntity.setLastPlayer(playerInventory.player);
         this.addSlot(new SrcNBTSlot(nbtExtractorEntity.getInventory(), SRC_NBT, 9, 6));
         this.addSlot(new VarOutSlot(nbtExtractorEntity.getInventory(), VAR_OUT, 153, 6));
         for (int i = 0; i < 3; i++) {

@@ -1,0 +1,26 @@
+{
+  "display": {
+    "icon": {
+      "item": "integrateddynamics:part_display_panel"
+    },
+    "title": {
+      "translate": "advancement.integratednbt.display_entity_position"
+    },
+    "description": {
+      "translate": "advancement.integratednbt.display_entity_position.desc"
+    }
+  },
+  "parent": "integratednbt:nbt_extractor/entity_nbt_variable",
+  "criteria": {
+    "criteria_0": {
+      "trigger": "integrateddynamics:part_variable_driven",
+      "conditions": {
+        "parttype": "integrateddynamics:display_panel",
+        "variable": {
+          "type": "integratednbt:nbt_extracted"
+        }
+      }
+    }
+  }
+}
+

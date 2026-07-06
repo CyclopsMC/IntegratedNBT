@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<section name="info_book.integratednbt.section.main">
+    <section name="info_book.integratednbt.introduction">
+        <paragraph>info_book.integratednbt.introduction.text1</paragraph>
+        <paragraph>info_book.integratednbt.introduction.text2</paragraph>
+    </section>
+
+    <section name="info_book.integratednbt.nbt_extractor">
+        <tag>integratednbt:nbt_extractor</tag>
+        <paragraph>info_book.integratednbt.nbt_extractor.text1</paragraph>
+        <appendix type="minecraft:crafting">integratednbt:nbt_extractor</appendix>
+    </section>
+
+    <section name="info_book.integratednbt.nbt_extractor_remote">
+        <tag>integratednbt:nbt_extractor_remote</tag>
+        <paragraph>info_book.integratednbt.nbt_extractor_remote.text1</paragraph>
+        <appendix type="minecraft:crafting">integratednbt:nbt_extractor_remote</appendix>
+    </section>
+
+    <section name="info_book.integratednbt.usage">
+        <paragraph>info_book.integratednbt.usage.text1</paragraph>
+        <paragraph>info_book.integratednbt.usage.text2</paragraph>
+        <paragraph>info_book.integratednbt.usage.text3</paragraph>
+        <paragraph>info_book.integratednbt.usage.text4</paragraph>
+        <paragraph>info_book.integratednbt.usage.text5</paragraph>
+        <paragraph>info_book.integratednbt.usage.text6</paragraph>
+    </section>
+
+</section>

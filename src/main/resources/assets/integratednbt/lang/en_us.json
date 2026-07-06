@@ -56,5 +56,47 @@
   "integratednbt:nbt_extractor_remote.invalid_bind": "Previously bound NBT Extractor no longer exists. Please right click another NBT Extractor block to bind again.",
   "integratednbt:nbt_extractor_remote.tooltip": "§7Allows remote access of a NBT Extractor.",
   "integratednbt:nbt_extractor_remote.tooltip.not_bound": "§eRight click a NBT Extractor to bind.",
-  "integratednbt:nbt_extractor_remote.tooltip.bound": "Bound to NBT Extractor at (%s, %s, %s) in dimension %s."
+  "integratednbt:nbt_extractor_remote.tooltip.bound": "Bound to NBT Extractor at (%s, %s, %s) in dimension %s.",
+
+  "_comment": "Advancements",
+  "advancement.integratednbt.entity_nbt_variable": "Walking the Entity NBT Tree",
+  "advancement.integratednbt.entity_nbt_variable.desc": "Use the NBT Extractor to extract a value from an entity's NBT variable in Reference Mode.",
+  "advancement.integratednbt.display_entity_position": "Sneaky Entity Tracking",
+  "advancement.integratednbt.display_entity_position.desc": "Place an NBT-extracted variable within a Display Panel to show an entity's X coordinate.",
+
+  "_comment": "------ On the Dynamics of Integration contents ------",
+
+  "info_book.integratednbt.section.main": "NBT",
+
+  "info_book.integratednbt.introduction": "Introduction",
+  "info_book.integratednbt.introduction.text1": "&lIntegrated NBT&r is an extension to &lIntegrated Dynamics&r that adds tools for working with &lNBT&r (Named Binary Tag) data. It allows you to visually navigate, inspect, and extract deeply nested values from any &3NBT&0-typed variable on your &lIntegrated Dynamics&r network.",
+  "info_book.integratednbt.introduction.text2": "Whether you need to pull a single integer out of a complex item tag, extract a string buried inside a nested compound, or encode a reusable extraction path for use in operators — &lIntegrated NBT&r makes it straightforward, with no extra wiring required.",
+
+  "info_book.integratednbt.nbt_extractor": "NBT Extractor",
+  "info_book.integratednbt.nbt_extractor.text1": "The &lNBT Extractor&r is the centerpiece of this add-on. It is a block that presents a graphical tree browser for any &3NBT&0-typed variable. Place the block, insert an &3NBT&0 &lVariable Card&r into its left slot, and the block will load the full NBT tree of that variable so you can explore it. Once you have located the value you need, a single left click selects its path and lets you write it to an output card.",
+
+  "info_book.integratednbt.nbt_extractor_remote": "NBT Extractor Remote",
+  "info_book.integratednbt.nbt_extractor_remote.text1": "The &lNBT Extractor Remote&r is an item-form companion to the &lNBT Extractor&r block. Right click any placed &lNBT Extractor&r to bind the remote to it. From that point on you can open the same NBT browsing interface from anywhere in the same dimension without having to stand next to the block. The remote requires line-of-sight loading: the target chunk must be loaded.",
+
+  "info_book.integratednbt.usage": "Usage",
+  "info_book.integratednbt.usage.text1": "To get started, place an &3NBT&0-typed &lVariable Card&r into the &oleft slot&r of the &lNBT Extractor&r. The block will read the variable and display its contents as a collapsible tree.",
+  "info_book.integratednbt.usage.text2": "&oRight click&r any compound tag or list entry in the tree to expand or collapse it. Keep drilling down until you reach the value you want to extract.",
+  "info_book.integratednbt.usage.text3": "&oLeft click&r the target entry to select its path. Once a path is selected, place a compatible &lVariable Card&r into the &oright slot&r. The extractor will write the extracted value to that card according to the active &lOutput Mode&r.",
+  "info_book.integratednbt.usage.text4": "The &lOutput Mode&r controls how the output value is created. In &oReference Mode&r, the output variable holds a live reference to the extracted value and updates whenever the source NBT variable changes. In &oOperator Mode&r, the extraction path is encoded as a reusable &lOperator&r that accepts any NBT input and returns the sub-value. In &oValue Mode&r, the current value is written to the card as a fixed constant. In &oNBT Path Mode&r, the path itself is stored as a &lCyclopsCore NBT Path&r string.",
+  "info_book.integratednbt.usage.text5": "For most use cases, &oReference Mode&r is the right choice. If you want a snapshot that does not change, or if you intend to apply the same extraction to many different NBT values, consider &oValue Mode&r or &oOperator Mode&r respectively.",
+  "info_book.integratednbt.usage.text6": "The &lAuto Refresh&r toggle in the GUI controls whether the displayed NBT tree updates automatically when the source variable is updated. Turn it off to freeze the view at its current state, which is useful when inspecting rapidly changing data.",
+
+  "info_book.integratednbt.section.tutorials": "NBT Tutorials",
+
+  "info_book.integratednbt.tutorials.introduction": "Introduction",
+  "info_book.integratednbt.tutorials.introduction.text1": "This section contains tutorials that walk you through working with &lIntegrated NBT&r. The goal is to set up a live view of a specific value inside an entity's NBT data, then display it on screen using an &lIntegrated Dynamics&r network.",
+
+  "info_book.integratednbt.tutorials.entity_nbt_variable": "Walking the Entity NBT Tree",
+  "info_book.integratednbt.tutorials.entity_nbt_variable.text1": "Start by attaching an &lEntity Reader&r to a &lCable&r, facing the space where your target entity will stand. Open the &lLogic Programmer&r and write the &oEntity&r aspect to a &lVariable Card&r. This card holds a live reference to the entity in that space.",
+  "info_book.integratednbt.tutorials.entity_nbt_variable.text2": "Next, use the &lEntity NBT&r operator in the &lLogic Programmer&r to convert the entity value into an NBT compound. Create an &oOperator&r variable that applies &lEntity NBT&r to your &oEntity&r card. The resulting card holds the entity's full NBT data as a &3NBT&0-typed variable.",
+  "info_book.integratednbt.tutorials.entity_nbt_variable.text3": "Place the &3NBT&0 &lVariable Card&r into the left slot of your &lNBT Extractor&r. The block will load and display the entity's full NBT tree. Make sure &oReference Mode&r is active, place a blank &lVariable Card&r into the right slot, navigate the tree, and then left click a value to select its extraction path to write the extracted reference.",
+
+  "info_book.integratednbt.tutorials.display_entity_position": "Sneaky Entity Tracking",
+  "info_book.integratednbt.tutorials.display_entity_position.text1": "With the entity NBT reference variable from the previous step, open your &lNBT Extractor&r again, and place a blank &lVariable Card&r into the right slot. Expand the &oPos&r list, which stores the entity's X, Y and Z coordinates as doubles. Left click entry &o#0&r to select the X position and to write the extracted value.",
+  "info_book.integratednbt.tutorials.display_entity_position.text2": "Place a &lDisplay Panel&r on a &lCable&r in the same network and insert the extracted X position &lVariable Card&r. The panel will display the entity's current X coordinate in real time. As long as &oAuto Refresh&r is enabled on the &lNBT Extractor&r, the value updates whenever the entity moves."
 }

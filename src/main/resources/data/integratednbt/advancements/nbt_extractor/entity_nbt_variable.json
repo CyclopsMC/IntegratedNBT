@@ -1,0 +1,26 @@
+{
+  "display": {
+    "icon": {
+      "item": "integratednbt:nbt_extractor"
+    },
+    "title": {
+      "translate": "advancement.integratednbt.entity_nbt_variable"
+    },
+    "description": {
+      "translate": "advancement.integratednbt.entity_nbt_variable.desc"
+    }
+  },
+  "parent": "integrateddynamics:logic_operations/constant_definition",
+  "criteria": {
+    "criteria_0": {
+      "trigger": "integrateddynamics:variable_created",
+      "conditions": {
+        "block": "integratednbt:nbt_extractor",
+        "variable_facade": {
+          "type": "integratednbt:nbt_extracted"
+        }
+      }
+    }
+  }
+}
+

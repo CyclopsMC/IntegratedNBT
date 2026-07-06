@@ -1,6 +1,7 @@
 package org.cyclops.integratednbt.evaluate;
 
 
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.Tag;
@@ -42,8 +43,8 @@ public enum NbtExtractorOutputMode {
             Tag currentNBT,
             SegmentedNbtPath extractionPath,
             byte defaultNBTId,
-            BlockState blockState
-        ) {
+            BlockState blockState,
+            Player player) {
             IVariableFacadeHandlerRegistry registry =
                 IntegratedDynamics._instance.getRegistryManager()
                     .getRegistry(IVariableFacadeHandlerRegistry.class);
@@ -77,7 +78,7 @@ public enum NbtExtractorOutputMode {
                     outputVariableItemStack,
                     NbtExtractedVariableFacadeHandler.getInstance(),
                     factory,
-                    null,
+                    player,
                     blockState
                 );
             } else {
@@ -98,12 +99,12 @@ public enum NbtExtractorOutputMode {
             Tag currentNBT,
             SegmentedNbtPath extractionPath,
             byte defaultNBTId,
-            BlockState blockState
-        ) {
+            BlockState blockState,
+            Player player) {
             return getVariableUsingValue(ValueOperator.of(new NbtExtractionOperator(
                 extractionPath,
                 defaultNBTId
-            )), outputVariableItemStack, blockState);
+            )), outputVariableItemStack, blockState, player);
         }
     },
     VALUE(
@@ -119,14 +120,14 @@ public enum NbtExtractorOutputMode {
             Tag currentNBT,
             SegmentedNbtPath extractionPath,
             byte defaultNBTId,
-            BlockState blockState
-        ) {
+            BlockState blockState,
+            Player player) {
             sourceVariableFacadeSupplier.get(); // Refresh variable
             Tag extractedNBT = extractionPath.extract(currentNBT);
             IValue value = extractedNBT == null
                 ? NbtValueConverter.getDefaultValue(defaultNBTId)
                 : NbtValueConverter.mapNBTToValue(extractedNBT);
-            return getVariableUsingValue(value, outputVariableItemStack, blockState);
+            return getVariableUsingValue(value, outputVariableItemStack, blockState, player);
         }
     },
     NBT_PATH(
@@ -142,12 +143,13 @@ public enum NbtExtractorOutputMode {
             Tag currentNBT,
             SegmentedNbtPath extractionPath,
             byte defaultNBTId,
-            BlockState blockState
-        ) {
+            BlockState blockState,
+            Player player) {
             return getVariableUsingValue(
                 ValueString.of(extractionPath.getCyclopsNBTPath()),
                 outputVariableItemStack,
-                blockState
+                blockState,
+                player
             );
         }
     };
@@ -182,7 +184,8 @@ public enum NbtExtractorOutputMode {
     private static ItemStack getVariableUsingValue(
         IValue value,
         ItemStack outputVariableItemStack,
-        BlockState blockState
+        BlockState blockState,
+        Player player
     ) {
         IVariableFacadeHandlerRegistry registry = IntegratedDynamics._instance.getRegistryManager()
             .getRegistry(IVariableFacadeHandlerRegistry.class);
@@ -204,7 +207,7 @@ public enum NbtExtractorOutputMode {
                     return new ValueTypeVariableFacade(id, value.getType(), value);
                 }
             },
-            null,
+            player,
             blockState
         );
     }
@@ -223,8 +226,8 @@ public enum NbtExtractorOutputMode {
         Tag currentNBT,
         SegmentedNbtPath extractionPath,
         byte defaultNBTId,
-        BlockState blockState
-    );
+        BlockState blockState,
+        Player player);
 
     public Component getDescription(boolean highlighted) {
         return Component.translatable(
