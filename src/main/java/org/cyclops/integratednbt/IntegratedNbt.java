@@ -1,6 +1,7 @@
 package org.cyclops.integratednbt;
 
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.Mod;
@@ -9,7 +10,6 @@ import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.cyclopscore.helper.MinecraftHelpers;
 import org.cyclops.cyclopscore.infobook.IInfoBookRegistry;
-import org.cyclops.cyclopscore.init.ItemGroupMod;
 import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
@@ -63,8 +63,9 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
     }
 
     @Override
-    public CreativeModeTab constructDefaultCreativeModeTab() {
-        return new ItemGroupMod(this, () -> RegistryEntries.ITEM_NBT_EXTRACTOR);
+    protected CreativeModeTab.Builder constructDefaultCreativeModeTab(CreativeModeTab.Builder builder) {
+        return super.constructDefaultCreativeModeTab(builder)
+                .icon(() -> new ItemStack(RegistryEntries.ITEM_NBT_EXTRACTOR));
     }
 
     @Override

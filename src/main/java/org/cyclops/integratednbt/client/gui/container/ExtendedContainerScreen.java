@@ -1,18 +1,14 @@
 package org.cyclops.integratednbt.client.gui.container;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-import com.mojang.math.Matrix4f;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
+import org.joml.Matrix4f;
 
 public abstract class ExtendedContainerScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
     public ExtendedContainerScreen(
@@ -46,13 +42,5 @@ public abstract class ExtendedContainerScreen<T extends AbstractContainerMenu> e
             .uv((float) (srcX) * 0.00390625F, (float) (srcY) * 0.00390625F)
             .endVertex();
         tesselator.end();
-    }
-
-    public void drawSplitString(PoseStack matrixStack, Font fontRenderer, FormattedText text, int x, int y, int maxLength, int color) {
-        for(FormattedCharSequence ireorderingprocessor : fontRenderer.split(text, maxLength)) {
-            fontRenderer.drawShadow(matrixStack, ireorderingprocessor, (float) x, (float) y, color);
-            y += 9;
-        }
-
     }
 }

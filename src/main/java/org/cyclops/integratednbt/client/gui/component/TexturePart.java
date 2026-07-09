@@ -2,10 +2,10 @@ package org.cyclops.integratednbt.client.gui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import org.cyclops.integratednbt.client.gui.container.ExtendedContainerScreen;
+import org.joml.Matrix4f;
 
 /**
  * Represents a part in a texture; Offers help method for quick rendering
@@ -25,7 +25,7 @@ public class TexturePart {
         this.height = height;
     }
 
-    public void renderTo(GuiComponent gui, PoseStack matrixStack, int x, int y) {
+    public void renderTo(GuiGraphics gui, PoseStack matrixStack, int x, int y) {
         this.texture.bind();
         gui.blit(matrixStack, x, y, this.x, this.y, this.width, this.height);
     }
@@ -39,7 +39,7 @@ public class TexturePart {
         );
     }
 
-    public void renderTo(GuiComponent gui, PoseStack matrixStack, int x, int y, int color) {
+    public void renderTo(GuiGraphics gui, PoseStack matrixStack, int x, int y, int color) {
         this.setColorInt(color);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.enableBlend();
