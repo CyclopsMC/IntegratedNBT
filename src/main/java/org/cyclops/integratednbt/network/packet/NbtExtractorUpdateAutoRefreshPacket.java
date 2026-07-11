@@ -1,19 +1,28 @@
 package org.cyclops.integratednbt.network.packet;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
 import org.cyclops.cyclopscore.network.CodecField;
 import org.cyclops.cyclopscore.network.PacketCodec;
+import org.cyclops.integratednbt.Reference;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 
 /**
  * Updates the auto refresh flag in the NBT Extractor.
  * @author rubensworks
  */
-public class NbtExtractorUpdateAutoRefreshPacket extends PacketCodec {
+public class NbtExtractorUpdateAutoRefreshPacket extends PacketCodec<NbtExtractorUpdateAutoRefreshPacket> {
+
+    public static final CustomPacketPayload.Type<NbtExtractorUpdateAutoRefreshPacket> TYPE = new CustomPacketPayload.Type<>(
+            ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "nbt_extractor_update_auto_refresh"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, NbtExtractorUpdateAutoRefreshPacket> CODEC = getCodec(NbtExtractorUpdateAutoRefreshPacket::new);
 
     @CodecField
     private BlockPos blockPos;
@@ -21,12 +30,23 @@ public class NbtExtractorUpdateAutoRefreshPacket extends PacketCodec {
     private boolean autoRefresh;
 
     public NbtExtractorUpdateAutoRefreshPacket() {
-
+        super(TYPE);
     }
 
     public NbtExtractorUpdateAutoRefreshPacket(BlockPos blockPos, boolean autoRefresh) {
+        super(TYPE);
         this.blockPos = blockPos;
         this.autoRefresh = autoRefresh;
+    }
+
+    @Override
+    public void encode(RegistryFriendlyByteBuf output) {
+        super.encode(output);
+    }
+
+    @Override
+    public void decode(RegistryFriendlyByteBuf input) {
+        super.decode(input);
     }
 
     @Override

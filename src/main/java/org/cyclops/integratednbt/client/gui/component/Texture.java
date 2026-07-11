@@ -11,7 +11,7 @@ public class Texture {
     }
 
     public Texture(String namespace, String path) {
-        this(new ResourceLocation(namespace, path));
+        this(ResourceLocation.fromNamespaceAndPath(namespace, path));
     }
 
     public void bind() {

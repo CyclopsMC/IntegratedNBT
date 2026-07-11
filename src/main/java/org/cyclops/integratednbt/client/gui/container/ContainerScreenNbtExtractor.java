@@ -12,8 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.cyclops.integratednbt.IntegratedNbt;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.client.gui.component.HoverTextImageButton;
@@ -350,11 +350,12 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
     public boolean mouseScrolled(
         double mouseX,
         double mouseY,
-        double dWheel
+        double scrollX,
+        double scrollY
     ) {
-        super.mouseScrolled(mouseX, mouseY, dWheel);
+        super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         if (errorCode == UpdateClientNbtExtractorPacket.ErrorCode.NO_ERROR && nbt != null) {
-            this.treeViewer.mouseScrolled(dWheel);
+            this.treeViewer.mouseScrolled(scrollY);
         }
         return true;
     }
@@ -367,7 +368,7 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         this.outputModeButton.render(guiGraphics, mouseX, mouseY, partialTicks);
         this.autoRefreshButton.render(guiGraphics, mouseX, mouseY, partialTicks);

@@ -23,11 +23,11 @@ public class CommonProxy extends CommonProxyComponent {
         super.registerPacketHandlers(packetHandler);
 
         // Register packets.
-        packetHandler.register(UpdateClientNbtExtractorPacket.class);
-        packetHandler.register(OpenNbtExtractorRemoteGuiPacket.class);
-        packetHandler.register(NbtExtractorUpdateAutoRefreshPacket.class);
-        packetHandler.register(NbtExtractorSetExtractionPathPacket.class);
-        packetHandler.register(NbtExtractorSetOutputModePacket.class);
+        packetHandler.register(UpdateClientNbtExtractorPacket.class, UpdateClientNbtExtractorPacket.TYPE, UpdateClientNbtExtractorPacket.CODEC);
+        packetHandler.register(OpenNbtExtractorRemoteGuiPacket.class, OpenNbtExtractorRemoteGuiPacket.TYPE, OpenNbtExtractorRemoteGuiPacket.CODEC);
+        packetHandler.register(NbtExtractorUpdateAutoRefreshPacket.class, NbtExtractorUpdateAutoRefreshPacket.TYPE, NbtExtractorUpdateAutoRefreshPacket.CODEC);
+        packetHandler.register(NbtExtractorSetExtractionPathPacket.class, NbtExtractorSetExtractionPathPacket.TYPE, NbtExtractorSetExtractionPathPacket.CODEC);
+        packetHandler.register(NbtExtractorSetOutputModePacket.class, NbtExtractorSetOutputModePacket.TYPE, NbtExtractorSetOutputModePacket.CODEC);
     }
 
 }

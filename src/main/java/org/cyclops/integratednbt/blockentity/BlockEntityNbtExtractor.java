@@ -1,6 +1,7 @@
 package org.cyclops.integratednbt.blockentity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -14,17 +15,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.LazyOptional;
 import org.cyclops.cyclopscore.datastructure.DimPos;
 import org.cyclops.cyclopscore.helper.MinecraftHelpers;
+import org.cyclops.integrateddynamics.Capabilities;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.api.evaluate.variable.ValueDeseralizationContext;
 import org.cyclops.integrateddynamics.api.network.INetwork;
 import org.cyclops.integrateddynamics.api.network.INetworkElement;
+import org.cyclops.integrateddynamics.api.network.INetworkElementProvider;
 import org.cyclops.integrateddynamics.api.network.IPartNetwork;
-import org.cyclops.integrateddynamics.capability.networkelementprovider.NetworkElementProviderConfig;
 import org.cyclops.integrateddynamics.capability.networkelementprovider.NetworkElementProviderSingleton;
-import org.cyclops.integrateddynamics.capability.variablecontainer.VariableContainerConfig;
 import org.cyclops.integrateddynamics.capability.variablecontainer.VariableContainerDefault;
 import org.cyclops.integrateddynamics.core.blockentity.BlockEntityActiveVariableBase;
 import org.cyclops.integrateddynamics.core.blockentity.BlockEntityCableConnectableInventory;
@@ -40,6 +40,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtExtractorNetworkElement> implements MenuProvider {
 
@@ -80,21 +81,43 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
     private Player lastPlayer;
 
     public BlockEntityNbtExtractor(BlockPos pos, BlockState state) {
-        this(RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR, pos, state, 2);
+        this(RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR.get(), pos, state, 2);
         this.expandedPaths = new HashSet<>();
         this.expandedPaths.add(new SegmentedNbtPath());
     }
 
     public BlockEntityNbtExtractor(BlockEntityType<?> type, BlockPos blockPos, BlockState blockState, int inventorySize) {
         super(type, blockPos, blockState, inventorySize);
+    }
 
-        addCapabilityInternal(NetworkElementProviderConfig.CAPABILITY, LazyOptional.of(() -> new NetworkElementProviderSingleton() {
+    public static class CapabilityRegistrar extends BlockEntityActiveVariableBase.CapabilityRegistrar<BlockEntityNbtExtractor> {
+        public CapabilityRegistrar(Supplier<BlockEntityType<? extends BlockEntityNbtExtractor>> blockEntityType) {
+            super(blockEntityType);
+        }
+
+        @Override
+        public void populate() {
+            super.populate();
+
+            add(
+                    Capabilities.NetworkElementProvider.BLOCK,
+                    (blockEntity, context) -> blockEntity.getNetworkElementProvider()
+            );
+            add(
+                    Capabilities.VariableContainer.BLOCK,
+                    (blockEntity, context) -> blockEntity.variableContainerCapability
+            );
+        }
+    }
+
+    @Override
+    public INetworkElementProvider getNetworkElementProvider() {
+        return new NetworkElementProviderSingleton() {
             @Override
             public INetworkElement createNetworkElement(Level world, BlockPos blockPos) {
                 return new NbtExtractorNetworkElement(DimPos.of(world, blockPos));
             }
-        }));
-        addCapabilityInternal(VariableContainerConfig.CAPABILITY, LazyOptional.of(() -> variableContainerCapability));
+        };
     }
 
     public void setLastPlayer(Player player) {
@@ -243,23 +266,14 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveAdditional(tag, provider);
         ListTag errorsList = new ListTag();
         tag.put("path", this.extractionPath.toNBT());
         tag.putByte("defaultNBTId", this.defaultNBTId);
         tag.putByte("outputMode", (byte) this.outputMode.ordinal());
         tag.putBoolean("isAutoRefresh", this.autoRefresh);
         if (!this.autoRefresh) {
-            // frozenNBT = null:
-            // { ... }
-            //
-            // frozenNBT = Wrapper.of(null):
-            // { ..., frozenNBT: {} }
-            //
-            // frozenNBT = Wrapper.of(something):
-            // {..., frozenNBT: { value: something } }
-
             if (this.frozenNBT != null) {
                 CompoundTag compound = new CompoundTag();
                 if (this.frozenNBT.get() != null) {
@@ -267,10 +281,7 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
                 }
                 tag.put("frozenNBT", compound);
             }
-            tag.put(
-                "frozenNBTItemStack",
-                this.frozenNBTItemStack.save(new CompoundTag())
-            );
+            tag.put("frozenNBTItemStack", this.frozenNBTItemStack.save(provider));
         }
     }
 
@@ -281,8 +292,8 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
     }
 
     @Override
-    public void read(CompoundTag tag) {
-        super.read(tag);
+    public void read(CompoundTag tag, HolderLookup.Provider provider) {
+        super.read(tag, provider);
         if (tag.contains("path")) {
             this.extractionPath = SegmentedNbtPath.fromNBT(tag.get("path")).orElse(new SegmentedNbtPath());
         }
@@ -298,7 +309,7 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
                 if (tag.contains("frozenNBT")) {
                     this.frozenNBT = Wrapper.of(tag.getCompound("frozenNBT").get("value"));
                 }
-                this.frozenNBTItemStack = ItemStack.of(tag.getCompound("frozenNBTItemStack"));
+                this.frozenNBTItemStack = ItemStack.parseOptional(provider, tag.getCompound("frozenNBTItemStack"));
             }
         }
         this.shouldRefreshVariable = true;

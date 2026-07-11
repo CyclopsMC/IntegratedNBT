@@ -2,7 +2,9 @@ package org.cyclops.integratednbt.evaluate.variable;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.api.evaluate.variable.ValueDeseralizationContext;
+import org.cyclops.integrateddynamics.api.item.IVariableFacade;
 import org.cyclops.integrateddynamics.api.item.IVariableFacadeHandler;
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.Reference;
@@ -25,7 +27,7 @@ public class NbtExtractedVariableFacadeHandler
 
     @Override
     public ResourceLocation getUniqueName() {
-        return new ResourceLocation(Reference.MOD_ID, "nbt_extracted");
+        return ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "nbt_extracted");
     }
 
     @Override
@@ -42,9 +44,19 @@ public class NbtExtractedVariableFacadeHandler
     }
 
     @Override
-    public void setVariableFacade(CompoundTag tag, NbtExtractedVariableFacade facade) {
+    public void setVariableFacade(ValueDeseralizationContext valueDeseralizationContext, CompoundTag tag, NbtExtractedVariableFacade facade) {
         tag.putInt(KEY_SOURCE_NBT_ID, facade.getSourceNbtId());
         tag.put(KEY_EXTRACTION_PATH, facade.getExtractionPath().toNBT());
         tag.putByte(KEY_DEFAULT_NBT_ID, facade.getDefaultNbtId());
+    }
+
+    @Override
+    public boolean isInstance(IVariableFacade variableFacade) {
+        return variableFacade instanceof NbtExtractedVariableFacade;
+    }
+
+    @Override
+    public boolean isInstance(IVariable<?> variable) {
+        return variable instanceof NbtExtractedVariable;
     }
 }

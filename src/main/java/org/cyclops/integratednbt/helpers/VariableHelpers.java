@@ -5,6 +5,6 @@ import org.cyclops.integrateddynamics.RegistryEntries;
 
 public class VariableHelpers {
     public static boolean isVariable(ItemStack itemStack) {
-        return itemStack.getItem() == RegistryEntries.ITEM_VARIABLE;
+        return itemStack.getItem() == RegistryEntries.ITEM_VARIABLE.get();
     }
 }

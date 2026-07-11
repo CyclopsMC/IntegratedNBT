@@ -2,21 +2,30 @@ package org.cyclops.integratednbt.network.packet;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.cyclops.cyclopscore.network.PacketCodec;
-import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
+import org.cyclops.integratednbt.Reference;
 import org.cyclops.integratednbt.client.gui.container.ContainerScreenNbtExtractor;
+import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 
 /**
  * Packet for updating a live crafting plan gui.
  * @author rubensworks
  */
-public class UpdateClientNbtExtractorPacket extends PacketCodec {
+public class UpdateClientNbtExtractorPacket extends PacketCodec<UpdateClientNbtExtractorPacket> {
+
+    public static final CustomPacketPayload.Type<UpdateClientNbtExtractorPacket> TYPE = new CustomPacketPayload.Type<>(
+            ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "update_client_nbt_extractor"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, UpdateClientNbtExtractorPacket> CODEC = getCodec(UpdateClientNbtExtractorPacket::new);
 
     private static ByteMaskMaker maskMaker = new ByteMaskMaker();
     private static final byte MASK_NBT = maskMaker.nextMask();
@@ -35,7 +44,7 @@ public class UpdateClientNbtExtractorPacket extends PacketCodec {
     private boolean autoRefresh;
 
     public UpdateClientNbtExtractorPacket() {
-
+        super(TYPE);
     }
 
     public void updateNBT(Tag nbt) {
@@ -77,7 +86,7 @@ public class UpdateClientNbtExtractorPacket extends PacketCodec {
     }
 
     @Override
-    public void encode(FriendlyByteBuf buf) {
+    public void encode(RegistryFriendlyByteBuf buf) {
         super.encode(buf);
 
         buf.writeByte(this.updated);
@@ -98,11 +107,11 @@ public class UpdateClientNbtExtractorPacket extends PacketCodec {
             buf.writeByte(this.outputMode.ordinal());
         }
         if (this.isUpdated(MASK_ERROR_MESSAGE)) {
-            if (this.errorMessage == null) { // Is null
+            if (this.errorMessage == null) {
                 buf.writeBoolean(true);
             } else {
                 buf.writeBoolean(false);
-                buf.writeComponent(this.errorMessage);
+                ComponentSerialization.STREAM_CODEC.encode(buf, this.errorMessage);
             }
         }
         if (this.isUpdated(MASK_AUTO_REFRESH)) {
@@ -111,7 +120,7 @@ public class UpdateClientNbtExtractorPacket extends PacketCodec {
     }
 
     @Override
-    public void decode(FriendlyByteBuf buf) {
+    public void decode(RegistryFriendlyByteBuf buf) {
         super.decode(buf);
 
         this.updated = buf.readByte();
@@ -130,10 +139,10 @@ public class UpdateClientNbtExtractorPacket extends PacketCodec {
             this.outputMode = NbtExtractorOutputMode.values()[buf.readByte()];
         }
         if (this.isUpdated(MASK_ERROR_MESSAGE)) {
-            if (buf.readBoolean()) { // Is null
+            if (buf.readBoolean()) {
                 this.errorMessage = null;
             } else {
-                this.errorMessage = buf.readComponent();
+                this.errorMessage = ComponentSerialization.STREAM_CODEC.decode(buf);
             }
         }
         if (this.isUpdated(MASK_AUTO_REFRESH)) {

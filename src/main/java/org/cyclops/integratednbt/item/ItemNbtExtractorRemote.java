@@ -4,6 +4,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -18,11 +19,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkHooks;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
 import org.cyclops.integratednbt.IntegratedNbt;
 import org.cyclops.integratednbt.Reference;
@@ -31,7 +32,6 @@ import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.network.packet.OpenNbtExtractorRemoteGuiPacket;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class ItemNbtExtractorRemote extends Item {
@@ -77,12 +77,12 @@ public class ItemNbtExtractorRemote extends Item {
             nbt.getInt("y"),
             nbt.getInt("z")
         );
-        if (!world.isAreaLoaded(pos, 1)) {
+        if (!world.isLoaded(pos)) {
             player.sendSystemMessage(Component.translatable(
                 "integratednbt:nbt_extractor_remote.require_load_client"));
             return;
         }
-        if (world.getBlockState(pos).getBlock() != RegistryEntries.BLOCK_NBT_EXTRACTOR) {
+        if (world.getBlockState(pos).getBlock() != RegistryEntries.BLOCK_NBT_EXTRACTOR.get()) {
             player.sendSystemMessage(Component.translatable(
                 "integratednbt:nbt_extractor_remote.invalid_bind"));
             return;
@@ -91,7 +91,7 @@ public class ItemNbtExtractorRemote extends Item {
     }
 
     public CompoundTag getModNBT(ItemStack itemStack) {
-        return itemStack.getOrCreateTagElement(Reference.MOD_ID);
+        return itemStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getCompound(Reference.MOD_ID);
     }
 
     public void serverUse(ItemStack itemStack, ServerPlayer player) {
@@ -101,7 +101,7 @@ public class ItemNbtExtractorRemote extends Item {
                 "integratednbt:nbt_extractor_remote.need_bind"));
             return;
         }
-        ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("world")));
+        ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString("world")));
         MinecraftServer server = player.getServer();
         if (server == null) {
             player.sendSystemMessage(Component.translatable(
@@ -119,12 +119,12 @@ public class ItemNbtExtractorRemote extends Item {
             nbt.getInt("y"),
             nbt.getInt("z")
         );
-        if (!world.isAreaLoaded(pos, 1)) {
+        if (!world.isLoaded(pos)) {
             player.sendSystemMessage(Component.translatable(
                 "integratednbt:nbt_extractor_remote.require_load_server"));
             return;
         }
-        if (world.getBlockState(pos).getBlock() != RegistryEntries.BLOCK_NBT_EXTRACTOR) {
+        if (world.getBlockState(pos).getBlock() != RegistryEntries.BLOCK_NBT_EXTRACTOR.get()) {
             player.sendSystemMessage(Component.translatable(
                 "integratednbt:nbt_extractor_remote.invalid_bind"));
             return;
@@ -136,7 +136,7 @@ public class ItemNbtExtractorRemote extends Item {
         BlockEntityHelpers.get(level, pos, BlockEntityNbtExtractor.class)
                 .ifPresent(blockEntity -> {
                     blockEntity.refreshVariables(true);
-                    NetworkHooks.openScreen(playerMP, blockEntity, pos);
+                    playerMP.openMenu(blockEntity, buf -> buf.writeBlockPos(pos));
                 });
     }
 
@@ -150,9 +150,9 @@ public class ItemNbtExtractorRemote extends Item {
             return InteractionResult.FAIL;
         }
         InteractionHand hand = itemUseContext.getHand();
-        if (world.getBlockState(pos).getBlock() == RegistryEntries.BLOCK_NBT_EXTRACTOR) {
+        if (world.getBlockState(pos).getBlock() == RegistryEntries.BLOCK_NBT_EXTRACTOR.get()) {
             if (!world.isClientSide) {
-                RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE
+                RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE.get()
                     .bindBlock(player.getItemInHand(hand), world, pos);
                 player.sendSystemMessage(Component.translatable(
                     "integratednbt:nbt_extractor_remote.bind_successful",
@@ -168,21 +168,26 @@ public class ItemNbtExtractorRemote extends Item {
     }
 
     public void bindBlock(ItemStack itemStack, Level world, BlockPos pos) {
-        CompoundTag nbt = this.getModNBT(itemStack);
-        nbt.putString("world", world.dimension().location().toString());
-        nbt.putInt("x", pos.getX());
-        nbt.putInt("y", pos.getY());
-        nbt.putInt("z", pos.getZ());
+        itemStack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, customData -> {
+            CompoundTag tag = customData.copyTag();
+            CompoundTag modNbt = tag.getCompound(Reference.MOD_ID);
+            modNbt.putString("world", world.dimension().location().toString());
+            modNbt.putInt("x", pos.getX());
+            modNbt.putInt("y", pos.getY());
+            modNbt.putInt("z", pos.getZ());
+            tag.put(Reference.MOD_ID, modNbt);
+            return CustomData.of(tag);
+        });
     }
 
     @Override
     public void appendHoverText(
         ItemStack itemStack,
-        @Nullable Level world,
+        Item.TooltipContext context,
         List<Component> tooltip,
         TooltipFlag flag
     ) {
-        super.appendHoverText(itemStack, world, tooltip, flag);
+        super.appendHoverText(itemStack, context, tooltip, flag);
         CompoundTag nbt = this.getModNBT(itemStack);
         if (nbt.contains("world")) {
             tooltip.add(Component.translatable(

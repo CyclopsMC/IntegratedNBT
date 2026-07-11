@@ -54,22 +54,16 @@ public class TexturePart {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         this.texture.bind();
         Matrix4f matrix = gui.pose().last().pose();
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(matrix, x, y + destHeight, 0)
-            .uv((float) (this.x) * 0.00390625F, (float) (this.y + this.height) * 0.00390625F)
-            .endVertex();
-        bufferbuilder.vertex(matrix, x + destWidth, y + destHeight, 0)
-            .uv((float) (this.x + this.width) * 0.00390625F, (float) (this.y + this.height) * 0.00390625F)
-            .endVertex();
-        bufferbuilder.vertex(matrix, x + destWidth, y, 0)
-            .uv((float) (this.x + this.width) * 0.00390625F, (float) (this.y) * 0.00390625F)
-            .endVertex();
-        bufferbuilder.vertex(matrix, x, y, 0)
-            .uv((float) (this.x) * 0.00390625F, (float) (this.y) * 0.00390625F)
-            .endVertex();
-        tesselator.end();
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.addVertex(matrix, x, y + destHeight, 0)
+            .setUv((float) (this.x) * 0.00390625F, (float) (this.y + this.height) * 0.00390625F);
+        bufferbuilder.addVertex(matrix, x + destWidth, y + destHeight, 0)
+            .setUv((float) (this.x + this.width) * 0.00390625F, (float) (this.y + this.height) * 0.00390625F);
+        bufferbuilder.addVertex(matrix, x + destWidth, y, 0)
+            .setUv((float) (this.x + this.width) * 0.00390625F, (float) (this.y) * 0.00390625F);
+        bufferbuilder.addVertex(matrix, x, y, 0)
+            .setUv((float) (this.x) * 0.00390625F, (float) (this.y) * 0.00390625F);
+        com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
     }
 
     public void renderToScaled(GuiGraphics gui, int x, int y, int width, int height, int color) {

@@ -14,7 +14,7 @@ public class VariableModelProviders {
 
     public static final IVariableModelProviderRegistry REGISTRY = IntegratedDynamics._instance.getRegistryManager().getRegistry(IVariableModelProviderRegistry.class);
 
-    public static final SingleVariableModelProvider NBT_EXTRACTED = REGISTRY.addProvider(new SingleVariableModelProvider(new ResourceLocation(Reference.MOD_ID, "customoverlay/nbt_extracted")));
+    public static final SingleVariableModelProvider NBT_EXTRACTED = REGISTRY.addProvider(new SingleVariableModelProvider(ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "customoverlay/nbt_extracted")));
 
     public static void load() {}
 

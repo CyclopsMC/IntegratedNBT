@@ -2,10 +2,10 @@ package org.cyclops.integratednbt;
 
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.cyclopscore.helper.MinecraftHelpers;
@@ -15,6 +15,7 @@ import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.integrateddynamics.IntegratedDynamics;
 import org.cyclops.integrateddynamics.core.evaluate.operator.OperatorRegistry;
+import org.cyclops.integrateddynamics.core.event.IntegratedDynamicsSetupEvent;
 import org.cyclops.integrateddynamics.core.item.VariableFacadeHandlerRegistry;
 import org.cyclops.integrateddynamics.infobook.OnTheDynamicsOfIntegrationBook;
 import org.cyclops.integratednbt.block.BlockNbtExtractorConfig;
@@ -32,14 +33,13 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
 
     public static IntegratedNbt _instance;
 
-    public IntegratedNbt() {
-        super(Reference.MOD_ID, (instance) -> _instance = instance);
+    public IntegratedNbt(IEventBus modEventBus) {
+        super(Reference.MOD_ID, (instance) -> _instance = instance, modEventBus);
+
+        modEventBus.addListener(this::onSetup);
     }
 
-    @Override
-    protected void setup(FMLCommonSetupEvent event) {
-        super.setup(event);
-
+    protected void onSetup(IntegratedDynamicsSetupEvent event) {
         // Initialize info book
         IntegratedDynamics._instance.getRegistryManager().getRegistry(IInfoBookRegistry.class)
                 .registerSection(this,

@@ -1,13 +1,14 @@
 package org.cyclops.integratednbt.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -33,10 +34,15 @@ public class BlockNbtExtractor extends BlockWithEntityGuiCabled {
                 .setValue(FACING, Direction.NORTH));
     }
 
+    @Override
+    public MapCodec<? extends BaseEntityBlock> codec() {
+        return simpleCodec(BlockNbtExtractor::new);
+    }
+
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return level.isClientSide ? null : createTickerHelper(blockEntityType, RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR, new BlockEntityNbtExtractor.Ticker<>());
+        return level.isClientSide ? null : createTickerHelper(blockEntityType, RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR.get(), new BlockEntityNbtExtractor.Ticker<>());
     }
 
     @Override
@@ -50,23 +56,22 @@ public class BlockNbtExtractor extends BlockWithEntityGuiCabled {
     }
 
     @Override
-    public InteractionResult use(
+    public InteractionResult useWithoutItem(
         BlockState blockState,
         Level world,
         BlockPos blockPos,
         Player player,
-        InteractionHand hand,
         BlockHitResult rayTraceResult
     ) {
-        if (!world.isClientSide() && player.getItemInHand(hand).getItem() == RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE) {
+        if (!world.isClientSide() && player.getMainHandItem().getItem() == RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE.get()) {
             return InteractionResult.PASS;
         }
-        return super.use(blockState, world, blockPos, player, hand, rayTraceResult);
+        return super.useWithoutItem(blockState, world, blockPos, player, rayTraceResult);
     }
 
     @Override
-    public void writeExtraGuiData(FriendlyByteBuf packetBuffer, Level world, Player player, BlockPos blockPos, InteractionHand hand, BlockHitResult rayTraceResult) {
-        super.writeExtraGuiData(packetBuffer, world, player, blockPos, hand, rayTraceResult);
+    public void writeExtraGuiData(FriendlyByteBuf packetBuffer, Level world, Player player, BlockPos blockPos, BlockHitResult rayTraceResult) {
+        super.writeExtraGuiData(packetBuffer, world, player, blockPos, rayTraceResult);
         packetBuffer.writeBlockPos(blockPos);
     }
 }

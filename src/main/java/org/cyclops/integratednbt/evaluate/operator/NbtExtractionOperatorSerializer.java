@@ -22,7 +22,7 @@ public class NbtExtractionOperatorSerializer implements IOperatorSerializer<NbtE
     }
 
     @Override
-    public Tag serialize(NbtExtractionOperator operator) {
+    public Tag serialize(ValueDeseralizationContext valueDeseralizationContext, NbtExtractionOperator operator) {
         CompoundTag data = new CompoundTag();
         data.put("path", operator.getExtractionPath().toNBT());
         data.putByte("defaultNBTId", operator.getDefaultNBTId());

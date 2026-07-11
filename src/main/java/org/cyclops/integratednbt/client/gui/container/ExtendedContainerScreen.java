@@ -1,6 +1,8 @@
 package org.cyclops.integratednbt.client.gui.container;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
@@ -26,21 +28,16 @@ public abstract class ExtendedContainerScreen<T extends AbstractContainerMenu> e
         int srcX, int srcY,
         int srcWidth, int srcHeight
     ) {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(matrix, destX, destY + destHeight, 0)
-            .uv((float) (srcX) * 0.00390625F, (float) (srcY + srcHeight) * 0.00390625F)
-            .endVertex();
-        bufferbuilder.vertex(matrix, destX + destWidth, destY + destHeight, 0)
-            .uv((float) (srcX + srcWidth) * 0.00390625F, (float) (srcY + srcHeight) * 0.00390625F)
-            .endVertex();
-        bufferbuilder.vertex(matrix, destX + destWidth, destY, 0)
-            .uv((float) (srcX + srcWidth) * 0.00390625F, (float) (srcY) * 0.00390625F)
-            .endVertex();
-        bufferbuilder.vertex(matrix, destX, destY, 0)
-            .uv((float) (srcX) * 0.00390625F, (float) (srcY) * 0.00390625F)
-            .endVertex();
-        tesselator.end();
+        RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionTexShader);
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.addVertex(matrix, destX, destY + destHeight, 0)
+            .setUv((float) (srcX) * 0.00390625F, (float) (srcY + srcHeight) * 0.00390625F);
+        bufferbuilder.addVertex(matrix, destX + destWidth, destY + destHeight, 0)
+            .setUv((float) (srcX + srcWidth) * 0.00390625F, (float) (srcY + srcHeight) * 0.00390625F);
+        bufferbuilder.addVertex(matrix, destX + destWidth, destY, 0)
+            .setUv((float) (srcX + srcWidth) * 0.00390625F, (float) (srcY) * 0.00390625F);
+        bufferbuilder.addVertex(matrix, destX, destY, 0)
+            .setUv((float) (srcX) * 0.00390625F, (float) (srcY) * 0.00390625F);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
     }
 }

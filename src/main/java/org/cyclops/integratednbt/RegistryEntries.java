@@ -1,9 +1,11 @@
 package org.cyclops.integratednbt;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.ObjectHolder;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.cyclops.integratednbt.block.BlockNbtExtractor;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractor;
@@ -15,18 +17,13 @@ import org.cyclops.integratednbt.item.ItemNbtExtractorRemote;
  */
 public class RegistryEntries {
 
-    @ObjectHolder(registryName = "item", value = "integratednbt:nbt_extractor")
-    public static final Item ITEM_NBT_EXTRACTOR = null;
-    @ObjectHolder(registryName = "item", value = "integratednbt:nbt_extractor_remote")
-    public static final ItemNbtExtractorRemote ITEM_NBT_EXTRACTOR_REMOTE = null;
+    public static final DeferredHolder<Item, Item> ITEM_NBT_EXTRACTOR = DeferredHolder.create(Registries.ITEM, ResourceLocation.parse("integratednbt:nbt_extractor"));
+    public static final DeferredHolder<Item, ItemNbtExtractorRemote> ITEM_NBT_EXTRACTOR_REMOTE = DeferredHolder.create(Registries.ITEM, ResourceLocation.parse("integratednbt:nbt_extractor_remote"));
 
-    @ObjectHolder(registryName = "block", value = "integratednbt:nbt_extractor")
-    public static final BlockNbtExtractor BLOCK_NBT_EXTRACTOR = null;
+    public static final DeferredHolder<net.minecraft.world.level.block.Block, BlockNbtExtractor> BLOCK_NBT_EXTRACTOR = DeferredHolder.create(Registries.BLOCK, ResourceLocation.parse("integratednbt:nbt_extractor"));
 
-    @ObjectHolder(registryName = "block_entity_type", value = "integratednbt:nbt_extractor")
-    public static final BlockEntityType<BlockEntityNbtExtractor> BLOCK_ENTITY_NBT_EXTRACTOR = null;
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityNbtExtractor>> BLOCK_ENTITY_NBT_EXTRACTOR = DeferredHolder.create(Registries.BLOCK_ENTITY_TYPE, ResourceLocation.parse("integratednbt:nbt_extractor"));
 
-    @ObjectHolder(registryName = "menu", value = "integratednbt:nbt_extractor")
-    public static final MenuType<ContainerNbtExtractor> CONTAINER_NBT_EXTRACTOR = null;
+    public static final DeferredHolder<MenuType<?>, MenuType<ContainerNbtExtractor>> CONTAINER_NBT_EXTRACTOR = DeferredHolder.create(Registries.MENU, ResourceLocation.parse("integratednbt:nbt_extractor"));
 
 }

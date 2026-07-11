@@ -1,6 +1,6 @@
 package org.cyclops.integratednbt;
 
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.config.ModConfig;
 import org.cyclops.cyclopscore.config.ConfigurableProperty;
 import org.cyclops.cyclopscore.config.extendedconfig.DummyConfig;
 

@@ -1,11 +1,11 @@
 plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'com.matthewprenger.cursegradle' version '1.4.0'
-    id 'com.diffplug.spotless' version '5.14.3'
+	id 'net.neoforged.gradle.userdev' version '7.0.180'
+    id 'net.darkhax.curseforgegradle' version '1.0.8'
+	id 'com.github.kt3k.coveralls' version '2.12.0'
+    id 'com.diffplug.spotless' version '6.25.0'
 	id 'com.modrinth.minotaur' version '2.+'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
 apply plugin: 'jacoco'
@@ -13,29 +13,34 @@ apply plugin: 'jacoco'
 // All jar files from this folder will be added automatically as runtime mod dependencies (inspired by AE2's build.gradle)
 def extraModsDir = "extra-mods"
 
-import net.minecraftforge.gradle.common.tasks.SignJar
+import net.neoforged.gradle.common.tasks.PotentiallySignJar
+import net.darkhax.curseforgegradle.Constants
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
 
 // Determine build number
 String build_number = "DEV" // this will be referenced as simply build_number from now on.
 if (System.getenv().BUILD_NUMBER)
     build_number = System.getenv().BUILD_NUMBER
-if (System.getenv().TRAVIS_BUILD_NUMBER)
-    build_number = System.getenv().TRAVIS_BUILD_NUMBER
 if (System.getenv().GITHUB_RUN_ID)
     build_number = System.getenv().GITHUB_RUN_NUMBER
-if (System.getenv().RELEASE || System.getenv().TRAVIS_TAG)
+if (System.getenv().RELEASE)
     build_number = "RELEASE"
 logger.lifecycle "BUILDING VERSION: " + build_number
 
-// Set mod details
-version = project.mod_version
-group = "org.cyclops.integratednbt"
-archivesBaseName = "IntegratedNBT"
+// Include build number in version
+if (build_number.equals("RELEASE"))
+    version = "${project.mod_version}"
+else
+    version = "${project.mod_version}-${build_number}"
 
-// Set Java details
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+base {
+    archivesName = "${mod_id}-${minecraft_version}-neoforge"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+}
 compileJava.options.compilerArgs << "-Xmaxerrs" << "9999"
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 // Load secrets
 def getSecrets() {
@@ -45,12 +50,44 @@ def getSecrets() {
     }
     return props
 }
-Properties secrets = getSecrets();
+def getCurseforgeKey() {
+    if(secrets.curseforge_key) {
+        return secrets.curseforge_key
+    } else if(System.getenv().GITHUB_ACTIONS && System.getenv().CURSEFORGE_KEY_SECRET) {
+        return System.getenv().CURSEFORGE_KEY_SECRET
+    } else {
+        return "DUMMY"
+    }
+}
+def getModrinthKey() {
+    if(secrets.modrinth_key) {
+        return secrets.modrinth_key
+    } else if(System.getenv().GITHUB_ACTIONS && System.getenv().MODRINTH_KEY_SECRET) {
+        return System.getenv().MODRINTH_KEY_SECRET
+    } else {
+        return "DUMMY"
+    }
+}
+def getChangelog() {
+    if (System.getenv().RELEASE) {
+        return file("./CHANGELOG-${project.minecraft_version}.md").getText();
+    } else {
+        return "Changes since last release: ${project.github_url}/compare/${project.minecraft_version}-${project.mod_version}...${System.getenv().GITHUB_SHA}"
+    }
+}
+//ext {
+    Properties secrets = getSecrets();
+    secrets.curseforgeKey = getCurseforgeKey();
+    secrets.modrinthKey = getModrinthKey();
+    secrets.changelog = getChangelog();
+    secrets.build_number = build_number;
+//}
 
 sourceSets {
     main
     test
 }
+sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 configurations {
     modLib
@@ -65,13 +102,13 @@ test {
 
 repositories {
     mavenCentral()
-    mavenLocal()
+	mavenLocal()
     maven {
         name "Cyclops Repo"
         url "https://maven.pkg.github.com/CyclopsMC/packages"
         credentials {
-            username = project.findProperty("gpr.user") ?: System.getenv("MAVEN_USERNAME")
-            password = project.findProperty("gpr.key") ?: System.getenv("MAVEN_KEY")
+            username = project.findProperty("gpr.user") ?: System.getenv("MAVEN_USERNAME") ?: System.getenv("GITHUB_USER")
+            password = project.findProperty("gpr.key") ?: System.getenv("MAVEN_KEY") ?: System.getenv("GITHUB_TOKEN")
         }
     }
     flatDir {
@@ -81,45 +118,48 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+    implementation "net.neoforged:neoforge:${project.neoforge_version}"
 
     // Add something like 'cyclopscore_version_local=0.1.0-DEV' to your secrets.properties if you want to use a custom local CyclopsCore version.
     if(secrets.cyclopscore_version_local) {
-        implementation "org.cyclops.cyclopscore:cyclopscore:${project.minecraft_version}-${secrets.cyclopscore_version_local}:deobf"
+        implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-neoforge:${secrets.cyclopscore_version_local}:deobf"
     } else {
-        implementation "org.cyclops.cyclopscore:cyclopscore:${project.minecraft_version}-${project.cyclopscore_version}:deobf"
+        implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-neoforge:${project.cyclopscore_version}:deobf"
     }
-
+	
     // Add something like 'integrateddynamics_version_local=0.1.0-DEV' to your secrets.properties if you want to use a custom local Integrated Tunnels Compat version.
     if(secrets.integrateddynamics_version_local) {
-        implementation ("org.cyclops.integrateddynamics:integrateddynamics:${secrets.integrateddynamics_version_local}:deobf") {
+        implementation ("org.cyclops.integrateddynamics:integrateddynamics-${project.minecraft_version}-neoforge:${secrets.integrateddynamics_version_local}:deobf") {
             transitive = false
         }
     } else {
-        implementation ("org.cyclops.integrateddynamics:integrateddynamics:${project.integrateddynamics_version}:deobf") {
+        implementation ("org.cyclops.integrateddynamics:integrateddynamics-${project.minecraft_version}-neoforge:${project.integrateddynamics_version}:deobf") {
             transitive = false
         }
     }
 
     if(secrets.commoncapabilities_version_local) {
-        implementation ("org.cyclops.commoncapabilities:commoncapabilities:${secrets.commoncapabilities_version_local}:deobf") {
+        implementation ("org.cyclops.commoncapabilities:commoncapabilities-${project.minecraft_version}-neoforge:${secrets.commoncapabilities_version_local}:deobf") {
             transitive = false
         }
     } else {
-        implementation ("org.cyclops.commoncapabilities:commoncapabilities:${project.commoncapabilities_version}:deobf") { // https://dl.bintray.com/cyclopsmc/dev/org/cyclops/commoncapabilities/CommonCapabilities/
+        implementation ("org.cyclops.commoncapabilities:commoncapabilities-${project.minecraft_version}-neoforge:${project.commoncapabilities_version}:deobf") { // https://dl.bintray.com/cyclopsmc/dev/org/cyclops/commoncapabilities/CommonCapabilities/
             transitive = false
         }
     }
 
     modLib "com.google.re2j:re2j:1.1"
+    modLib ("io.netty:netty-codec-http:4.1.77.Final") {
+        transitive = false
+    }
 
     // Project lombok
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    testCompileOnly 'org.projectlombok:lombok:1.18.22'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
-
-    testImplementation "junit:junit:4.12"
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+	testCompileOnly 'org.projectlombok:lombok:1.18.30'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+	
+	testImplementation "junit:junit:4.12"
 
     // Locally sourced extra mods for runtime (i.e. testing)
     for (extraModJar in fileTree(dir: extraModsDir, include: '*.jar')) {
@@ -133,63 +173,50 @@ dependencies {
 }
 
 minecraft {
-    mappings channel: "official", version: "${project.minecraft_version}"
+    accessTransformers {
+        file('src/main/resources/META-INF/accesstransformer.cfg')
+	}
+}
 
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-            //property 'forge.logging.markers', 'REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                integratedterminals {
-                    source sourceSets.main
-                }
-            }
-
-            lazyToken('minecraft_classpath') {
-                configurations.modLib.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                integratedterminals {
-                    source sourceSets.main
-                }
-            }
-
-            lazyToken('minecraft_classpath') {
-                configurations.modLib.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            args '--mod', 'integratedterminals', '--all', '--output', file('src/generated/resources/')
-            mods {
-                integratedterminals {
-                    source sourceSets.main
-                }
-            }
-
-            lazyToken('minecraft_classpath') {
-                configurations.modLib.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-            }
-        }
+subsystems {
+    parchment {
+        minecraftVersion = "${project.parchment_minecraft_version}"
+        mappingsVersion = "${project.parchment_version}"
     }
 }
 
-if (build_number.equals("RELEASE"))
-    version = "${project.minecraft_version}-${project.mod_version}"
-else
-    version = "${project.minecraft_version}-${project.mod_version}-${build_number}"
+runs {
+    configureEach {
+		systemProperty 'forge.logging.markers', 'REGISTRIES'
+        systemProperty 'forge.logging.console.level', 'debug'
+        systemProperty 'forge.logging.console.level', 'debug'
+        modSource project.sourceSets.main
+
+        dependencies {
+            runtime project.configurations.modLib
+        }
+    }
+	
+    client {
+        systemProperty 'neoforge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
+    }
+
+    server {
+        systemProperty 'neoforge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
+        programArgument '--nogui'
+    }
+
+    gameTestServer {
+        systemProperty 'neoforge.enabledGameTestNamespaces', "cyclopscore,${mod_id}"
+    }
+
+    data {
+        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
 
 jar {
+    archiveClassifier.set('slim')
     manifest {
         attributes([
                 "Specification-Title": "${project.name}",
@@ -202,9 +229,10 @@ jar {
         ])
     }
 }
-jar.finalizedBy('reobfJar')
 
-task signJar(type: SignJar, dependsOn: jar) {
+task signJar(type: PotentiallySignJar, dependsOn: jar) {
+	dependsOn(tasks.jar)
+
     onlyIf {
         System.getenv().SIGN_KEYSTORE
     }
@@ -213,10 +241,9 @@ task signJar(type: SignJar, dependsOn: jar) {
     alias = System.getenv().SIGN_ALIAS
     storePass = System.getenv().SIGN_STOREPASS
     keyPass = System.getenv().SIGN_KEYPASS
-    inputFile = jar.archivePath
-    outputFile = jar.archivePath
+    input = jar.archivePath
+    output = jar.archivePath
 }
-build.dependsOn signJar
 
 task deobfJar(type: Jar) {
     from sourceSets.main.output
@@ -252,55 +279,69 @@ artifacts {
     archives javadocJar
 }
 
-curseforge {
-    if(secrets.curseforge_key) {
-        apiKey = secrets.curseforge_key
-    } else if(System.getenv().GITHUB_ACTIONS && System.getenv().CURSEFORGE_KEY_SECRET) {
-        apiKey = System.getenv().CURSEFORGE_KEY_SECRET
+// Replace properties in files
+processResources {
+    def expandProps = [
+            'mod_version'                           : mod_version,
+            'group'                                 : project.group, //Else we target the task's group.
+            'minecraft_version'                     : minecraft_version,
+            'mod_name'                              : mod_name,
+            'mod_author'                            : mod_author,
+            'mod_id'                                : mod_id,
+            'license'                               : license,
+            'issue_tracker_url'                     : issue_tracker_url,
+            'display_url'                           : display_url,
+            'description'                           : project.description,
+            'neoforge_version'                      : neoforge_version,
+            'neoforge_loader_version_range'         : neoforge_loader_version_range,
+            'neoforge_update_json_url'              : neoforge_update_json_url,
+            'java_version'                          : java_version,
+            'cyclopscore_version'                   : cyclopscore_version,
+            'cyclopscore_version_semver'            : cyclopscore_version.replaceAll("-.*\$", ""),
+            'commoncapabilities_version'            : commoncapabilities_version,
+            'commoncapabilities_version_semver'     : commoncapabilities_version.replaceAll("-.*\$", ""),
+            'integrateddynamics_version'            : integrateddynamics_version,
+            'integrateddynamics_version_semver'     : integrateddynamics_version.replaceAll("-.*\$", "")
+    ]
+
+    filesMatching(['pack.mcmeta', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'mixins.*.json']) {
+        expand expandProps
     }
+    inputs.properties(expandProps)
+}
 
-    project {
-        id = "380998" // my project url is http://minecraft.curseforge.com/mc-mods/380998/
-        releaseType = project.project.release_type
-        addGameVersion project.minecraft_version
-        mainArtifact(jar) {
-            relations {
-                requiredDependency 'cyclops-core'
-                requiredDependency 'integrated-dynamics'
-            }
-        }
+task publishCurseForge(type: TaskPublishCurseForge) {
+    dependsOn(tasks.jar)
+    apiToken = secrets.curseforgeKey;
+    def mainFile = upload(project.curseforge_project_id, jar)
+    mainFile.releaseType = secrets.build_number.equals("RELEASE") ? Constants.RELEASE_TYPE_RELEASE : Constants.RELEASE_TYPE_BETA
+    mainFile.changelogType = "markdown"
+    mainFile.changelog = secrets.changelog
+    mainFile.addJavaVersion("Java ${project.java_version}")
+    mainFile.addGameVersion(project.minecraft_version)
+    mainFile.addModLoader("NeoForge")
 
-        changelog = ""
-        if (new File("resources/changelog/${project.version}.txt").exists()) {
-            changelog = new File("resources/changelog/${project.version}.txt").text
-        }
-
-        addArtifact deobfJar
-        addArtifact sourcesJar
-        addArtifact javadocJar
-    }
+    mainFile.addRequirement("cyclops-core")
+	mainFile.addRequirement('integrated-dynamics')
+	mainFile.addRequirement('integrated-tunnels')
+	mainFile.addOptional('integrated-crafting')
 }
 
 modrinth {
-    if(secrets.modrinth_key) {
-        token = secrets.modrinth_key
-    } else if(System.getenv().GITHUB_ACTIONS && System.getenv().MODRINTH_KEY_SECRET) {
-        token = System.getenv().MODRINTH_KEY_SECRET
-    } else {
-        token = "DUMMY"
-    }
-    projectId = "2PVU5Uck"
-    versionNumber = project.minecraft_version + '-' + project.mod_version
-    versionType = project.release_type
+    token = secrets.modrinthKey;
+    projectId = "${modrinth_project_id}"
+    versionNumber = project.minecraft_version + '-' + project.version
+    versionName = "${project.version} for NeoForge ${project.minecraft_version}"
+    versionType = secrets.build_number.equals("RELEASE") ? "release" : "beta"
     uploadFile = jar
     gameVersions = [ project.minecraft_version ]
-    changelog = ""
-    if (new File("resources/changelog/${project.version}.txt").exists()) {
-        changelog = new File("resources/changelog/${project.version}.txt").text
-    }
-    dependencies { // A special DSL for creating dependencies
+    changelog = provider { secrets.changelog }
+
+    dependencies {
         required.project "Z9DM0LJ4" // Cyclops Core
         required.project "yYzdQHJI" // Integrated Dynamics
+		required.project "Etqy1Omb" // Integrated Tunnels
+		optional.project "qwpACdla" // Integrated Crafting
     }
 }
 
@@ -339,6 +380,8 @@ publishing {
 
 idea {
     module {
+        downloadSources = true
+        downloadJavadoc = true
         for (String excludeDirName in ["run", "out", "logs", "gradle"]) {
             File excludeDir = new File(projectDir, excludeDirName)
             excludeDirs.add(excludeDir)
@@ -369,3 +412,7 @@ tasks.register('updateGitHooks', Copy) {
     into './.git/hooks'
 }
 compileJava.dependsOn updateGitHooks
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}

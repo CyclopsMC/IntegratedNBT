@@ -3,10 +3,10 @@ package org.cyclops.integratednbt.evaluate.variable;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.data.ModelData;
+import net.minecraft.world.item.Item;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.cyclops.integrateddynamics.api.client.model.IVariableModelBaked;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
@@ -71,7 +71,7 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(List<Component> list, Level world) {
+    public void appendHoverText(List<Component> list, Item.TooltipContext context) {
         if (!this.isValid()) {
             return;
         }
@@ -87,7 +87,7 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
             "integratednbt:nbt_extracted_variable.tooltip.default_value",
             NbtValueConverter.getDefaultValueDisplayText(this.defaultNbtId)
         ));
-        super.appendHoverText(list, world);
+        super.appendHoverText(list, context);
     }
 
     @Override

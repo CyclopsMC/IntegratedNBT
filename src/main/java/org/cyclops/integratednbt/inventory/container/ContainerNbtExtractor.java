@@ -1,7 +1,7 @@
 package org.cyclops.integratednbt.inventory.container;
 
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -91,12 +91,12 @@ public class ContainerNbtExtractor extends AbstractContainerMenu {
     private Component clientErrorMessage = null;
     private Boolean clientAutoRefresh = null;
 
-    public ContainerNbtExtractor(int id, Inventory playerInventory, FriendlyByteBuf data) {
+    public ContainerNbtExtractor(int id, Inventory playerInventory, RegistryFriendlyByteBuf data) {
         this(id, playerInventory, getTileEntity(playerInventory, data));
     }
 
     public ContainerNbtExtractor(int id, Inventory playerInventory, BlockEntityNbtExtractor nbtExtractorEntity) {
-        super(RegistryEntries.CONTAINER_NBT_EXTRACTOR, id);
+        super(RegistryEntries.CONTAINER_NBT_EXTRACTOR.get(), id);
         this.playerInventory = playerInventory;
         this.nbtExtractorEntity = nbtExtractorEntity;
         nbtExtractorEntity.setLastPlayer(playerInventory.player);
@@ -119,7 +119,7 @@ public class ContainerNbtExtractor extends AbstractContainerMenu {
 
     private static BlockEntityNbtExtractor getTileEntity(
         Inventory playerInventory,
-        FriendlyByteBuf data
+        RegistryFriendlyByteBuf data
     ) {
         Objects.requireNonNull(playerInventory);
         Objects.requireNonNull(data);

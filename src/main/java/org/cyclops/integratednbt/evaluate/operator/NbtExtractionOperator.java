@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class NbtExtractionOperator implements IOperator {
-    public static ResourceLocation UNIQUE_NAME = new ResourceLocation(
+    public static ResourceLocation UNIQUE_NAME = ResourceLocation.fromNamespaceAndPath(
         Reference.MOD_ID,
         "nbt_extraction"
     );
