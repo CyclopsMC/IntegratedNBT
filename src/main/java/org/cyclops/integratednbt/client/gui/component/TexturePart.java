@@ -1,10 +1,12 @@
 package org.cyclops.integratednbt.client.gui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
-import org.cyclops.integratednbt.client.gui.container.ExtendedContainerScreen;
 import org.joml.Matrix4f;
 
 /**
@@ -25,9 +27,8 @@ public class TexturePart {
         this.height = height;
     }
 
-    public void renderTo(GuiGraphics gui, PoseStack matrixStack, int x, int y) {
-        this.texture.bind();
-        gui.blit(matrixStack, x, y, this.x, this.y, this.width, this.height);
+    public void renderTo(GuiGraphics gui, int x, int y) {
+        gui.blit(this.texture.getResourceLocation(), x, y, this.x, this.y, this.width, this.height);
     }
 
     private void setColorInt(int color) {
@@ -39,34 +40,44 @@ public class TexturePart {
         );
     }
 
-    public void renderTo(GuiGraphics gui, PoseStack matrixStack, int x, int y, int color) {
+    public void renderTo(GuiGraphics gui, int x, int y, int color) {
         this.setColorInt(color);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.enableBlend();
-        this.renderTo(gui, matrixStack, x, y);
+        this.renderTo(gui, x, y);
+        RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 
-    public void renderToScaled(ExtendedContainerScreen<?> gui, PoseStack matrixStack, int x, int y, int width, int height) {
+    public void renderToScaled(GuiGraphics gui, int x, int y, int width, int height) {
+        int destWidth = width == -1 ? this.width : width;
+        int destHeight = height == -1 ? this.height : height;
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         this.texture.bind();
-        Matrix4f matrix = matrixStack.last().pose();
-        gui.drawTexturedModalRectScalable(
-            matrix,
-            x,
-            y,
-            width == -1 ? this.width : width,
-            height == -1 ? this.height : height,
-            this.x,
-            this.y,
-            this.width,
-            this.height
-        );
+        Matrix4f matrix = gui.pose().last().pose();
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferbuilder = tesselator.getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.vertex(matrix, x, y + destHeight, 0)
+            .uv((float) (this.x) * 0.00390625F, (float) (this.y + this.height) * 0.00390625F)
+            .endVertex();
+        bufferbuilder.vertex(matrix, x + destWidth, y + destHeight, 0)
+            .uv((float) (this.x + this.width) * 0.00390625F, (float) (this.y + this.height) * 0.00390625F)
+            .endVertex();
+        bufferbuilder.vertex(matrix, x + destWidth, y, 0)
+            .uv((float) (this.x + this.width) * 0.00390625F, (float) (this.y) * 0.00390625F)
+            .endVertex();
+        bufferbuilder.vertex(matrix, x, y, 0)
+            .uv((float) (this.x) * 0.00390625F, (float) (this.y) * 0.00390625F)
+            .endVertex();
+        tesselator.end();
     }
 
-    public void renderToScaled(ExtendedContainerScreen<?> gui, PoseStack matrixStack, int x, int y, int width, int height, int color) {
+    public void renderToScaled(GuiGraphics gui, int x, int y, int width, int height, int color) {
         this.setColorInt(color);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.enableBlend();
-        this.renderToScaled(gui, matrixStack, x, y, width, height);
+        this.renderToScaled(gui, x, y, width, height);
+        RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 
     public int getWidth() {

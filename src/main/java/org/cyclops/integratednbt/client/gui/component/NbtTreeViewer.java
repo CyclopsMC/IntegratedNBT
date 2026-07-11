@@ -3,21 +3,22 @@ package org.cyclops.integratednbt.client.gui.component;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
-import org.cyclops.integratednbt.client.gui.FontHelper;
 import org.cyclops.integratednbt.client.gui.container.ExtendedContainerScreen;
 import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.helpers.Wrapper;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 import static org.cyclops.integratednbt.client.gui.container.ContainerScreenNbtExtractor.GUI_TEXTURE;
 import static org.cyclops.integratednbt.client.gui.container.ContainerScreenNbtExtractor.SCREEN_EDGE;
@@ -28,16 +29,16 @@ public abstract class NbtTreeViewer {
     private static final int LINE_SPACE = 1;
     private static final int EXPAND_BUTTON_RIGHT_MARGIN = 3;
     private static final int INDENTATION = 10;
-    private static final int HIGHLIGHT_COLOR = 0x505050; // Dark gray
-    private static final int SELECTED_COLOR = 0x506850; // Lighter Dark gray
+    private static final int HIGHLIGHT_COLOR = 0xFF505050; // Dark gray
+    private static final int SELECTED_COLOR = 0xFF506850; // Lighter Dark gray
     private static final int LABEL_COLOR = 0xFFFF55; // Yellow
     private static final int EXPAND_COLOR = 0xFFBB11; // Orange
     private static final int NUMBER_COLOR = 0x66FFFF; // Cyan
     private static final int STRING_COLOR = 0x55FF55; // Green
     private static final int COMPLEX_COLOR = 0xAAAAAA; // Gray
     private static final int EMPTY_COLOR = 0x777777; // Gray
-    private static final int SCREEN_BACKGROUND_COLOR = 0x303030;
-    private static final int SCROLL_BAR_COLOR = 0xCCCCCC;
+    private static final int SCREEN_BACKGROUND_COLOR = 0xFF303030;
+    private static final int SCROLL_BAR_COLOR = 0xFFCCCCCC;
     private static final int SCROLL_BAR_PADDING = 2;
     private static final int SCROLL_BAR_WIDTH = 3;
     private static final int EXPAND_BUTTON_SIZE = 7;
@@ -65,10 +66,6 @@ public abstract class NbtTreeViewer {
         EXPAND_BUTTON_SIZE,
         EXPAND_BUTTON_SIZE
     );
-    private static final TexturePart PURE_COLOR = new Texture(
-        "integratednbt",
-        "textures/gui/1x1.png"
-    ).createPart(0, 0, 1, 1);
 
     private final Set<SegmentedNbtPath> expandedPaths;
     private final Wrapper<Integer> scrollTop;
@@ -135,7 +132,7 @@ public abstract class NbtTreeViewer {
     }
 
     private boolean renderKVPair(
-        PoseStack matrixStack,
+        GuiGraphics guiGraphics,
         String label,
         String value,
         int valueColor
@@ -161,33 +158,25 @@ public abstract class NbtTreeViewer {
                 if (isThreeSideInBounds && this.mouseX < rightBoundary) {
                     isHovering = true;
                 }
-                PURE_COLOR.renderToScaled(
-                    this.gui,
-                    matrixStack,
+                guiGraphics.fill(
                     this.currentX - 1,
                     this.currentY - 1,
-                    rightBoundary - this.currentX + 1,
-                    bottomBoundary - this.currentY + 1,
+                    rightBoundary + 1,
+                    bottomBoundary + 1,
                     isSelected ? SELECTED_COLOR : HIGHLIGHT_COLOR
                 );
             }
         }
         if (value.isEmpty()) {
-            this.fontRenderer.draw(matrixStack, label, this.currentX, this.currentY, LABEL_COLOR);
+            guiGraphics.drawString(this.fontRenderer, label, this.currentX, this.currentY, LABEL_COLOR, false);
         } else {
-            int valueX = this.fontRenderer.draw(
-                matrixStack,
-                label + ": ",
-                this.currentX,
-                this.currentY,
-                LABEL_COLOR
-            );
-            this.fontRenderer.draw(matrixStack, value, valueX, this.currentY, valueColor);
+            int valueX = guiGraphics.drawString(this.fontRenderer, label + ": ", this.currentX, this.currentY, LABEL_COLOR, false);
+            guiGraphics.drawString(this.fontRenderer, value, valueX, this.currentY, valueColor, false);
         }
         return isHovering;
     }
 
-    private void renderExpandableButton(PoseStack matrixStack, boolean expanded) {
+    private void renderExpandableButton(GuiGraphics guiGraphics, boolean expanded) {
         boolean hovering = (
             this.mouseX >= this.currentX &&
                 this.mouseX < (this.currentX + EXPAND_BUTTON_SIZE) &&
@@ -200,11 +189,11 @@ public abstract class NbtTreeViewer {
         if (hovering) {
             this.hoveringExpandableButton = this.currentPath.copy();
         }
-        part.renderTo(this.gui, matrixStack, this.currentX, this.currentY, EXPAND_COLOR);
+        part.renderTo(guiGraphics, this.currentX, this.currentY, EXPAND_COLOR);
         this.currentX += EXPAND_BUTTON_SIZE + EXPAND_BUTTON_RIGHT_MARGIN;
     }
 
-    public void render(PoseStack matrixStack, Tag nbt, int absMouseX, int absMouseY) {
+    public void render(GuiGraphics guiGraphics, Tag nbt, int absMouseX, int absMouseY) {
         this.hoveringPath = null;
         this.hoveringNBTNode = null;
         this.hoveringExpandableButton = null;
@@ -213,58 +202,58 @@ public abstract class NbtTreeViewer {
         this.updateScroll();
         this.mouseX = absMouseX - this.left;
         this.mouseY = (int) (absMouseY - this.top + this.renderScroll);
-        matrixStack.pushPose();
+        PoseStack poseStack = guiGraphics.pose();
+        poseStack.pushPose();
         try {
-            matrixStack.translate(this.left, this.top - this.renderScroll, 0);
+            poseStack.translate(this.left, this.top - this.renderScroll, 0);
             if (nbt == null) {
-                this.fontRenderer.draw(
-                    matrixStack,
+                guiGraphics.drawString(
+                    this.fontRenderer,
                     I18n.get("integratednbt:nbt_extractor.empty"),
                     SCREEN_EDGE,
                     this.currentY,
-                    EMPTY_COLOR
+                    EMPTY_COLOR,
+                    false
                 );
             } else {
-                this.renderNode(matrixStack, I18n.get("integratednbt:nbt_extractor.root"), nbt);
+                this.renderNode(guiGraphics, I18n.get("integratednbt:nbt_extractor.root"), nbt);
             }
             int totalHeight = this.currentY + SCREEN_EDGE;
-            matrixStack.translate(0, this.renderScroll, 0);
+            poseStack.translate(0, this.renderScroll, 0);
             this.maxScroll = Math.max(totalHeight - this.height, 0);
             if (this.scrollTop.get() > this.maxScroll) {
                 this.scrollTop.set(this.maxScroll);
                 this.startScrollTransition();
             }
             if (this.maxScroll != 0) {
-                PURE_COLOR.renderToScaled(
-                    this.gui,
-                    matrixStack,
-                    this.width - SCROLL_BAR_PADDING * 2 - SCROLL_BAR_WIDTH,
+                guiGraphics.fill(
+                    this.width - SCROLL_BAR_PADDING * 2 - SCROLL_BAR_WIDTH - 1,
                     -1,
-                    SCROLL_BAR_PADDING * 2 + SCROLL_BAR_WIDTH + 2,
+                    this.width + 1,
                     this.height,
                     SCREEN_BACKGROUND_COLOR
                 );
-                PURE_COLOR.renderToScaled(
-                    this.gui,
-                    matrixStack,
+                guiGraphics.fill(
                     this.width - SCROLL_BAR_PADDING - SCROLL_BAR_WIDTH,
                     SCROLL_BAR_PADDING + (int) (
                         this.renderScroll / totalHeight * (
                             this.height - SCROLL_BAR_PADDING * 2)),
-                    SCROLL_BAR_WIDTH,
-                    (int) (
-                        Math.ceil(
+                    this.width - SCROLL_BAR_PADDING,
+                    SCROLL_BAR_PADDING + (int) (
+                        this.renderScroll / totalHeight * (
+                            this.height - SCROLL_BAR_PADDING * 2)) +
+                        (int) (Math.ceil(
                             (double) this.height / totalHeight * (
                                 this.height - SCROLL_BAR_PADDING * 2))),
                     SCROLL_BAR_COLOR
                 );
             }
         } finally {
-            matrixStack.popPose();
+            poseStack.popPose();
         }
     }
 
-    public void renderTooltip(PoseStack matrixStack, int absMouseX, int absMouseY) {
+    public void renderTooltip(GuiGraphics guiGraphics, int absMouseX, int absMouseY) {
         if (this.hoveringPath != null) {
             IValueType<? extends IValue> hoveringValueType =
                     NbtValueConverter.mapNBTToValueType(this.hoveringNBTNode);
@@ -300,11 +289,15 @@ public abstract class NbtTreeViewer {
                             "integratednbt:nbt_extractor.tooltip.right_click_expand"));
                 }
             }
-            this.gui.renderTooltip(
-                    matrixStack,
-                    FontHelper.wrap(list.stream().map(s -> Component.literal(s)).collect(Collectors.toList()), 250),
-                    this.mouseX,
-                    (int) (this.mouseY - this.renderScroll)
+            List<Component> tooltipComponents = new ArrayList<>();
+            for (String s : list) {
+                tooltipComponents.add(Component.literal(s));
+            }
+            guiGraphics.renderComponentTooltip(
+                    this.fontRenderer,
+                    tooltipComponents,
+                    absMouseX,
+                    absMouseY
             );
         }
     }
@@ -352,20 +345,21 @@ public abstract class NbtTreeViewer {
         return nbtId == 9 || nbtId == 10;
     }
 
-    private void renderEmpty(PoseStack matrixStack) {
+    private void renderEmpty(GuiGraphics guiGraphics) {
         this.currentX = (this.currentPath.getDepth() + 1) * INDENTATION + SCREEN_EDGE
             + EXPAND_BUTTON_RIGHT_MARGIN + EXPAND_BUTTON_SIZE;
-        this.fontRenderer.draw(
-            matrixStack,
+        guiGraphics.drawString(
+            this.fontRenderer,
             I18n.get("integratednbt:nbt_extractor.empty"),
             this.currentX,
             this.currentY,
-            EMPTY_COLOR
+            EMPTY_COLOR,
+            false
         );
         this.currentY += this.fontRenderer.lineHeight + LINE_SPACE;
     }
 
-    private void renderNode(PoseStack matrixStack, String label, Tag node) {
+    private void renderNode(GuiGraphics guiGraphics, String label, Tag node) {
         this.currentX = this.currentPath.getDepth() * INDENTATION + SCREEN_EDGE;
         boolean isExpandedIfExpandable = false;
         if (isNodeExpandable(node)) {
@@ -380,7 +374,7 @@ public abstract class NbtTreeViewer {
         switch (node.getId()) {
             case 1: // Byte
                 isHoveringText = this.renderKVPair(
-                    matrixStack,
+                    guiGraphics,
                     label,
                     String.valueOf(((ByteTag) node).getAsByte()),
                     NUMBER_COLOR
@@ -388,7 +382,7 @@ public abstract class NbtTreeViewer {
                 break;
             case 2: // Short
                 isHoveringText = this.renderKVPair(
-                    matrixStack,
+                    guiGraphics,
                     label,
                     String.valueOf(((ShortTag) node).getAsShort()),
                     NUMBER_COLOR
@@ -396,7 +390,7 @@ public abstract class NbtTreeViewer {
                 break;
             case 3: // Int
                 isHoveringText = this.renderKVPair(
-                    matrixStack,
+                    guiGraphics,
                     label,
                     String.valueOf(((IntTag) node).getAsInt()),
                     NUMBER_COLOR
@@ -404,7 +398,7 @@ public abstract class NbtTreeViewer {
                 break;
             case 4: // Long
                 isHoveringText = this.renderKVPair(
-                    matrixStack,
+                    guiGraphics,
                     label,
                     String.valueOf(((LongTag) node).getAsLong()),
                     NUMBER_COLOR
@@ -412,7 +406,7 @@ public abstract class NbtTreeViewer {
                 break;
             case 5: // Float
                 isHoveringText = this.renderKVPair(
-                    matrixStack,
+                    guiGraphics,
                     label,
                     String.valueOf(((FloatTag) node).getAsFloat()),
                     NUMBER_COLOR
@@ -420,7 +414,7 @@ public abstract class NbtTreeViewer {
                 break;
             case 6: // Double
                 isHoveringText = this.renderKVPair(
-                    matrixStack,
+                    guiGraphics,
                     label,
                     String.valueOf(((DoubleTag) node).getAsDouble()),
                     NUMBER_COLOR
@@ -430,7 +424,7 @@ public abstract class NbtTreeViewer {
             case 11: // Int Array
             case 12: // Long Array
                 isHoveringText = this.renderKVPair(
-                    matrixStack,
+                    guiGraphics,
                     label,
                     "[]",
                     NUMBER_COLOR
@@ -438,7 +432,7 @@ public abstract class NbtTreeViewer {
                 break;
             case 8: // String
                 isHoveringText = this.renderKVPair(
-                    matrixStack,
+                    guiGraphics,
                     label,
                     // Yes, I understand technically we should escape double quotes in the string.
                     // However, I think that will just make it confusing.
@@ -448,9 +442,9 @@ public abstract class NbtTreeViewer {
                 break;
             case 9: // List
             case 10: { // Compound
-                this.renderExpandableButton(matrixStack, isExpandedIfExpandable);
+                this.renderExpandableButton(guiGraphics, isExpandedIfExpandable);
                 isHoveringText = this.renderKVPair(
-                    matrixStack,
+                    guiGraphics,
                     label,
                     (isExpandedIfExpandable ? "" : node.toString()),
                     COMPLEX_COLOR
@@ -470,13 +464,13 @@ public abstract class NbtTreeViewer {
             switch (node.getId()) {
                 case 9: { // List
                     if (((ListTag) node).size() == 0) {
-                        this.renderEmpty(matrixStack);
+                        this.renderEmpty(guiGraphics);
                         break;
                     }
                     int i = 0;
                     for (Tag item : (ListTag) node) {
                         this.currentPath.pushIndex(i);
-                        this.renderNode(matrixStack, "#" + i, item);
+                        this.renderNode(guiGraphics, "#" + i, item);
                         this.currentPath.pop();
                         i++;
                     }
@@ -484,13 +478,13 @@ public abstract class NbtTreeViewer {
                 }
                 case 10: { // Compound
                     if (((CompoundTag) node).size() == 0) {
-                        this.renderEmpty(matrixStack);
+                        this.renderEmpty(guiGraphics);
                         break;
                     }
                     CompoundTag compound = (CompoundTag) node;
                     for (String key : compound.getAllKeys()) {
                         this.currentPath.pushKey(key);
-                        this.renderNode(matrixStack, key, compound.get(key));
+                        this.renderNode(guiGraphics, key, compound.get(key));
                         this.currentPath.pop();
                     }
                     break;

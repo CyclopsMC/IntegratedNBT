@@ -23,7 +23,7 @@ side="BOTH"
 modId="integrateddynamics"
 mandatory=true
 versionRange="[1.15.2,)"
-ordering="NONE"
+ordering="AFTER"
 side="BOTH"
 [[dependencies.integratednbt]]
 modId="commoncapabilities"

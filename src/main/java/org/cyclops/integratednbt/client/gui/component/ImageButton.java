@@ -1,7 +1,7 @@
 package org.cyclops.integratednbt.client.gui.component;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,7 +22,7 @@ public class ImageButton extends Button {
         int y,
         Button.OnPress onPress
     ) {
-        super(x, y, textureNormal.getWidth(), textureNormal.getHeight(), Component.literal(""), onPress);
+        super(Button.builder(Component.literal(""), onPress).pos(x, y).size(textureNormal.getWidth(), textureNormal.getHeight()));
         this.textureNormal = textureNormal;
         this.textureHover = textureHover;
     }
@@ -31,7 +31,7 @@ public class ImageButton extends Button {
      * For lazy initialization of textures.
      */
     public ImageButton(int x, int y, Button.OnPress onPress) {
-        super(x, y, 1, 1, Component.literal(""), onPress);
+        super(Button.builder(Component.literal(""), onPress).pos(x, y).size(1, 1));
     }
 
     public void setTexture(TexturePart textureNormal, TexturePart textureHover) {
@@ -45,18 +45,16 @@ public class ImageButton extends Button {
      * Draws this button to the screen.
      */
     @Override
-    public void renderButton(PoseStack matrixStack, int mouseX, int mouseY, float wtf) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (this.visible) {
-            this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width &&
-                mouseY < this.y + this.height;
+            this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width &&
+                mouseY < this.getY() + this.height;
             TexturePart texturePart = this.isHovered
                 ? this.textureHover
                 : this.textureNormal;
             RenderSystem.defaultBlendFunc();
             RenderSystem.enableDepthTest();
-//            RenderSystem.disableDepthTest();
-            texturePart.renderTo(this, matrixStack, this.x, this.y, 0xffffff);
-//            GlStateManager._enableDepthTest();
+            texturePart.renderTo(guiGraphics, this.getX(), this.getY(), 0xffffff);
         }
     }
 }

@@ -1,0 +1,5 @@
+{ "sources": [
+  { "type": "minecraft:single", "resource": "integratednbt:item/nbt_extractor_remote" },
+  { "type": "minecraft:single", "resource": "integratednbt:customoverlay/nbt_extracted" },
+  { "type": "minecraft:single", "resource": "integratednbt:block/nbt_extractor_front" }
+]}

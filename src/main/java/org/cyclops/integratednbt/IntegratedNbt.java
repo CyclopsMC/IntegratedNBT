@@ -40,26 +40,24 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
     protected void setup(FMLCommonSetupEvent event) {
         super.setup(event);
 
-        event.enqueueWork(() -> {
-            // Initialize info book
-            IntegratedDynamics._instance.getRegistryManager().getRegistry(IInfoBookRegistry.class)
-                    .registerSection(this,
-                            OnTheDynamicsOfIntegrationBook.getInstance(), "info_book.integrateddynamics.manual",
-                            "/data/" + Reference.MOD_ID + "/info/nbt_info.xml");
-            IntegratedDynamics._instance.getRegistryManager().getRegistry(IInfoBookRegistry.class)
-                    .registerSection(this,
-                            OnTheDynamicsOfIntegrationBook.getInstance(), "info_book.integrateddynamics.tutorials",
-                            "/data/" + Reference.MOD_ID + "/info/nbt_tutorials.xml");
+        // Initialize info book
+        IntegratedDynamics._instance.getRegistryManager().getRegistry(IInfoBookRegistry.class)
+                .registerSection(this,
+                        OnTheDynamicsOfIntegrationBook.getInstance(), "info_book.integrateddynamics.manual",
+                        "/data/" + Reference.MOD_ID + "/info/nbt_info.xml");
+        IntegratedDynamics._instance.getRegistryManager().getRegistry(IInfoBookRegistry.class)
+                .registerSection(this,
+                        OnTheDynamicsOfIntegrationBook.getInstance(), "info_book.integrateddynamics.tutorials",
+                        "/data/" + Reference.MOD_ID + "/info/nbt_tutorials.xml");
 
-            VariableFacadeHandlerRegistry.getInstance()
-                    .registerHandler(new NbtExtractedVariableFacadeHandler());
-            OperatorRegistry.getInstance()
-                    .registerSerializer(new NbtExtractionOperatorSerializer());
+        VariableFacadeHandlerRegistry.getInstance()
+                .registerHandler(new NbtExtractedVariableFacadeHandler());
+        OperatorRegistry.getInstance()
+                .registerSerializer(new NbtExtractionOperatorSerializer());
 
-            if (MinecraftHelpers.isClientSide()) {
-                VariableModelProviders.load();
-            }
-        });
+        if (MinecraftHelpers.isClientSide()) {
+            VariableModelProviders.load();
+        }
     }
 
     @Override

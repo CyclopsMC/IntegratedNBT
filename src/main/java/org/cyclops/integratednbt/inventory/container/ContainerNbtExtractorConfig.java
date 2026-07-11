@@ -3,6 +3,7 @@ package org.cyclops.integratednbt.inventory.container;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.cyclops.cyclopscore.client.gui.ScreenFactorySafe;
@@ -20,7 +21,7 @@ public class ContainerNbtExtractorConfig extends GuiConfig<ContainerNbtExtractor
     public ContainerNbtExtractorConfig() {
         super(IntegratedNbt._instance,
                 "nbt_extractor",
-                eConfig -> new ContainerTypeData<>(ContainerNbtExtractor::new));
+                eConfig -> new ContainerTypeData<>(ContainerNbtExtractor::new, FeatureFlags.VANILLA_SET));
     }
 
     @OnlyIn(Dist.CLIENT)

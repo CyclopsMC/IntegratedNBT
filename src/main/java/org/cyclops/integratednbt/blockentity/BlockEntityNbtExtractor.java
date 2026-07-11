@@ -18,6 +18,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import org.cyclops.cyclopscore.datastructure.DimPos;
 import org.cyclops.cyclopscore.helper.MinecraftHelpers;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
+import org.cyclops.integrateddynamics.api.evaluate.variable.ValueDeseralizationContext;
 import org.cyclops.integrateddynamics.api.network.INetwork;
 import org.cyclops.integrateddynamics.api.network.INetworkElement;
 import org.cyclops.integrateddynamics.api.network.IPartNetwork;
@@ -152,7 +153,8 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
         this.variableContainerCapability.refreshVariables(
                 getNetwork(),
                 getInventory(),
-                sendVariablesUpdateEvent
+                sendVariablesUpdateEvent,
+                ValueDeseralizationContext.of(this.level)
         );
     }
 
@@ -329,6 +331,7 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
                     : this.lastEvaluatedNBT,
                 this.extractionPath,
                 this.defaultNBTId,
+                this.getLevel(),
                 this.getBlockState(),
                 this.lastPlayer
             );

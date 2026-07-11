@@ -2,6 +2,7 @@ package org.cyclops.integratednbt.evaluate;
 
 
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.Tag;
@@ -43,6 +44,7 @@ public enum NbtExtractorOutputMode {
             Tag currentNBT,
             SegmentedNbtPath extractionPath,
             byte defaultNBTId,
+            Level level,
             BlockState blockState,
             Player player) {
             IVariableFacadeHandlerRegistry registry =
@@ -78,6 +80,7 @@ public enum NbtExtractorOutputMode {
                     outputVariableItemStack,
                     NbtExtractedVariableFacadeHandler.getInstance(),
                     factory,
+                    level,
                     player,
                     blockState
                 );
@@ -99,12 +102,13 @@ public enum NbtExtractorOutputMode {
             Tag currentNBT,
             SegmentedNbtPath extractionPath,
             byte defaultNBTId,
+            Level level,
             BlockState blockState,
             Player player) {
             return getVariableUsingValue(ValueOperator.of(new NbtExtractionOperator(
                 extractionPath,
                 defaultNBTId
-            )), outputVariableItemStack, blockState, player);
+            )), outputVariableItemStack, level, blockState, player);
         }
     },
     VALUE(
@@ -120,6 +124,7 @@ public enum NbtExtractorOutputMode {
             Tag currentNBT,
             SegmentedNbtPath extractionPath,
             byte defaultNBTId,
+            Level level,
             BlockState blockState,
             Player player) {
             sourceVariableFacadeSupplier.get(); // Refresh variable
@@ -127,7 +132,7 @@ public enum NbtExtractorOutputMode {
             IValue value = extractedNBT == null
                 ? NbtValueConverter.getDefaultValue(defaultNBTId)
                 : NbtValueConverter.mapNBTToValue(extractedNBT);
-            return getVariableUsingValue(value, outputVariableItemStack, blockState, player);
+            return getVariableUsingValue(value, outputVariableItemStack, level, blockState, player);
         }
     },
     NBT_PATH(
@@ -143,11 +148,13 @@ public enum NbtExtractorOutputMode {
             Tag currentNBT,
             SegmentedNbtPath extractionPath,
             byte defaultNBTId,
+            Level level,
             BlockState blockState,
             Player player) {
             return getVariableUsingValue(
                 ValueString.of(extractionPath.getCyclopsNBTPath()),
                 outputVariableItemStack,
+                level,
                 blockState,
                 player
             );
@@ -184,6 +191,7 @@ public enum NbtExtractorOutputMode {
     private static ItemStack getVariableUsingValue(
         IValue value,
         ItemStack outputVariableItemStack,
+        Level level,
         BlockState blockState,
         Player player
     ) {
@@ -207,6 +215,7 @@ public enum NbtExtractorOutputMode {
                     return new ValueTypeVariableFacade(id, value.getType(), value);
                 }
             },
+            level,
             player,
             blockState
         );
@@ -226,6 +235,7 @@ public enum NbtExtractorOutputMode {
         Tag currentNBT,
         SegmentedNbtPath extractionPath,
         byte defaultNBTId,
+        Level level,
         BlockState blockState,
         Player player);
 

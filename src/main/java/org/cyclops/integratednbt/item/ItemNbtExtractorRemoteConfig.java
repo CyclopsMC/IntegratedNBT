@@ -15,8 +15,7 @@ public class ItemNbtExtractorRemoteConfig extends ItemConfig {
                 IntegratedNbt._instance,
                 "nbt_extractor_remote",
                 eConfig -> new ItemNbtExtractorRemote(new Item.Properties()
-                        .stacksTo(1)
-                        .tab(IntegratedNbt._instance.getDefaultItemGroup()))
+                        .stacksTo(1))
         );
     }
 
