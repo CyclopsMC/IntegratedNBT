@@ -21,6 +21,7 @@ import org.cyclops.integrateddynamics.infobook.OnTheDynamicsOfIntegrationBook;
 import org.cyclops.integratednbt.block.BlockNbtExtractorConfig;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractorConfig;
 import org.cyclops.integratednbt.client.model.VariableModelProviders;
+import org.cyclops.integratednbt.component.DataComponentNbtExtractorRemoteConfig;
 import org.cyclops.integratednbt.evaluate.operator.NbtExtractionOperatorSerializer;
 import org.cyclops.integratednbt.evaluate.variable.NbtExtractedVariableFacadeHandler;
 import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractorConfig;
@@ -71,6 +72,8 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
         super.onConfigsRegister(configHandler);
 
         configHandler.addConfigurable(new GeneralConfig());
+
+        configHandler.addConfigurable(new DataComponentNbtExtractorRemoteConfig());
 
         configHandler.addConfigurable(new ItemNbtExtractorRemoteConfig());
 

@@ -30,6 +30,7 @@ import org.cyclops.integrateddynamics.part.aspect.Aspects;
 import org.cyclops.integratednbt.Reference;
 import org.cyclops.integratednbt.RegistryEntries;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
+import org.cyclops.integratednbt.component.NbtExtractorRemoteBoundData;
 import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.item.ItemNbtExtractorRemote;
@@ -343,25 +344,14 @@ public class GameTestsNbtExtractor {
                 .bindBlock(remoteItem, helper.getLevel(), extractorAbsPos);
 
         // Verify the binding data stored in the remote item
-        CompoundTag modNbt = RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE.get().getModNBT(remoteItem);
+        NbtExtractorRemoteBoundData boundData = remoteItem.get(RegistryEntries.DATA_COMPONENT_NBT_EXTRACTOR_REMOTE.get());
 
-        helper.assertTrue(modNbt.contains("world"),
-                "Remote item does not contain 'world' key after binding");
-        helper.assertTrue(modNbt.contains("x"),
-                "Remote item does not contain 'x' coordinate after binding");
-        helper.assertTrue(modNbt.contains("y"),
-                "Remote item does not contain 'y' coordinate after binding");
-        helper.assertTrue(modNbt.contains("z"),
-                "Remote item does not contain 'z' coordinate after binding");
-
-        helper.assertValueEqual(modNbt.getInt("x"), extractorAbsPos.getX(),
-                "Remote item X coordinate mismatch");
-        helper.assertValueEqual(modNbt.getInt("y"), extractorAbsPos.getY(),
-                "Remote item Y coordinate mismatch");
-        helper.assertValueEqual(modNbt.getInt("z"), extractorAbsPos.getZ(),
-                "Remote item Z coordinate mismatch");
+        helper.assertTrue(boundData != null,
+                "Remote item does not have binding data after binding");
+        helper.assertValueEqual(boundData.pos(), extractorAbsPos,
+                "Remote item block position mismatch");
         helper.assertValueEqual(
-                modNbt.getString("world"),
+                boundData.dimensionId(),
                 helper.getLevel().dimension().location().toString(),
                 "Remote item dimension key mismatch");
 
