@@ -1,17 +1,12 @@
 package org.cyclops.integratednbt.evaluate.variable;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import org.cyclops.integrateddynamics.api.client.model.IVariableModelBaked;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.api.item.IVariableFacade;
+import org.cyclops.integrateddynamics.api.item.IVariableFacadeClient;
 import org.cyclops.integrateddynamics.api.network.INetwork;
 import org.cyclops.integrateddynamics.api.network.IPartNetwork;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueNbt;
@@ -19,12 +14,11 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.helper.L10NValues;
 import org.cyclops.integrateddynamics.core.item.ProxyVariableFacade;
 import org.cyclops.integrateddynamics.core.item.VariableFacadeBase;
-import org.cyclops.integratednbt.client.model.VariableModelProviders;
 import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.function.Consumer;
 
 public class NbtExtractedVariableFacade extends VariableFacadeBase {
     private int sourceNbtId;
@@ -57,6 +51,11 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
         this.defaultNbtId = defaultNbtId;
     }
 
+    @Override
+    protected IVariableFacadeClient constructClient() {
+        return new NbtExtractedVariableFacadeClient(this);
+    }
+
     public byte getDefaultNbtId() {
         return this.defaultNbtId;
     }
@@ -70,41 +69,28 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(List<Component> list, Item.TooltipContext context) {
+    public void appendHoverText(Consumer<Component> tooltipAdder, Item.TooltipContext context) {
         if (!this.isValid()) {
             return;
         }
-        list.add(Component.translatable(
+        tooltipAdder.accept(Component.translatable(
             "integratednbt:nbt_extracted_variable.tooltip.source_nbt_id",
             this.sourceNbtId
         ));
-        list.add(Component.translatable(
+        tooltipAdder.accept(Component.translatable(
             "integratednbt:nbt_extracted_variable.tooltip.path",
             this.extractionPath.getDisplayText()
         ));
-        list.add(Component.translatable(
+        tooltipAdder.accept(Component.translatable(
             "integratednbt:nbt_extracted_variable.tooltip.default_value",
             NbtValueConverter.getDefaultValueDisplayText(this.defaultNbtId)
         ));
-        super.appendHoverText(list, context);
+        super.appendHoverText(tooltipAdder, context);
     }
 
     @Override
     public boolean isValid() {
         return this.extractionPath != null;
-    }
-
-    @Override
-    public void addModelOverlay(
-        IVariableModelBaked variableModelBaked,
-        List<BakedQuad> quads,
-        RandomSource random,
-        ModelData modelData
-    ) {
-        if(isValid()) {
-            quads.addAll(variableModelBaked.getSubModels(VariableModelProviders.NBT_EXTRACTED).getBakedModel().getQuads(null, null, random, modelData, null));
-        }
     }
 
     @Override
@@ -122,6 +108,9 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
                 return null;
             }
             IVariable<ValueNbt> sourceNbtVariable = sourceNbtVariableFacade.getVariable(network, partNetwork);
+            if (sourceNbtVariable == null) {
+                return null;
+            }
             return (IVariable<V>) new NbtExtractedVariable(
                     sourceNbtVariable,
                     this.extractionPath,

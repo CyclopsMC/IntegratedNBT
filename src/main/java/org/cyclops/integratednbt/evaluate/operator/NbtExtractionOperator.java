@@ -4,8 +4,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
-import org.cyclops.cyclopscore.helper.L10NHelpers;
+import net.minecraft.resources.Identifier;
+import org.cyclops.cyclopscore.helper.IModHelpers;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.operator.IOperator;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
@@ -21,10 +21,10 @@ import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 import org.cyclops.integratednbt.Reference;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public class NbtExtractionOperator implements IOperator {
-    public static ResourceLocation UNIQUE_NAME = ResourceLocation.fromNamespaceAndPath(
+    public static Identifier UNIQUE_NAME = Identifier.fromNamespaceAndPath(
         Reference.MOD_ID,
         "nbt_extraction"
     );
@@ -45,7 +45,7 @@ public class NbtExtractionOperator implements IOperator {
     }
 
     @Override
-    public ResourceLocation getUniqueName() {
+    public Identifier getUniqueName() {
         return UNIQUE_NAME;
     }
 
@@ -70,28 +70,28 @@ public class NbtExtractionOperator implements IOperator {
     }
 
     @Override
-    public void loadTooltip(List<Component> lines, boolean appendOptionalInfo) {
-        String operatorName = L10NHelpers.localize(this.getTranslationKey());
-        String categoryName = L10NHelpers.localize(this.getUnlocalizedCategoryName());
+    public void loadTooltip(Consumer<Component> lines, boolean appendOptionalInfo) {
+        String operatorName = IModHelpers.get().getL10NHelpers().localize(this.getTranslationKey());
+        String categoryName = IModHelpers.get().getL10NHelpers().localize(this.getUnlocalizedCategoryName());
         String symbol = this.getSymbol();
-        String outputTypeName = L10NHelpers.localize(this.getOutputType().getTranslationKey());
-        lines.add(Component.translatable(
+        String outputTypeName = IModHelpers.get().getL10NHelpers().localize(this.getOutputType().getTranslationKey());
+        lines.accept(Component.translatable(
             L10NValues.OPERATOR_TOOLTIP_OPERATORNAME,
             operatorName,
             symbol
         ));
-        lines.add(Component.translatable(
+        lines.accept(Component.translatable(
             L10NValues.OPERATOR_TOOLTIP_OPERATORCATEGORY,
             categoryName
         ));
-        lines.add(Component.translatable(
+        lines.accept(Component.translatable(
             L10NValues.OPERATOR_TOOLTIP_INPUTTYPENAME,
             1,
             Component.translatable(ValueTypes.NBT.getTranslationKey()).setStyle(
                 Style.EMPTY.withColor(
                     ValueTypes.NBT.getDisplayColorFormat()))
         ));
-        lines.add(Component.translatable(
+        lines.accept(Component.translatable(
             L10NValues.OPERATOR_TOOLTIP_OUTPUTTYPENAME,
             this.getOutputType().getDisplayColorFormat() + outputTypeName
         ));

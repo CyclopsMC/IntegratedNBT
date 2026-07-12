@@ -5,23 +5,12 @@
     "clc"
   ],
   "key": {
-    "c": {
-      "item": "integrateddynamics:crystalized_menril_chunk"
-    },
-    "e": {
-      "item": "minecraft:ender_pearl"
-    },
-    "r": {
-      "item": "minecraft:redstone"
-    },
+    "c": "integrateddynamics:crystalized_menril_chunk",
+    "e": "minecraft:ender_pearl",
+    "r": "minecraft:redstone",
     "l": [
-      {
-        "item": "integrateddynamics:logic_programmer",
-        "data": 0
-      },
-      {
-        "item": "integrateddynamics:portable_logic_programmer"
-      }
+      "integrateddynamics:logic_programmer",
+      "integrateddynamics:portable_logic_programmer"
     ]
   },
   "result": {

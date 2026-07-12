@@ -1,24 +1,23 @@
 package org.cyclops.integratednbt.client.gui.component;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
-import org.cyclops.integratednbt.client.gui.container.ExtendedContainerScreen;
 import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.helpers.Wrapper;
+import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
 
 import static org.cyclops.integratednbt.client.gui.container.ContainerScreenNbtExtractor.GUI_TEXTURE;
 import static org.cyclops.integratednbt.client.gui.container.ContainerScreenNbtExtractor.SCREEN_EDGE;
@@ -70,7 +69,7 @@ public abstract class NbtTreeViewer {
     private final Set<SegmentedNbtPath> expandedPaths;
     private final Wrapper<Integer> scrollTop;
     private final Font fontRenderer = Minecraft.getInstance().font;
-    private ExtendedContainerScreen<?> gui;
+    private AbstractContainerScreen<?> gui;
     private int left;
     private int top;
     private int width;
@@ -96,7 +95,7 @@ public abstract class NbtTreeViewer {
     private SegmentedNbtPath hoveringExpandableButton;
 
     public NbtTreeViewer(
-        ExtendedContainerScreen<?> gui,
+        AbstractContainerScreen<?> gui,
         Set<SegmentedNbtPath> expandedPaths,
         Wrapper<Integer> scrollTop
     ) {
@@ -132,7 +131,7 @@ public abstract class NbtTreeViewer {
     }
 
     private boolean renderKVPair(
-        GuiGraphics guiGraphics,
+        GuiGraphicsExtractor guiGraphics,
         String label,
         String value,
         int valueColor
@@ -168,15 +167,16 @@ public abstract class NbtTreeViewer {
             }
         }
         if (value.isEmpty()) {
-            guiGraphics.drawString(this.fontRenderer, label, this.currentX, this.currentY, LABEL_COLOR, false);
+            guiGraphics.text(this.fontRenderer, label, this.currentX, this.currentY, LABEL_COLOR, false);
         } else {
-            int valueX = guiGraphics.drawString(this.fontRenderer, label + ": ", this.currentX, this.currentY, LABEL_COLOR, false);
-            guiGraphics.drawString(this.fontRenderer, value, valueX, this.currentY, valueColor, false);
+            guiGraphics.text(this.fontRenderer, label + ": ", this.currentX, this.currentY, LABEL_COLOR, false);
+            int valueX = this.currentX + this.fontRenderer.width(label + ": ");
+            guiGraphics.text(this.fontRenderer, value, valueX, this.currentY, valueColor, false);
         }
         return isHovering;
     }
 
-    private void renderExpandableButton(GuiGraphics guiGraphics, boolean expanded) {
+    private void renderExpandableButton(GuiGraphicsExtractor guiGraphics, boolean expanded) {
         boolean hovering = (
             this.mouseX >= this.currentX &&
                 this.mouseX < (this.currentX + EXPAND_BUTTON_SIZE) &&
@@ -193,7 +193,7 @@ public abstract class NbtTreeViewer {
         this.currentX += EXPAND_BUTTON_SIZE + EXPAND_BUTTON_RIGHT_MARGIN;
     }
 
-    public void render(GuiGraphics guiGraphics, Tag nbt, int absMouseX, int absMouseY) {
+    public void render(GuiGraphicsExtractor guiGraphics, Tag nbt, int absMouseX, int absMouseY) {
         this.hoveringPath = null;
         this.hoveringNBTNode = null;
         this.hoveringExpandableButton = null;
@@ -202,12 +202,12 @@ public abstract class NbtTreeViewer {
         this.updateScroll();
         this.mouseX = absMouseX - this.left;
         this.mouseY = (int) (absMouseY - this.top + this.renderScroll);
-        PoseStack poseStack = guiGraphics.pose();
-        poseStack.pushPose();
+        Matrix3x2fStack poseStack = guiGraphics.pose();
+        poseStack.pushMatrix();
         try {
-            poseStack.translate(this.left, this.top - this.renderScroll, 0);
+            poseStack.translate(this.left, this.top - (float) this.renderScroll);
             if (nbt == null) {
-                guiGraphics.drawString(
+                guiGraphics.text(
                     this.fontRenderer,
                     I18n.get("integratednbt:nbt_extractor.empty"),
                     SCREEN_EDGE,
@@ -219,7 +219,7 @@ public abstract class NbtTreeViewer {
                 this.renderNode(guiGraphics, I18n.get("integratednbt:nbt_extractor.root"), nbt);
             }
             int totalHeight = this.currentY + SCREEN_EDGE;
-            poseStack.translate(0, this.renderScroll, 0);
+            poseStack.translate(0, (float) this.renderScroll);
             this.maxScroll = Math.max(totalHeight - this.height, 0);
             if (this.scrollTop.get() > this.maxScroll) {
                 this.scrollTop.set(this.maxScroll);
@@ -249,11 +249,11 @@ public abstract class NbtTreeViewer {
                 );
             }
         } finally {
-            poseStack.popPose();
+            poseStack.popMatrix();
         }
     }
 
-    public void renderTooltip(GuiGraphics guiGraphics, int absMouseX, int absMouseY) {
+    public void renderTooltip(GuiGraphicsExtractor guiGraphics, int absMouseX, int absMouseY) {
         if (this.hoveringPath != null) {
             IValueType<? extends IValue> hoveringValueType =
                     NbtValueConverter.mapNBTToValueType(this.hoveringNBTNode);
@@ -293,9 +293,10 @@ public abstract class NbtTreeViewer {
             for (String s : list) {
                 tooltipComponents.add(Component.literal(s));
             }
-            guiGraphics.renderComponentTooltip(
+            guiGraphics.setTooltipForNextFrame(
                     this.fontRenderer,
                     tooltipComponents,
+                    java.util.Optional.empty(),
                     absMouseX,
                     absMouseY
             );
@@ -345,10 +346,10 @@ public abstract class NbtTreeViewer {
         return nbtId == 9 || nbtId == 10;
     }
 
-    private void renderEmpty(GuiGraphics guiGraphics) {
+    private void renderEmpty(GuiGraphicsExtractor guiGraphics) {
         this.currentX = (this.currentPath.getDepth() + 1) * INDENTATION + SCREEN_EDGE
             + EXPAND_BUTTON_RIGHT_MARGIN + EXPAND_BUTTON_SIZE;
-        guiGraphics.drawString(
+        guiGraphics.text(
             this.fontRenderer,
             I18n.get("integratednbt:nbt_extractor.empty"),
             this.currentX,
@@ -359,7 +360,7 @@ public abstract class NbtTreeViewer {
         this.currentY += this.fontRenderer.lineHeight + LINE_SPACE;
     }
 
-    private void renderNode(GuiGraphics guiGraphics, String label, Tag node) {
+    private void renderNode(GuiGraphicsExtractor guiGraphics, String label, Tag node) {
         this.currentX = this.currentPath.getDepth() * INDENTATION + SCREEN_EDGE;
         boolean isExpandedIfExpandable = false;
         if (isNodeExpandable(node)) {
@@ -376,7 +377,7 @@ public abstract class NbtTreeViewer {
                 isHoveringText = this.renderKVPair(
                     guiGraphics,
                     label,
-                    String.valueOf(((ByteTag) node).getAsByte()),
+                    String.valueOf(((ByteTag) node).byteValue()),
                     NUMBER_COLOR
                 );
                 break;
@@ -384,7 +385,7 @@ public abstract class NbtTreeViewer {
                 isHoveringText = this.renderKVPair(
                     guiGraphics,
                     label,
-                    String.valueOf(((ShortTag) node).getAsShort()),
+                    String.valueOf(((ShortTag) node).shortValue()),
                     NUMBER_COLOR
                 );
                 break;
@@ -392,7 +393,7 @@ public abstract class NbtTreeViewer {
                 isHoveringText = this.renderKVPair(
                     guiGraphics,
                     label,
-                    String.valueOf(((IntTag) node).getAsInt()),
+                    String.valueOf(((IntTag) node).intValue()),
                     NUMBER_COLOR
                 );
                 break;
@@ -400,7 +401,7 @@ public abstract class NbtTreeViewer {
                 isHoveringText = this.renderKVPair(
                     guiGraphics,
                     label,
-                    String.valueOf(((LongTag) node).getAsLong()),
+                    String.valueOf(((LongTag) node).longValue()),
                     NUMBER_COLOR
                 );
                 break;
@@ -408,7 +409,7 @@ public abstract class NbtTreeViewer {
                 isHoveringText = this.renderKVPair(
                     guiGraphics,
                     label,
-                    String.valueOf(((FloatTag) node).getAsFloat()),
+                    String.valueOf(((FloatTag) node).floatValue()),
                     NUMBER_COLOR
                 );
                 break;
@@ -416,7 +417,7 @@ public abstract class NbtTreeViewer {
                 isHoveringText = this.renderKVPair(
                     guiGraphics,
                     label,
-                    String.valueOf(((DoubleTag) node).getAsDouble()),
+                    String.valueOf(((DoubleTag) node).doubleValue()),
                     NUMBER_COLOR
                 );
                 break;
@@ -436,7 +437,7 @@ public abstract class NbtTreeViewer {
                     label,
                     // Yes, I understand technically we should escape double quotes in the string.
                     // However, I think that will just make it confusing.
-                    '"' + node.getAsString() + '"',
+                    '"' + node.asString().orElse("") + '"',
                     STRING_COLOR
                 );
                 break;
@@ -482,7 +483,7 @@ public abstract class NbtTreeViewer {
                         break;
                     }
                     CompoundTag compound = (CompoundTag) node;
-                    for (String key : compound.getAllKeys()) {
+                    for (String key : compound.keySet()) {
                         this.currentPath.pushKey(key);
                         this.renderNode(guiGraphics, key, compound.get(key));
                         this.currentPath.pop();

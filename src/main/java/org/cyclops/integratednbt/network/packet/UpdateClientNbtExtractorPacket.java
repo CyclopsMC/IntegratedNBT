@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -24,7 +24,7 @@ import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 public class UpdateClientNbtExtractorPacket extends PacketCodec<UpdateClientNbtExtractorPacket> {
 
     public static final CustomPacketPayload.Type<UpdateClientNbtExtractorPacket> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "update_client_nbt_extractor"));
+            Identifier.fromNamespaceAndPath(Reference.MOD_ID, "update_client_nbt_extractor"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UpdateClientNbtExtractorPacket> CODEC = getCodec(UpdateClientNbtExtractorPacket::new);
 
     private static ByteMaskMaker maskMaker = new ByteMaskMaker();

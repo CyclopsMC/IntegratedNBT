@@ -1,16 +1,12 @@
 package org.cyclops.integratednbt.client.gui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Basically net.minecraft.client.gui.ImageButton, but more dynamic
  */
-@OnlyIn(Dist.CLIENT)
 public class ImageButton extends Button {
     private TexturePart textureNormal;
     private TexturePart textureHover;
@@ -45,15 +41,13 @@ public class ImageButton extends Button {
      * Draws this button to the screen.
      */
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (this.visible) {
             this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width &&
                 mouseY < this.getY() + this.height;
             TexturePart texturePart = this.isHovered
                 ? this.textureHover
                 : this.textureNormal;
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.enableDepthTest();
             texturePart.renderTo(guiGraphics, this.getX(), this.getY(), 0xffffff);
         }
     }

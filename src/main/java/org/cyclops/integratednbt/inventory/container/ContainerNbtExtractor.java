@@ -138,7 +138,7 @@ public class ContainerNbtExtractor extends AbstractContainerMenu {
     public void broadcastChanges() {
         super.broadcastChanges();
         Level world = this.nbtExtractorEntity.getLevel();
-        if (world != null && !world.isClientSide) {
+        if (world != null && !world.isClientSide()) {
             UpdateClientNbtExtractorPacket.ErrorCode errorCode;
             Wrapper<Tag> newNBT = this.clientNBT;
             Component errorMessage = null;

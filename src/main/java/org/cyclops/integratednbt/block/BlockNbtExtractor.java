@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.cyclops.integrateddynamics.core.block.BlockWithEntityGuiCabled;
 import org.cyclops.integratednbt.RegistryEntries;
@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 
 public class BlockNbtExtractor extends BlockWithEntityGuiCabled {
 
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public BlockNbtExtractor(Properties properties) {
         super(properties, BlockEntityNbtExtractor::new);
@@ -42,7 +42,7 @@ public class BlockNbtExtractor extends BlockWithEntityGuiCabled {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return level.isClientSide ? null : createTickerHelper(blockEntityType, RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR.get(), new BlockEntityNbtExtractor.Ticker<>());
+        return level.isClientSide() ? null : createTickerHelper(blockEntityType, RegistryEntries.BLOCK_ENTITY_NBT_EXTRACTOR.get(), new BlockEntityNbtExtractor.Ticker<>());
     }
 
     @Override

@@ -4,11 +4,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
+import org.cyclops.cyclopscore.helper.IModHelpers;
 import org.cyclops.cyclopscore.network.CodecField;
 import org.cyclops.cyclopscore.network.PacketCodec;
 import org.cyclops.integratednbt.Reference;
@@ -22,7 +22,7 @@ import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
 public class NbtExtractorSetOutputModePacket extends PacketCodec<NbtExtractorSetOutputModePacket> {
 
     public static final CustomPacketPayload.Type<NbtExtractorSetOutputModePacket> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "nbt_extractor_set_output_mode"));
+            Identifier.fromNamespaceAndPath(Reference.MOD_ID, "nbt_extractor_set_output_mode"));
     public static final StreamCodec<RegistryFriendlyByteBuf, NbtExtractorSetOutputModePacket> CODEC = getCodec(NbtExtractorSetOutputModePacket::new);
 
     @CodecField
@@ -63,7 +63,7 @@ public class NbtExtractorSetOutputModePacket extends PacketCodec<NbtExtractorSet
 
     @Override
     public void actionServer(Level world, ServerPlayer player) {
-        BlockEntityHelpers.get(world, blockPos, BlockEntityNbtExtractor.class)
+        IModHelpers.get().getBlockEntityHelpers().get(world, blockPos, BlockEntityNbtExtractor.class)
                 .ifPresent(blockEntity -> blockEntity.setOutputMode(outputMode));
     }
 

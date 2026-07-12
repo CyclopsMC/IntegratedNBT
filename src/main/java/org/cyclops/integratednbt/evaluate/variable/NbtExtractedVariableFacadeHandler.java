@@ -1,7 +1,7 @@
 package org.cyclops.integratednbt.evaluate.variable;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.api.evaluate.variable.ValueDeseralizationContext;
 import org.cyclops.integrateddynamics.api.item.IVariableFacade;
@@ -26,15 +26,15 @@ public class NbtExtractedVariableFacadeHandler
     }
 
     @Override
-    public ResourceLocation getUniqueName() {
-        return ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "nbt_extracted");
+    public Identifier getUniqueName() {
+        return Identifier.fromNamespaceAndPath(Reference.MOD_ID, "nbt_extracted");
     }
 
     @Override
     public NbtExtractedVariableFacade getVariableFacade(ValueDeseralizationContext deserializationContext, int id, CompoundTag tag) {
-        int sourceNBTId = tag.getInt(KEY_SOURCE_NBT_ID);
+        int sourceNBTId = tag.getIntOr(KEY_SOURCE_NBT_ID, 0);
         Optional<SegmentedNbtPath> extractionPath = SegmentedNbtPath.fromNBT(tag.get(KEY_EXTRACTION_PATH));
-        byte defaultNBTId = tag.getByte(KEY_DEFAULT_NBT_ID);
+        byte defaultNBTId = tag.getByteOr(KEY_DEFAULT_NBT_ID, (byte) 1);
         return new NbtExtractedVariableFacade(
             id,
             sourceNBTId,

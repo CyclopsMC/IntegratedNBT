@@ -6,22 +6,20 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
+import org.cyclops.cyclopscore.helper.IModHelpers;
 import org.cyclops.integratednbt.IntegratedNbt;
 import org.cyclops.integratednbt.RegistryEntries;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
@@ -29,7 +27,7 @@ import org.cyclops.integratednbt.component.NbtExtractorRemoteBoundData;
 import org.cyclops.integratednbt.network.packet.OpenNbtExtractorRemoteGuiPacket;
 
 import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.function.Consumer;
 
 public class ItemNbtExtractorRemote extends Item {
 
@@ -39,18 +37,17 @@ public class ItemNbtExtractorRemote extends Item {
 
     @Override
     @Nonnull
-    public InteractionResultHolder<ItemStack> use(
+    public InteractionResult use(
         Level world,
         Player player,
         @Nonnull InteractionHand hand
     ) {
-        if (world.isClientSide) {
+        if (world.isClientSide()) {
             this.clientUse(player.getItemInHand(hand), player);
         }
         return super.use(world, player, hand);
     }
 
-    @OnlyIn(Dist.CLIENT)
     private void clientUse(ItemStack itemStack, Player player) {
         NbtExtractorRemoteBoundData data = itemStack.get(RegistryEntries.DATA_COMPONENT_NBT_EXTRACTOR_REMOTE.get());
         if (data == null) {
@@ -64,7 +61,7 @@ public class ItemNbtExtractorRemote extends Item {
                 "integratednbt:nbt_extractor_remote.invalid_bind"));
             return;
         }
-        if (!world.dimension().location().toString().equals(data.dimensionId())) {
+        if (!world.dimension().identifier().toString().equals(data.dimensionId())) {
             player.sendSystemMessage(Component.translatable(
                 "integratednbt:nbt_extractor_remote.require_dim"));
             return;
@@ -90,8 +87,8 @@ public class ItemNbtExtractorRemote extends Item {
                 "integratednbt:nbt_extractor_remote.need_bind"));
             return;
         }
-        ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(data.dimensionId()));
-        MinecraftServer server = player.getServer();
+        ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, Identifier.parse(data.dimensionId()));
+        MinecraftServer server = player.level().getServer();
         if (server == null) {
             player.sendSystemMessage(Component.translatable(
                 "integratednbt:nbt_extractor_remote.invalid_bind"));
@@ -118,7 +115,7 @@ public class ItemNbtExtractorRemote extends Item {
     }
 
     public void playerAccess(Level level, BlockPos pos, ServerPlayer playerMP) {
-        BlockEntityHelpers.get(level, pos, BlockEntityNbtExtractor.class)
+        IModHelpers.get().getBlockEntityHelpers().get(level, pos, BlockEntityNbtExtractor.class)
                 .ifPresent(blockEntity -> {
                     blockEntity.refreshVariables(true);
                     playerMP.openMenu(blockEntity, buf -> buf.writeBlockPos(pos));
@@ -136,7 +133,7 @@ public class ItemNbtExtractorRemote extends Item {
         }
         InteractionHand hand = itemUseContext.getHand();
         if (world.getBlockState(pos).getBlock() == RegistryEntries.BLOCK_NBT_EXTRACTOR.get()) {
-            if (!world.isClientSide) {
+            if (!world.isClientSide()) {
                 RegistryEntries.ITEM_NBT_EXTRACTOR_REMOTE.get()
                     .bindBlock(player.getItemInHand(hand), world, pos);
                 player.sendSystemMessage(Component.translatable(
@@ -146,7 +143,7 @@ public class ItemNbtExtractorRemote extends Item {
                     String.valueOf(pos.getZ())
                 ));
             }
-        } else if (world.isClientSide) {
+        } else if (world.isClientSide()) {
             this.clientUse(player.getItemInHand(hand), player);
         }
         return InteractionResult.SUCCESS;
@@ -155,7 +152,7 @@ public class ItemNbtExtractorRemote extends Item {
     public void bindBlock(ItemStack itemStack, Level world, BlockPos pos) {
         itemStack.set(
             RegistryEntries.DATA_COMPONENT_NBT_EXTRACTOR_REMOTE.get(),
-            new NbtExtractorRemoteBoundData(world.dimension().location().toString(), pos)
+            new NbtExtractorRemoteBoundData(world.dimension().identifier().toString(), pos)
         );
     }
 
@@ -163,13 +160,14 @@ public class ItemNbtExtractorRemote extends Item {
     public void appendHoverText(
         ItemStack itemStack,
         Item.TooltipContext context,
-        List<Component> tooltip,
+        TooltipDisplay display,
+        Consumer<Component> tooltip,
         TooltipFlag flag
     ) {
-        super.appendHoverText(itemStack, context, tooltip, flag);
+        super.appendHoverText(itemStack, context, display, tooltip, flag);
         NbtExtractorRemoteBoundData data = itemStack.get(RegistryEntries.DATA_COMPONENT_NBT_EXTRACTOR_REMOTE.get());
         if (data != null) {
-            tooltip.add(Component.translatable(
+            tooltip.accept(Component.translatable(
                 "integratednbt:nbt_extractor_remote.tooltip.bound",
                 String.valueOf(data.pos().getX()),
                 String.valueOf(data.pos().getY()),
@@ -177,9 +175,9 @@ public class ItemNbtExtractorRemote extends Item {
                 data.dimensionId()
             ).withStyle(style -> style.withColor(ChatFormatting.GREEN)));
         } else {
-            tooltip.add(Component.translatable(
+            tooltip.accept(Component.translatable(
                 "integratednbt:nbt_extractor_remote.tooltip.not_bound"));
         }
-        tooltip.add(Component.translatable("integratednbt:nbt_extractor_remote.tooltip"));
+        tooltip.accept(Component.translatable("integratednbt:nbt_extractor_remote.tooltip"));
     }
 }

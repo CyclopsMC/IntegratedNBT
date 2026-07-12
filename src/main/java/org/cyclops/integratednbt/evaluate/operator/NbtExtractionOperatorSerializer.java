@@ -1,14 +1,14 @@
 package org.cyclops.integratednbt.evaluate.operator;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ExtraCodecs;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.operator.IOperator;
 import org.cyclops.integrateddynamics.api.evaluate.operator.IOperatorSerializer;
-import org.cyclops.integrateddynamics.api.evaluate.variable.ValueDeseralizationContext;
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class NbtExtractionOperatorSerializer implements IOperatorSerializer<NbtExtractionOperator> {
     @Override
@@ -17,24 +17,24 @@ public class NbtExtractionOperatorSerializer implements IOperatorSerializer<NbtE
     }
 
     @Override
-    public ResourceLocation getUniqueName() {
+    public Identifier getUniqueName() {
         return NbtExtractionOperator.UNIQUE_NAME;
     }
 
     @Override
-    public Tag serialize(ValueDeseralizationContext valueDeseralizationContext, NbtExtractionOperator operator) {
-        CompoundTag data = new CompoundTag();
-        data.put("path", operator.getExtractionPath().toNBT());
-        data.putByte("defaultNBTId", operator.getDefaultNBTId());
-        return data;
+    public void serialize(ValueOutput valueOutput, NbtExtractionOperator operator) {
+        valueOutput.store("path", ExtraCodecs.NBT, operator.getExtractionPath().toNBT());
+        valueOutput.putByte("defaultNBTId", operator.getDefaultNBTId());
     }
 
     @Override
-    public NbtExtractionOperator deserialize(ValueDeseralizationContext deserializationContext, Tag nbt) throws EvaluationException {
+    public NbtExtractionOperator deserialize(ValueInput valueInput) throws EvaluationException {
         try {
-            CompoundTag tag = (CompoundTag) nbt;
-            return new NbtExtractionOperator(SegmentedNbtPath.fromNBT(tag.get("path"))
-                .orElse(new SegmentedNbtPath()), tag.getByte("defaultNBTId"));
+            SegmentedNbtPath path = valueInput.read("path", ExtraCodecs.NBT)
+                .flatMap(SegmentedNbtPath::fromNBT)
+                .orElse(new SegmentedNbtPath());
+            byte defaultNBTId = valueInput.getByteOr("defaultNBTId", (byte) 1);
+            return new NbtExtractionOperator(path, defaultNBTId);
         } catch (Exception e) {
             e.printStackTrace();
             throw new EvaluationException(Component.literal(e.getMessage()));

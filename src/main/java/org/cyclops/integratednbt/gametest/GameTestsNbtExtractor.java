@@ -2,17 +2,16 @@ package org.cyclops.integratednbt.gametest;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
-import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cyclops.cyclopscore.datastructure.Wrapper;
+import org.cyclops.cyclopscore.gametest.GameTest;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.part.PartPos;
@@ -27,7 +26,6 @@ import org.cyclops.integrateddynamics.core.helper.PartHelpers;
 import org.cyclops.integrateddynamics.core.part.PartTypes;
 import org.cyclops.integrateddynamics.part.PartTypePanelDisplay;
 import org.cyclops.integrateddynamics.part.aspect.Aspects;
-import org.cyclops.integratednbt.Reference;
 import org.cyclops.integratednbt.RegistryEntries;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.component.NbtExtractorRemoteBoundData;
@@ -44,11 +42,9 @@ import static org.cyclops.integrateddynamics.gametest.GameTestHelpersIntegratedD
 /**
  * Game tests for the NBT Extractor block and the four output modes.
  */
-@GameTestHolder(Reference.MOD_ID)
-@PrefixGameTestTemplate(false)
 public class GameTestsNbtExtractor {
 
-    public static final String TEMPLATE_EMPTY = "empty10";
+    public static final String TEMPLATE_EMPTY = "integratednbt:empty10";
     public static final int TIMEOUT = 1000;
     public static final BlockPos POS = BlockPos.ZERO.offset(2, 0, 2);
 
@@ -81,11 +77,11 @@ public class GameTestsNbtExtractor {
 
         // Place variable store adjacent to cable (stores entity variable card)
         helper.setBlock(POS.north(), org.cyclops.integrateddynamics.RegistryEntries.BLOCK_VARIABLE_STORE.get());
-        BlockEntityVariablestore variableStore = helper.getBlockEntity(POS.north());
+        BlockEntityVariablestore variableStore = helper.getBlockEntity(POS.north(), BlockEntityVariablestore.class);
 
         // Place NBT extractor block (connects to cable at POS and cable at POS.east.east)
         helper.setBlock(POS.east(), RegistryEntries.BLOCK_NBT_EXTRACTOR.value());
-        BlockEntityNbtExtractor nbtExtractor = helper.getBlockEntity(POS.east());
+        BlockEntityNbtExtractor nbtExtractor = helper.getBlockEntity(POS.east(), BlockEntityNbtExtractor.class);
 
         // Place cable with display panel
         helper.setBlock(POS.east().east(), org.cyclops.integrateddynamics.RegistryEntries.BLOCK_CABLE.value());
@@ -130,6 +126,17 @@ public class GameTestsNbtExtractor {
         return Pair.of(sheep, nbtExtractor);
     }
 
+    private static CompoundTag getEntityNbt(GameTestHelper helper, Sheep sheep) {
+        TagValueOutput valueOutput = TagValueOutput.createWithContext(new ProblemReporter() {
+            @Override
+            public ProblemReporter forChild(net.minecraft.util.ProblemReporter.PathElement p) { return this; }
+            @Override
+            public void report(net.minecraft.util.ProblemReporter.Problem problem) { }
+        }, helper.getLevel().registryAccess());
+        sheep.saveWithoutId(valueOutput);
+        return valueOutput.buildResult();
+    }
+
     /**
      * Tests the REFERENCE output mode of the NBT Extractor.
      *
@@ -146,7 +153,6 @@ public class GameTestsNbtExtractor {
                 helper, NbtExtractorOutputMode.REFERENCE, path, DEFAULT_NBT_ID_FLOAT);
         BlockEntityNbtExtractor nbtExtractor = setup.getRight();
 
-        // Wait for the NBT extractor to process and write to the output slot
         Wrapper<Pair<PartTypePanelDisplay, PartTypePanelDisplay.State>> partAndState = new Wrapper<>(null);
         helper.runAfterDelay(5, () -> {
             ItemStack outputVarCard = nbtExtractor.getInventory()
@@ -163,7 +169,7 @@ public class GameTestsNbtExtractor {
         // Sheep at full health = 8.0f, FloatTag maps to ValueDouble.of(8.0)
         helper.succeedWhen(() -> {
             helper.assertTrue(partAndState.get() != null, "Display panel not yet set up");
-            assertValueEqual(
+            assertValueEqual(helper,
                     partAndState.get().getRight().getDisplayValue(),
                     ValueTypeDouble.ValueDouble.of(8.0));
         });
@@ -189,15 +195,7 @@ public class GameTestsNbtExtractor {
         Sheep sheep = setup.getLeft();
         BlockEntityNbtExtractor nbtExtractor = setup.getRight();
 
-        // Inject the sheep's NBT as the last-evaluated NBT.
-        // The helper has already set the inventory items (triggering setChanged →
-        // shouldUpdateOutVariable = true), but updateOutVariable() does not run until the
-        // next server tick. Calling updateLastEvaluatedNBT here — still in the same tick —
-        // ensures it is available when the ticker fires.
-        // In normal gameplay this is done by ContainerNbtExtractor.broadcastChanges() while
-        // the GUI is open.
-        CompoundTag entityNbt = new CompoundTag();
-        sheep.saveWithoutId(entityNbt);
+        CompoundTag entityNbt = getEntityNbt(helper, sheep);
         nbtExtractor.updateLastEvaluatedNBT(entityNbt);
 
         Wrapper<Pair<PartTypePanelDisplay, PartTypePanelDisplay.State>> partAndState =
@@ -216,10 +214,9 @@ public class GameTestsNbtExtractor {
             }
         });
 
-        // VALUE mode captures the Health snapshot = 8.0 for a full-health sheep
         helper.succeedWhen(() -> {
             helper.assertTrue(partAndState.get() != null, "Display panel not yet set up");
-            assertValueEqual(
+            assertValueEqual(helper,
                     partAndState.get().getRight().getDisplayValue(),
                     ValueTypeDouble.ValueDouble.of(8.0));
         });
@@ -259,8 +256,6 @@ public class GameTestsNbtExtractor {
             }
         });
 
-        // OPERATOR mode: display panel shows a ValueOperator (NbtExtractionOperator).
-        // Apply the operator to the sheep's NBT and verify it extracts Health = 8.0.
         helper.succeedWhen(() -> {
             helper.assertTrue(partAndState.get() != null, "Display panel not yet set up");
             IValue displayValue = partAndState.get().getRight().getDisplayValue();
@@ -270,15 +265,13 @@ public class GameTestsNbtExtractor {
             ValueTypeOperator.ValueOperator operatorValue =
                     (ValueTypeOperator.ValueOperator) displayValue;
 
-            // Serialize the sheep's current NBT and apply the extraction operator
-            CompoundTag currentEntityNbt = new CompoundTag();
-            sheep.saveWithoutId(currentEntityNbt);
+            CompoundTag currentEntityNbt = getEntityNbt(helper, sheep);
             ValueTypeNbt.ValueNbt nbtValue = ValueTypeNbt.ValueNbt.of(currentEntityNbt);
             try {
                 IValue result = operatorValue.getRawValue().evaluate(new Variable<>(nbtValue));
-                assertValueEqual(result, ValueTypeDouble.ValueDouble.of(8.0));
+                assertValueEqual(helper, result, ValueTypeDouble.ValueDouble.of(8.0));
             } catch (EvaluationException e) {
-                throw new GameTestAssertException("Operator evaluation failed: " + e.getMessage());
+                throw helper.assertionException("Operator evaluation failed: " + e.getMessage());
             }
         });
     }
@@ -317,7 +310,7 @@ public class GameTestsNbtExtractor {
         // because KeySegment.buildCyclopsNBTPath prepends a dot for each key segment.
         helper.succeedWhen(() -> {
             helper.assertTrue(partAndState.get() != null, "Display panel not yet set up");
-            assertValueEqual(
+            assertValueEqual(helper,
                     partAndState.get().getRight().getDisplayValue(),
                     ValueTypeString.ValueString.of("$.Health"));
         });
@@ -352,7 +345,7 @@ public class GameTestsNbtExtractor {
                 "Remote item block position mismatch");
         helper.assertValueEqual(
                 boundData.dimensionId(),
-                helper.getLevel().dimension().location().toString(),
+                helper.getLevel().dimension().identifier().toString(),
                 "Remote item dimension key mismatch");
 
         helper.succeed();

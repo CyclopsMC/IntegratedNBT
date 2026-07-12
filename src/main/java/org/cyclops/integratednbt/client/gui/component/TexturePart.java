@@ -1,18 +1,15 @@
 package org.cyclops.integratednbt.client.gui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
-import org.joml.Matrix4f;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.util.ARGB;
 
 /**
  * Represents a part in a texture; Offers help method for quick rendering
  */
 public class TexturePart {
+    private static final int TEXTURE_SIZE = 256;
+
     private Texture texture;
     private int x;
     private int y;
@@ -27,51 +24,32 @@ public class TexturePart {
         this.height = height;
     }
 
-    public void renderTo(GuiGraphics gui, int x, int y) {
-        gui.blit(this.texture.getResourceLocation(), x, y, this.x, this.y, this.width, this.height);
+    public void renderTo(GuiGraphicsExtractor gui, int x, int y) {
+        gui.blit(RenderPipelines.GUI_TEXTURED, this.texture.getResourceLocation(),
+            x, y, (float) this.x, (float) this.y,
+            this.width, this.height, this.width, this.height, TEXTURE_SIZE, TEXTURE_SIZE);
     }
 
-    private void setColorInt(int color) {
-        RenderSystem.setShaderColor(
-            (float) (color >> 16 & 255) / 255.0f,
-            (float) (color >> 8 & 255) / 255.0f,
-            (float) (color & 255) / 255.0F,
-            1
-        );
+    public void renderTo(GuiGraphicsExtractor gui, int x, int y, int color) {
+        gui.blit(RenderPipelines.GUI_TEXTURED, this.texture.getResourceLocation(),
+            x, y, (float) this.x, (float) this.y,
+            this.width, this.height, this.width, this.height, TEXTURE_SIZE, TEXTURE_SIZE, ARGB.opaque(color));
     }
 
-    public void renderTo(GuiGraphics gui, int x, int y, int color) {
-        this.setColorInt(color);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.enableBlend();
-        this.renderTo(gui, x, y);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-    }
-
-    public void renderToScaled(GuiGraphics gui, int x, int y, int width, int height) {
+    public void renderToScaled(GuiGraphicsExtractor gui, int x, int y, int width, int height) {
         int destWidth = width == -1 ? this.width : width;
         int destHeight = height == -1 ? this.height : height;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        this.texture.bind();
-        Matrix4f matrix = gui.pose().last().pose();
-        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.addVertex(matrix, x, y + destHeight, 0)
-            .setUv((float) (this.x) * 0.00390625F, (float) (this.y + this.height) * 0.00390625F);
-        bufferbuilder.addVertex(matrix, x + destWidth, y + destHeight, 0)
-            .setUv((float) (this.x + this.width) * 0.00390625F, (float) (this.y + this.height) * 0.00390625F);
-        bufferbuilder.addVertex(matrix, x + destWidth, y, 0)
-            .setUv((float) (this.x + this.width) * 0.00390625F, (float) (this.y) * 0.00390625F);
-        bufferbuilder.addVertex(matrix, x, y, 0)
-            .setUv((float) (this.x) * 0.00390625F, (float) (this.y) * 0.00390625F);
-        com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        gui.blit(RenderPipelines.GUI_TEXTURED, this.texture.getResourceLocation(),
+            x, y, (float) this.x, (float) this.y,
+            destWidth, destHeight, this.width, this.height, TEXTURE_SIZE, TEXTURE_SIZE);
     }
 
-    public void renderToScaled(GuiGraphics gui, int x, int y, int width, int height, int color) {
-        this.setColorInt(color);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.enableBlend();
-        this.renderToScaled(gui, x, y, width, height);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+    public void renderToScaled(GuiGraphicsExtractor gui, int x, int y, int width, int height, int color) {
+        int destWidth = width == -1 ? this.width : width;
+        int destHeight = height == -1 ? this.height : height;
+        gui.blit(RenderPipelines.GUI_TEXTURED, this.texture.getResourceLocation(),
+            x, y, (float) this.x, (float) this.y,
+            destWidth, destHeight, this.width, this.height, TEXTURE_SIZE, TEXTURE_SIZE, ARGB.opaque(color));
     }
 
     public int getWidth() {

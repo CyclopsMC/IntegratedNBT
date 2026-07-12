@@ -1,12 +1,10 @@
 package org.cyclops.integratednbt.blockentity;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -15,8 +13,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.cyclops.cyclopscore.datastructure.DimPos;
-import org.cyclops.cyclopscore.helper.MinecraftHelpers;
+import org.cyclops.cyclopscore.helper.IModHelpers;
 import org.cyclops.integrateddynamics.Capabilities;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
 import org.cyclops.integrateddynamics.api.evaluate.variable.ValueDeseralizationContext;
@@ -160,7 +160,7 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
         if (this.level == null) {
             return;
         }
-        if (!this.level.isClientSide) {
+        if (!this.level.isClientSide()) {
             this.shouldUpdateOutVariable = true;
             if (!this.autoRefresh &&
                     !ItemStack.matches(this.getInventory().getItem(SRC_NBT_SLOT), this.frozenNBTItemStack)) {
@@ -260,28 +260,26 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
     @Override
     public void onLoad() {
         super.onLoad();
-        if (!MinecraftHelpers.isClientSide()) {
+        if (!IModHelpers.get().getMinecraftHelpers().isClientSide()) {
             this.shouldRefreshVariable = true;
         }
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
-        ListTag errorsList = new ListTag();
-        tag.put("path", this.extractionPath.toNBT());
-        tag.putByte("defaultNBTId", this.defaultNBTId);
-        tag.putByte("outputMode", (byte) this.outputMode.ordinal());
-        tag.putBoolean("isAutoRefresh", this.autoRefresh);
+    public void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.store("path", ExtraCodecs.NBT, this.extractionPath.toNBT());
+        output.putByte("defaultNBTId", this.defaultNBTId);
+        output.putByte("outputMode", (byte) this.outputMode.ordinal());
+        output.putBoolean("isAutoRefresh", this.autoRefresh);
         if (!this.autoRefresh) {
             if (this.frozenNBT != null) {
-                CompoundTag compound = new CompoundTag();
+                ValueOutput frozenNBTOutput = output.child("frozenNBT");
                 if (this.frozenNBT.get() != null) {
-                    compound.put("value", this.frozenNBT.get());
+                    frozenNBTOutput.store("value", ExtraCodecs.NBT, this.frozenNBT.get());
                 }
-                tag.put("frozenNBT", compound);
             }
-            tag.put("frozenNBTItemStack", this.frozenNBTItemStack.save(provider));
+            output.store("frozenNBTItemStack", ItemStack.OPTIONAL_CODEC, this.frozenNBTItemStack);
         }
     }
 
@@ -292,25 +290,19 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
     }
 
     @Override
-    public void read(CompoundTag tag, HolderLookup.Provider provider) {
-        super.read(tag, provider);
-        if (tag.contains("path")) {
-            this.extractionPath = SegmentedNbtPath.fromNBT(tag.get("path")).orElse(new SegmentedNbtPath());
-        }
-        if (tag.contains("defaultNBTId")) {
-            this.defaultNBTId = tag.getByte("defaultNBTId");
-        }
-        if (tag.contains("outputMode")) {
-            this.outputMode = NbtExtractorOutputMode.values()[tag.getByte("outputMode")];
-        }
-        if (tag.contains("isAutoRefresh")) {
-            this.autoRefresh = tag.getBoolean("isAutoRefresh");
-            if (!this.autoRefresh) {
-                if (tag.contains("frozenNBT")) {
-                    this.frozenNBT = Wrapper.of(tag.getCompound("frozenNBT").get("value"));
-                }
-                this.frozenNBTItemStack = ItemStack.parseOptional(provider, tag.getCompound("frozenNBTItemStack"));
-            }
+    public void read(ValueInput input) {
+        super.read(input);
+        input.read("path", ExtraCodecs.NBT).ifPresent(pathTag ->
+            this.extractionPath = SegmentedNbtPath.fromNBT(pathTag).orElse(new SegmentedNbtPath()));
+        this.defaultNBTId = input.getByteOr("defaultNBTId", (byte) 1);
+        this.outputMode = NbtExtractorOutputMode.values()[input.getByteOr("outputMode", (byte) 0)];
+        this.autoRefresh = input.getBooleanOr("isAutoRefresh", true);
+        if (!this.autoRefresh) {
+            input.child("frozenNBT").ifPresent(frozenNBTInput -> {
+                Tag valueTag = frozenNBTInput.read("value", ExtraCodecs.NBT).orElse(null);
+                this.frozenNBT = Wrapper.of(valueTag);
+            });
+            this.frozenNBTItemStack = input.read("frozenNBTItemStack", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
         }
         this.shouldRefreshVariable = true;
     }
@@ -357,7 +349,7 @@ public class BlockEntityNbtExtractor extends BlockEntityActiveVariableBase<NbtEx
         protected void update(Level level, BlockPos pos, BlockState blockState, T blockEntity) {
             super.update(level, pos, blockState, blockEntity);
 
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 if (blockEntity.isShouldRefreshVariable() && blockEntity.getNetwork() != null) {
                     blockEntity.setShouldRefreshVariable(false);
                     blockEntity.refreshVariables(true);

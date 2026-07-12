@@ -2,15 +2,12 @@ package org.cyclops.integratednbt;
 
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import org.apache.logging.log4j.Level;
-import org.cyclops.cyclopscore.config.ConfigHandler;
-import org.cyclops.cyclopscore.helper.MinecraftHelpers;
+import org.cyclops.cyclopscore.config.ConfigHandlerCommon;
 import org.cyclops.cyclopscore.infobook.IInfoBookRegistry;
-import org.cyclops.cyclopscore.init.ModBase;
+import org.cyclops.cyclopscore.init.ModBaseNeoForge;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.integrateddynamics.IntegratedDynamics;
@@ -24,13 +21,14 @@ import org.cyclops.integratednbt.client.model.VariableModelProviders;
 import org.cyclops.integratednbt.component.DataComponentNbtExtractorRemoteConfig;
 import org.cyclops.integratednbt.evaluate.operator.NbtExtractionOperatorSerializer;
 import org.cyclops.integratednbt.evaluate.variable.NbtExtractedVariableFacadeHandler;
+import org.cyclops.integratednbt.gametest.GameTestsNbtExtractor;
 import org.cyclops.integratednbt.inventory.container.ContainerNbtExtractorConfig;
 import org.cyclops.integratednbt.item.ItemNbtExtractorRemoteConfig;
 import org.cyclops.integratednbt.proxy.ClientProxy;
 import org.cyclops.integratednbt.proxy.CommonProxy;
 
 @Mod(Reference.MOD_ID)
-public class IntegratedNbt extends ModBase<IntegratedNbt> {
+public class IntegratedNbt extends ModBaseNeoForge<IntegratedNbt> {
 
     public static IntegratedNbt _instance;
 
@@ -56,7 +54,7 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
         OperatorRegistry.getInstance()
                 .registerSerializer(new NbtExtractionOperatorSerializer());
 
-        if (MinecraftHelpers.isClientSide()) {
+        if (this.getModHelpers().getMinecraftHelpers().isClientSide()) {
             VariableModelProviders.load();
         }
     }
@@ -68,7 +66,7 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
     }
 
     @Override
-    public void onConfigsRegister(ConfigHandler configHandler) {
+    public void onConfigsRegister(ConfigHandlerCommon configHandler) {
         super.onConfigsRegister(configHandler);
 
         configHandler.addConfigurable(new GeneralConfig());
@@ -85,7 +83,6 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
     protected IClientProxy constructClientProxy() {
         return new ClientProxy();
     }
@@ -93,6 +90,11 @@ public class IntegratedNbt extends ModBase<IntegratedNbt> {
     @Override
     protected ICommonProxy constructCommonProxy() {
         return new CommonProxy();
+    }
+
+    @Override
+    public Class<?>[] getGameTestClasses() {
+        return new Class<?>[] { GameTestsNbtExtractor.class };
     }
 
     /**

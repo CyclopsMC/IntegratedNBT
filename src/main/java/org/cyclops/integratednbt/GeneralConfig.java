@@ -1,17 +1,17 @@
 package org.cyclops.integratednbt;
 
-import net.neoforged.fml.config.ModConfig;
-import org.cyclops.cyclopscore.config.ConfigurableProperty;
-import org.cyclops.cyclopscore.config.extendedconfig.DummyConfig;
+import org.cyclops.cyclopscore.config.ConfigurablePropertyCommon;
+import org.cyclops.cyclopscore.config.ModConfigLocation;
+import org.cyclops.cyclopscore.config.extendedconfig.DummyConfigCommon;
 
 /**
  * A config with general options for this mod.
  * @author rubensworks
  *
  */
-public class GeneralConfig extends DummyConfig {
+public class GeneralConfig extends DummyConfigCommon<IntegratedNbt> {
 
-    @ConfigurableProperty(category = "general", comment = "The base energy usage for the NBT Extractor.", minimalValue = 0, configLocation = ModConfig.Type.SERVER)
+    @ConfigurablePropertyCommon(category = "general", comment = "The base energy usage for the NBT Extractor.", minimalValue = 0, configLocation = ModConfigLocation.SERVER)
     public static int nbtExtractorBaseConsumption = 2;
 
     public GeneralConfig() {

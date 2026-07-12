@@ -1,5 +1,7 @@
 package org.cyclops.integratednbt.network;
 
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.cyclops.cyclopscore.datastructure.DimPos;
 import org.cyclops.integrateddynamics.api.network.IEventListenableNetworkElement;
 import org.cyclops.integrateddynamics.api.network.INetwork;
@@ -66,15 +68,15 @@ public class NbtExtractorNetworkElement extends TileNetworkElement<BlockEntityNb
     }
 
     @Override
-    public void onNetworkRemoval(INetwork network) {
-        BlockEntityNbtExtractor blockEntity = getTile().orElse(null);
-        if (blockEntity == null || !blockEntity.hasLevel()) {
+    public void onNetworkRemoval(INetwork network, BlockState blockState, BlockEntity blockEntity) {
+        BlockEntityNbtExtractor be = getTile().orElse(null);
+        if (be == null || !be.hasLevel()) {
             return;
         }
         NetworkHelpers.getPartNetwork(network).ifPresent(partNetwork -> partNetwork
                 .removeVariableContainer(DimPos.of(
-                        blockEntity.getLevel(),
-                        blockEntity.worldPosition
+                        be.getLevel(),
+                        be.worldPosition
                 ))
         );
     }

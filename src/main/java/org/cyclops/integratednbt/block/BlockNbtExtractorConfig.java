@@ -1,8 +1,7 @@
 package org.cyclops.integratednbt.block;
 
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import org.cyclops.cyclopscore.config.extendedconfig.BlockConfig;
+import org.cyclops.cyclopscore.config.extendedconfig.BlockConfigCommon;
 import org.cyclops.integratednbt.IntegratedNbt;
 
 /**
@@ -10,13 +9,13 @@ import org.cyclops.integratednbt.IntegratedNbt;
  * @author rubensworks
  *
  */
-public class BlockNbtExtractorConfig extends BlockConfig {
+public class BlockNbtExtractorConfig extends BlockConfigCommon<IntegratedNbt> {
 
     public BlockNbtExtractorConfig() {
         super(
                 IntegratedNbt._instance,
                 "nbt_extractor",
-                eConfig -> new BlockNbtExtractor(Block.Properties.of()
+                (eConfig, props) -> new BlockNbtExtractor(props
                         .strength(5.0F)
                         .sound(SoundType.METAL)),
                 getDefaultItemConstructor(IntegratedNbt._instance)

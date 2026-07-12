@@ -1,24 +1,19 @@
 package org.cyclops.integratednbt.client.gui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class Texture {
-    private ResourceLocation resourceLocation;
+    private Identifier resourceLocation;
 
-    public Texture(ResourceLocation resourceLocation) {
+    public Texture(Identifier resourceLocation) {
         this.resourceLocation = resourceLocation;
     }
 
     public Texture(String namespace, String path) {
-        this(ResourceLocation.fromNamespaceAndPath(namespace, path));
+        this(Identifier.fromNamespaceAndPath(namespace, path));
     }
 
-    public void bind() {
-        RenderSystem.setShaderTexture(0, this.resourceLocation);
-    }
-
-    public ResourceLocation getResourceLocation() {
+    public Identifier getResourceLocation() {
         return this.resourceLocation;
     }
 

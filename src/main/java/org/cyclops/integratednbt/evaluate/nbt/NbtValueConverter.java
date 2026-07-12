@@ -113,17 +113,17 @@ public abstract class NbtValueConverter {
     public static IValue mapNBTToValue(Tag nbt) {
         switch (nbt.getId()) {
             case 1: // Byte
-                return ValueInteger.of(((ByteTag) nbt).getAsInt());
+                return ValueInteger.of(((ByteTag) nbt).intValue());
             case 2: // Short
-                return ValueInteger.of(((ShortTag) nbt).getAsInt());
+                return ValueInteger.of(((ShortTag) nbt).intValue());
             case 3: // Int
-                return ValueInteger.of(((IntTag) nbt).getAsInt());
+                return ValueInteger.of(((IntTag) nbt).intValue());
             case 4: // Long
-                return ValueLong.of(((LongTag) nbt).getAsLong());
+                return ValueLong.of(((LongTag) nbt).longValue());
             case 5: // Float
-                return ValueDouble.of(((FloatTag) nbt).getAsDouble());
+                return ValueDouble.of(((FloatTag) nbt).doubleValue());
             case 6: // Double
-                return ValueDouble.of(((DoubleTag) nbt).getAsDouble());
+                return ValueDouble.of(((DoubleTag) nbt).doubleValue());
             case 7: // Byte Array
                 return ValueList.ofList(
                     ValueTypes.INTEGER,
@@ -132,7 +132,7 @@ public abstract class NbtValueConverter {
                         .collect(Collectors.toList())
                 );
             case 8: // String
-                return ValueString.of(nbt.getAsString());
+                return ValueString.of(nbt.asString().orElse(""));
             case 9: // List
                 return ValueList.ofAll(
                     ((ListTag) nbt).stream()

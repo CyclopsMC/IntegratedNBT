@@ -38,22 +38,22 @@ public class SegmentedNbtPath {
             }
             myAssert(nbt instanceof ListTag);
             ListTag list = (ListTag) nbt;
-            myAssert(list.getElementType() == 10 || list.size() == 0); /* Compound */
+            myAssert(list.isEmpty() || list.get(0).getId() == 10); /* Compound */
             myAssert(list.size() <= MAX_EXTRACTION_DEPTH);
             ArrayList<Segment> segments = new ArrayList<>(list.size());
             for (Tag item : list) {
                 CompoundTag compound = (CompoundTag) item;
-                String type = compound.getString(KEY_TYPE);
+                String type = compound.getString(KEY_TYPE).orElse("");
                 myAssert(!type.isEmpty());
                 if (type.equals(TYPE_KEY)) {
                     myAssert(compound.contains(KEY_KEY));
-                    String key = compound.getString(KEY_KEY);
+                    String key = compound.getString(KEY_KEY).orElse("");
                     myAssert(!key.isEmpty());
                     segments.add(new KeySegment(key));
                 } else {
                     myAssert(type.equals(TYPE_INDEX));
                     myAssert(compound.contains(KEY_INDEX));
-                    int index = compound.getInt(KEY_INDEX);
+                    int index = compound.getIntOr(KEY_INDEX, 0);
                     myAssert(index >= 0);
                     segments.add(new IndexSegment(index));
                 }

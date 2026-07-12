@@ -1,7 +1,7 @@
 package org.cyclops.integratednbt.proxy;
 
-import org.cyclops.cyclopscore.init.ModBase;
-import org.cyclops.cyclopscore.network.PacketHandler;
+import org.cyclops.cyclopscore.init.ModBaseNeoForge;
+import org.cyclops.cyclopscore.network.IPacketHandler;
 import org.cyclops.cyclopscore.proxy.CommonProxyComponent;
 import org.cyclops.integratednbt.IntegratedNbt;
 import org.cyclops.integratednbt.network.packet.*;
@@ -14,13 +14,13 @@ import org.cyclops.integratednbt.network.packet.*;
 public class CommonProxy extends CommonProxyComponent {
 
     @Override
-    public ModBase getMod() {
+    public ModBaseNeoForge getMod() {
         return IntegratedNbt._instance;
     }
 
     @Override
-    public void registerPacketHandlers(PacketHandler packetHandler) {
-        super.registerPacketHandlers(packetHandler);
+    public void registerPackets(IPacketHandler packetHandler) {
+        super.registerPackets(packetHandler);
 
         // Register packets.
         packetHandler.register(UpdateClientNbtExtractorPacket.class, UpdateClientNbtExtractorPacket.TYPE, UpdateClientNbtExtractorPacket.CODEC);

@@ -3,7 +3,7 @@ package org.cyclops.integratednbt.network.packet;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -20,7 +20,7 @@ import org.cyclops.integratednbt.item.ItemNbtExtractorRemote;
 public class OpenNbtExtractorRemoteGuiPacket extends PacketCodec<OpenNbtExtractorRemoteGuiPacket> {
 
     public static final CustomPacketPayload.Type<OpenNbtExtractorRemoteGuiPacket> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "open_nbt_extractor_remote_gui"));
+            Identifier.fromNamespaceAndPath(Reference.MOD_ID, "open_nbt_extractor_remote_gui"));
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenNbtExtractorRemoteGuiPacket> CODEC = getCodec(OpenNbtExtractorRemoteGuiPacket::new);
 
     public OpenNbtExtractorRemoteGuiPacket() {

@@ -1,19 +1,18 @@
 package org.cyclops.integratednbt.client.gui.container;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.cyclops.integratednbt.IntegratedNbt;
 import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.client.gui.component.HoverTextImageButton;
@@ -27,14 +26,14 @@ import org.cyclops.integratednbt.network.packet.NbtExtractorSetExtractionPathPac
 import org.cyclops.integratednbt.network.packet.NbtExtractorSetOutputModePacket;
 import org.cyclops.integratednbt.network.packet.NbtExtractorUpdateAutoRefreshPacket;
 import org.cyclops.integratednbt.network.packet.UpdateClientNbtExtractorPacket;
+import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.lwjgl.opengl.GL11.*;
 
-@OnlyIn(Dist.CLIENT)
-public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<ContainerNbtExtractor> {
+public class ContainerScreenNbtExtractor extends AbstractContainerScreen<ContainerNbtExtractor> {
     public static final int SCREEN_EDGE = 4;
     public static final Texture GUI_TEXTURE = new Texture(
         "integratednbt",
@@ -269,24 +268,26 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
 
     @Override
     public boolean mouseClicked(
-        double mouseX,
-        double mouseY,
-        int mouseButton
+        MouseButtonEvent event,
+        boolean doubleClick
     ) {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-        this.treeViewer.mouseClicked(mouseButton);
+        super.mouseClicked(event, doubleClick);
+        this.treeViewer.mouseClicked(event.button());
         return true;
     }
 
     @Override
     protected void init() {
         this.updateCalculations();
-        this.imageWidth = this.width - 2 * this.padding;
-        this.imageHeight = this.height - 2 * this.padding;
         super.init();
+        // Override leftPos and topPos for full-screen responsive layout
+        this.leftPos = this.padding;
+        this.topPos = this.padding;
+        int containerWidth = this.width - 2 * this.padding;
+        int containerHeight = this.height - 2 * this.padding;
         this.nbtExtractorContainer.setSlotOffset(
-            (this.imageWidth - INVENTORY_WIDTH) / 2,
-            this.imageHeight - INVENTORY_HEIGHT
+            (containerWidth - INVENTORY_WIDTH) / 2,
+            containerHeight - INVENTORY_HEIGHT
         );
         this.treeViewer.updateBounds(
             this.padding + SIDE_BORDER_SIZE,
@@ -361,24 +362,22 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         this.outputModeButton.drawHover(guiGraphics, mouseX, mouseY);
         this.autoRefreshButton.drawHover(guiGraphics, mouseX, mouseY);
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        this.outputModeButton.render(guiGraphics, mouseX, mouseY, partialTicks);
-        this.autoRefreshButton.render(guiGraphics, mouseX, mouseY, partialTicks);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        this.extractBackground(guiGraphics, mouseX, mouseY, partialTicks);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        // Draw the GUI frame background BEFORE super, so items/slots are rendered on top of it.
         this.renderGuiParts(guiGraphics);
-        guiGraphics.drawString(
+        guiGraphics.text(
             this.fontRenderer,
             I18n.get("block.integratednbt.nbt_extractor"),
             this.padding + 8,
@@ -407,11 +406,13 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
             this.treeViewer.render(guiGraphics, nbt, mouseX, mouseY);
         }
         glDisable(GL_SCISSOR_TEST);
+        // Draw widgets (buttons) + labels + slot highlights + item icons on top of the GUI frame.
+        super.extractContents(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
-    protected void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        super.renderTooltip(guiGraphics, mouseX, mouseY);
+    protected void extractTooltip(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+        super.extractTooltip(guiGraphics, mouseX, mouseY);
         this.treeViewer.renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
@@ -433,7 +434,7 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
         return false;
     }
 
-    private void renderGuiParts(GuiGraphics guiGraphics) {
+    private void renderGuiParts(GuiGraphicsExtractor guiGraphics) {
         int padding = this.padding;
         int screenWidth = this.screenWidth;
         int screenHeight = this.screenHeight;
@@ -486,7 +487,7 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
         );
     }
 
-    private void renderWelcome(GuiGraphics guiGraphics) {
+    private void renderWelcome(GuiGraphicsExtractor guiGraphics) {
         this.renderCenteredTextGroup(
             guiGraphics,
             I18n.get("integratednbt:nbt_extractor.welcome"),
@@ -495,7 +496,7 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
         );
     }
 
-    private void renderLoading(GuiGraphics guiGraphics) {
+    private void renderLoading(GuiGraphicsExtractor guiGraphics) {
         this.renderCenteredTextGroup(
             guiGraphics,
             I18n.get("integratednbt:nbt_extractor.loading"),
@@ -504,7 +505,7 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
         );
     }
 
-    private void renderError(GuiGraphics guiGraphics) {
+    private void renderError(GuiGraphicsExtractor guiGraphics) {
         String message = "";
         if (errorMessage != null) {
             message = errorMessage.getString();
@@ -529,17 +530,17 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
         );
     }
 
-    private void renderCenteredTextGroup(GuiGraphics guiGraphics, String title, int titleColor, String description) {
-        PoseStack poseStack = guiGraphics.pose();
-        poseStack.pushPose();
+    private void renderCenteredTextGroup(GuiGraphicsExtractor guiGraphics, String title, int titleColor, String description) {
+        Matrix3x2fStack poseStack = guiGraphics.pose();
+        poseStack.pushMatrix();
         try {
             int x = this.screenCenterX();
             int y = this.screenCenterY();
             int titleWidth = this.fontRenderer.width(title);
-            poseStack.pushPose();
+            poseStack.pushMatrix();
             try {
                 this.scaleAt(poseStack, x, y, 2);
-                guiGraphics.drawString(
+                guiGraphics.text(
                     this.fontRenderer,
                     title,
                     (int) (-titleWidth / 2f),
@@ -548,13 +549,13 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
                     false
                 );
             } finally {
-                poseStack.popPose();
+                poseStack.popMatrix();
             }
             this.scaleAt(poseStack, x, y, 1);
             int wrappingWidth = (int) (this.screenWidth * CENTERED_TEXT_MAX_RATIO);
             int descriptionWidth = this.fontRenderer.width(description);
             if (descriptionWidth > wrappingWidth) {
-                guiGraphics.drawWordWrap(
+                guiGraphics.textWithWordWrap(
                     this.fontRenderer,
                     Component.literal(description),
                     -wrappingWidth / 2,
@@ -563,7 +564,7 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
                     0xFFFFFF
                 );
             } else {
-                guiGraphics.drawString(
+                guiGraphics.text(
                     this.fontRenderer,
                     description,
                     (int) (-descriptionWidth / 2f),
@@ -573,7 +574,7 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
                 );
             }
         } finally {
-            poseStack.popPose();
+            poseStack.popMatrix();
         }
     }
 
@@ -585,8 +586,8 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
         return this.padding + TOP_BORDER_SIZE + this.screenHeight / 2;
     }
 
-    private void scaleAt(PoseStack poseStack, int x, int y, float scale) {
-        poseStack.scale(scale, scale, 1f);
-        poseStack.translate(x / scale, y / scale, 0f);
+    private void scaleAt(Matrix3x2fStack poseStack, int x, int y, float scale) {
+        poseStack.scale(scale, scale);
+        poseStack.translate(x / scale, y / scale);
     }
 }

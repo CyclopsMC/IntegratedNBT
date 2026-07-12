@@ -1,7 +1,7 @@
 package org.cyclops.integratednbt.client.gui.component;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
@@ -44,11 +44,12 @@ public class HoverTextImageButton extends ImageButton {
     /**
      * Draw hover text if is hovered
      */
-    public void drawHover(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    public void drawHover(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         if (this.isHovered) {
-            guiGraphics.renderComponentTooltip(
+            guiGraphics.setTooltipForNextFrame(
                 Minecraft.getInstance().font,
                 this.hoverText,
+                java.util.Optional.empty(),
                 mouseX,
                 mouseY
             );
