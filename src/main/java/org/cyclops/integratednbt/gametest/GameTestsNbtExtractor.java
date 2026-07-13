@@ -5,7 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -17,11 +17,7 @@ import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.part.PartPos;
 import org.cyclops.integrateddynamics.blockentity.BlockEntityVariablestore;
 import org.cyclops.integrateddynamics.core.evaluate.operator.Operators;
-import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeDouble;
-import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt;
-import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeOperator;
-import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeString;
-import org.cyclops.integrateddynamics.core.evaluate.variable.Variable;
+import org.cyclops.integrateddynamics.core.evaluate.variable.*;
 import org.cyclops.integrateddynamics.core.helper.PartHelpers;
 import org.cyclops.integrateddynamics.core.part.PartTypes;
 import org.cyclops.integrateddynamics.part.PartTypePanelDisplay;
@@ -33,11 +29,7 @@ import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.item.ItemNbtExtractorRemote;
 
-import static org.cyclops.integrateddynamics.gametest.GameTestHelpersIntegratedDynamics.assertValueEqual;
-import static org.cyclops.integrateddynamics.gametest.GameTestHelpersIntegratedDynamics.createVariableForOperator;
-import static org.cyclops.integrateddynamics.gametest.GameTestHelpersIntegratedDynamics.createVariableFromReader;
-import static org.cyclops.integrateddynamics.gametest.GameTestHelpersIntegratedDynamics.getVariableFacade;
-import static org.cyclops.integrateddynamics.gametest.GameTestHelpersIntegratedDynamics.placeVariableInDisplayPanel;
+import static org.cyclops.integrateddynamics.gametest.GameTestHelpersIntegratedDynamics.*;
 
 /**
  * Game tests for the NBT Extractor block and the four output modes.
@@ -91,7 +83,7 @@ public class GameTestsNbtExtractor {
                 new ItemStack(PartTypes.DISPLAY_PANEL.getItem()));
 
         // Spawn sheep at the entity reader's target block, disable AI so it stays still
-        Sheep sheep = helper.spawn(EntityType.SHEEP, POS.west());
+        Sheep sheep = helper.spawn(EntityTypes.SHEEP, POS.west());
         sheep.setNoAi(true);
 
         // Create entity variable card from the entity reader (reads the entity at POS.west)
