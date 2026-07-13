@@ -11,6 +11,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import org.cyclops.integratednbt.IntegratedNbt;
@@ -31,7 +32,6 @@ import org.joml.Matrix3x2fStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.lwjgl.opengl.GL11.*;
 
 public class ContainerScreenNbtExtractor extends AbstractContainerScreen<ContainerNbtExtractor> {
     public static final int SCREEN_EDGE = 4;
@@ -382,17 +382,16 @@ public class ContainerScreenNbtExtractor extends AbstractContainerScreen<Contain
             I18n.get("block.integratednbt.nbt_extractor"),
             this.padding + 8,
             this.padding + 9,
-            4210752,
+            ARGB.opaque(4210752),
             false
         );
         // Scissor test allows restricting rendering to a rectangular portion of the screen.
         // In this case, we only want to render in the screen area of the NBT Extractor.
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(
-            (int) this.scaleFactor * (this.padding + SIDE_BORDER_SIZE),
-            (int) this.scaleFactor * (this.padding + INVENTORY_HEIGHT),
-            (int) this.scaleFactor * this.screenWidth,
-            (int) this.scaleFactor * this.screenHeight
+        guiGraphics.enableScissor(
+            this.padding + SIDE_BORDER_SIZE,
+            this.padding + TOP_BORDER_SIZE,
+            this.padding + SIDE_BORDER_SIZE + this.screenWidth,
+            this.padding + TOP_BORDER_SIZE + this.screenHeight
         );
         Slot srcNBTSlot = this.nbtExtractorContainer.getSrcNBTSlot();
         if (!srcNBTSlot.hasItem()) {
@@ -405,7 +404,7 @@ public class ContainerScreenNbtExtractor extends AbstractContainerScreen<Contain
         } else {
             this.treeViewer.render(guiGraphics, nbt, mouseX, mouseY);
         }
-        glDisable(GL_SCISSOR_TEST);
+        guiGraphics.disableScissor();
         // Draw widgets (buttons) + labels + slot highlights + item icons on top of the GUI frame.
         super.extractContents(guiGraphics, mouseX, mouseY, partialTicks);
     }
@@ -491,7 +490,7 @@ public class ContainerScreenNbtExtractor extends AbstractContainerScreen<Contain
         this.renderCenteredTextGroup(
             guiGraphics,
             I18n.get("integratednbt:nbt_extractor.welcome"),
-            0x00FFFF,
+            0xFF00FFFF,
             I18n.get("integratednbt:nbt_extractor.welcome.description")
         );
     }
@@ -500,7 +499,7 @@ public class ContainerScreenNbtExtractor extends AbstractContainerScreen<Contain
         this.renderCenteredTextGroup(
             guiGraphics,
             I18n.get("integratednbt:nbt_extractor.loading"),
-            0xFFFF00,
+            0xFFFFFF00,
             I18n.get("integratednbt:nbt_extractor.loading.description")
         );
     }
@@ -525,7 +524,7 @@ public class ContainerScreenNbtExtractor extends AbstractContainerScreen<Contain
         this.renderCenteredTextGroup(
             guiGraphics,
             I18n.get("integratednbt:nbt_extractor.error"),
-            0xFF5555,
+            0xFFFF5555,
             message
         );
     }
@@ -561,7 +560,7 @@ public class ContainerScreenNbtExtractor extends AbstractContainerScreen<Contain
                     -wrappingWidth / 2,
                     4,
                     wrappingWidth,
-                    0xFFFFFF
+                    0xFFFFFFFF
                 );
             } else {
                 guiGraphics.text(
@@ -569,7 +568,7 @@ public class ContainerScreenNbtExtractor extends AbstractContainerScreen<Contain
                     description,
                     (int) (-descriptionWidth / 2f),
                     4,
-                    0xFFFFFF,
+                    0xFFFFFFFF,
                     false
                 );
             }
