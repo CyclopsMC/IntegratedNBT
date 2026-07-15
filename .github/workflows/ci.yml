@@ -51,7 +51,7 @@ jobs:
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         if: ${{ env.COVERALLS_REPO_TOKEN }}
-        run: ./gradlew test jacocoTestReport coveralls
+        run: ./gradlew test jacocoTestReport
       - name: 'Deploy to CurseForge'
         if: startsWith(github.ref, 'refs/tags/')
         env:
