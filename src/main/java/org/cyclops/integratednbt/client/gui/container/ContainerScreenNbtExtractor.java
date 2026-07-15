@@ -272,8 +272,26 @@ public class ContainerScreenNbtExtractor extends AbstractContainerScreen<Contain
         boolean doubleClick
     ) {
         super.mouseClicked(event, doubleClick);
-        this.treeViewer.mouseClicked(event.button());
+        this.treeViewer.mouseClicked(event);
         return true;
+    }
+
+    @Override
+    public boolean mouseDragged(
+        MouseButtonEvent event,
+        double dragX,
+        double dragY
+    ) {
+        if (this.treeViewer.mouseDragged(event)) {
+            return true;
+        }
+        return super.mouseDragged(event, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        this.treeViewer.mouseReleased(event);
+        return super.mouseReleased(event);
     }
 
     @Override

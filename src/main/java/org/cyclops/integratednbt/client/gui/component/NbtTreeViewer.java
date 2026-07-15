@@ -4,9 +4,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValueType;
 import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
@@ -93,6 +95,15 @@ public abstract class NbtTreeViewer {
      */
     private int mouseY;
     private SegmentedNbtPath hoveringExpandableButton;
+    private boolean isScrollbarDragging = false;
+    /**
+     * Y offset from the top of the scrollbar thumb at the time the drag started (absolute screen coords)
+     */
+    private double scrollbarDragOffsetY = 0;
+    /**
+     * Total content height, cached from the last render call; used by drag calculations
+     */
+    private int cachedTotalHeight = 0;
 
     public NbtTreeViewer(
         AbstractContainerScreen<?> gui,
@@ -219,6 +230,7 @@ public abstract class NbtTreeViewer {
                 this.renderNode(guiGraphics, I18n.get("integratednbt:nbt_extractor.root"), nbt);
             }
             int totalHeight = this.currentY + SCREEN_EDGE;
+            this.cachedTotalHeight = totalHeight;
             poseStack.translate(0, (float) this.renderScroll);
             this.maxScroll = Math.max(totalHeight - this.height, 0);
             if (this.scrollTop.get() > this.maxScroll) {
@@ -315,8 +327,20 @@ public abstract class NbtTreeViewer {
             + (this.scrollTop.get() - this.renderScrollTransitionStartLocation) * ratio;
     }
 
-    public void mouseClicked(int mouseButton) {
-        if (mouseButton == 0) { // Left click
+    public void mouseClicked(MouseButtonEvent event) {
+        if (event.button() == 0) { // Left click
+            // Check if clicking on the scrollbar track
+            if (this.maxScroll > 0 && this.isMouseOnScrollbarTrack(event.x(), event.y())) {
+                this.isScrollbarDragging = true;
+                int thumbTopAbsolute = this.getScrollbarThumbTopAbsolute();
+                int thumbHeight = this.getScrollbarThumbHeight();
+                this.scrollbarDragOffsetY = event.y() - thumbTopAbsolute;
+                // If clicked outside the thumb, centre the drag on the thumb
+                if (this.scrollbarDragOffsetY < 0 || this.scrollbarDragOffsetY > thumbHeight) {
+                    this.scrollbarDragOffsetY = thumbHeight / 2.0;
+                }
+                return;
+            }
             if (this.hoveringExpandableButton != null) {
                 this.toggleExpanded(this.hoveringExpandableButton);
             }
@@ -324,11 +348,62 @@ public abstract class NbtTreeViewer {
                 this.selecting = this.hoveringPath;
                 this.onUpdateSelectedPath(this.hoveringPath, this.hoveringNBTNode);
             }
-        } else if (mouseButton == 1) { // Right click
+        } else if (event.button() == 1) { // Right click
             if (this.hoveringPath != null && isNodeExpandable(this.hoveringNBTNode)) {
                 this.toggleExpanded(this.hoveringPath);
             }
         }
+    }
+
+    public boolean mouseDragged(MouseButtonEvent event) {
+        if (event.button() == 0 && this.isScrollbarDragging) {
+            int thumbHeight = this.getScrollbarThumbHeight();
+            int trackAvailableHeight = this.height - SCROLL_BAR_PADDING * 2 - thumbHeight;
+            int newThumbRelative = (int) (event.y() - this.top - this.scrollbarDragOffsetY - SCROLL_BAR_PADDING);
+            newThumbRelative = Mth.clamp(newThumbRelative, 0, trackAvailableHeight);
+            int newScroll = trackAvailableHeight > 0
+                ? (int) ((double) newThumbRelative / trackAvailableHeight * this.maxScroll)
+                : 0;
+            newScroll = Mth.clamp(newScroll, 0, this.maxScroll);
+            if (this.scrollTop.get() != newScroll) {
+                this.scrollTop.set(newScroll);
+                this.startScrollTransition();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public void mouseReleased(MouseButtonEvent event) {
+        if (event.button() == 0) {
+            this.isScrollbarDragging = false;
+        }
+    }
+
+    private boolean isMouseOnScrollbarTrack(double absMouseX, double absMouseY) {
+        int scrollbarLeft = this.left + this.width - SCROLL_BAR_PADDING * 2 - SCROLL_BAR_WIDTH;
+        int scrollbarRight = this.left + this.width;
+        return absMouseX >= scrollbarLeft && absMouseX < scrollbarRight
+            && absMouseY >= this.top && absMouseY < this.top + this.height;
+    }
+
+    private int getScrollbarThumbHeight() {
+        if (this.cachedTotalHeight == 0) {
+            return this.height;
+        }
+        return (int) Math.ceil(
+            (double) this.height / this.cachedTotalHeight * (this.height - SCROLL_BAR_PADDING * 2)
+        );
+    }
+
+    private int getScrollbarThumbTopAbsolute() {
+        if (this.cachedTotalHeight == 0) {
+            return this.top + SCROLL_BAR_PADDING;
+        }
+        int thumbTopRelative = SCROLL_BAR_PADDING + (int) (
+            (double) this.scrollTop.get() / this.cachedTotalHeight * (this.height - SCROLL_BAR_PADDING * 2)
+        );
+        return this.top + thumbTopRelative;
     }
 
     private void toggleExpanded(SegmentedNbtPath path) {
