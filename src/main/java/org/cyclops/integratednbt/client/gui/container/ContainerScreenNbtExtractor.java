@@ -273,8 +273,32 @@ public class ContainerScreenNbtExtractor extends ExtendedContainerScreen<Contain
         int mouseButton
     ) {
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        this.treeViewer.mouseClicked(mouseButton);
+        this.treeViewer.mouseClicked(mouseX, mouseY, mouseButton);
         return true;
+    }
+
+    @Override
+    public boolean mouseDragged(
+        double mouseX,
+        double mouseY,
+        int mouseButton,
+        double dragX,
+        double dragY
+    ) {
+        if (this.treeViewer.mouseDragged(mouseX, mouseY, mouseButton)) {
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, mouseButton, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(
+        double mouseX,
+        double mouseY,
+        int mouseButton
+    ) {
+        this.treeViewer.mouseReleased(mouseX, mouseY, mouseButton);
+        return super.mouseReleased(mouseX, mouseY, mouseButton);
     }
 
     @Override
