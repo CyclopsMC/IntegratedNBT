@@ -1,12 +1,8 @@
 {
-  "itemGroup.integratednbt": "Integrated NBT",
-
-  "_comment": "Blocs",
+  "_comment": "------ Contenu de On the Dynamics of Integration ------",
   "block.integratednbt.nbt_extractor": "Extracteur NBT",
   "block.integratednbt.nbt_extractor.info": "Permet d'extraire des valeurs profondément imbriquées à partir d'une variable de type NBT.",
-
   "item.integratednbt.nbt_extractor_remote": "Télécommande d'extracteur NBT",
-
   "integratednbt:nbt_extractor.welcome": "Bienvenue",
   "integratednbt:nbt_extractor.welcome.description": "Ceci est un extracteur NBT. Pour commencer, placez une variable de type NBT dans l'emplacement de gauche.",
   "integratednbt:nbt_extractor.loading": "Chargement",
@@ -17,8 +13,6 @@
   "integratednbt:nbt_extractor.error.unexpected": "Une erreur inattendue s'est produite. Elle est probablement due à une erreur d'Integrated Dynamics ou d'Integrated NBT.",
   "integratednbt:nbt_extractor.empty": "<vide>",
   "integratednbt:nbt_extractor.root": "§e§l<racine>",
-  "integratednbt:nbt_extractor.arrow": " §7➡§r ",
-  "integratednbt:nbt_extractor.index": "§7#§r%s",
   "integratednbt:nbt_extractor.tooltip.nbt_type": "§eType NBT : §r%s",
   "integratednbt:nbt_extractor.tooltip.converted_type": "§eType converti : §r%s",
   "integratednbt:nbt_extractor.tooltip.default_value": "§eValeur par défaut : §r%s",
@@ -45,8 +39,6 @@
   "integratednbt:nbt_extracted_variable.tooltip.source_nbt_id": "§eExtrait depuis : §r%s",
   "integratednbt:nbt_extracted_variable.tooltip.path": "§eChemin d'extraction : §r%s",
   "integratednbt:nbt_extracted_variable.tooltip.default_value": "§eValeur par défaut : §r%s",
-  "integratednbt:nbt_extraction_operator": "Extraction",
-  "integratednbt:nbt_extraction_operator.category_name": "NBT",
   "integratednbt:nbt_extraction_operator.full_name": "Extraction NBT",
   "integratednbt:nbt_extractor_remote.bind_successful": "Télécommande liée avec succès à l'extracteur NBT situé en (%s, %s, %s).",
   "integratednbt:nbt_extractor_remote.need_bind": "Veuillez d'abord faire un clic droit sur un bloc extracteur NBT pour lier cette télécommande.",
@@ -57,27 +49,16 @@
   "integratednbt:nbt_extractor_remote.tooltip": "§7Permet l'accès à distance à un extracteur NBT.",
   "integratednbt:nbt_extractor_remote.tooltip.not_bound": "§eFaites un clic droit sur un extracteur NBT pour le lier.",
   "integratednbt:nbt_extractor_remote.tooltip.bound": "Lié à l'extracteur NBT situé en (%s, %s, %s) dans la dimension %s.",
-
-  "_comment": "Progrès",
   "advancement.integratednbt.entity_nbt_variable": "Balade dans l'arbre NBT de l'entité",
   "advancement.integratednbt.entity_nbt_variable.desc": "Utilisez l'extracteur NBT pour extraire une valeur de la variable NBT d'une entité en mode référence.",
   "advancement.integratednbt.display_entity_position": "Filature discrète d'entité",
   "advancement.integratednbt.display_entity_position.desc": "Placez une variable extraite en NBT dans un panneau d'affichage pour afficher la coordonnée X d'une entité.",
-
-  "_comment": "------ Contenu de On the Dynamics of Integration ------",
-
-  "info_book.integratednbt.section.main": "NBT",
-
-  "info_book.integratednbt.introduction": "Introduction",
   "info_book.integratednbt.introduction.text1": "&lIntegrated NBT&r est une extension d'&lIntegrated Dynamics&r qui ajoute des outils pour manipuler les données &lNBT&r (Named Binary Tag). Il vous permet de naviguer visuellement, d'inspecter et d'extraire des valeurs profondément imbriquées depuis n'importe quelle variable de type &3NBT&0 sur votre réseau &lIntegrated Dynamics&r.",
   "info_book.integratednbt.introduction.text2": "Que vous ayez besoin d'extraire un simple entier d'une balise d'objet complexe, de récupérer une chaîne enfouie dans un compound imbriqué, ou d'encoder un chemin d'extraction réutilisable pour vos opérateurs — &lIntegrated NBT&r rend tout cela simple, sans câblage supplémentaire requis.",
-
   "info_book.integratednbt.nbt_extractor": "Extracteur NBT",
   "info_book.integratednbt.nbt_extractor.text1": "L'&lExtracteur NBT&r est la pièce maîtresse de cette extension. C'est un bloc qui présente un navigateur arborescent graphique pour toute variable de type &3NBT&0. Placez le bloc, insérez une &lCarte de variable&r de type &3NBT&0 dans son emplacement de gauche, et le bloc chargera l'arbre NBT complet de cette variable afin que vous puissiez l'explorer. Une fois que vous avez localisé la valeur recherchée, un simple clic gauche sélectionne son chemin et vous permet de l'écrire dans une carte de sortie.",
-
   "info_book.integratednbt.nbt_extractor_remote": "Télécommande d'extracteur NBT",
   "info_book.integratednbt.nbt_extractor_remote.text1": "La &lTélécommande d'extracteur NBT&r est un objet compagnon du bloc &lExtracteur NBT&r. Faites un clic droit sur un &lExtracteur NBT&r placé pour lier la télécommande à celui-ci. À partir de là, vous pouvez ouvrir la même interface de navigation NBT depuis n'importe où dans la même dimension, sans avoir besoin de vous tenir près du bloc. La télécommande nécessite un chargement par ligne de vue : le chunk ciblé doit être chargé.",
-
   "info_book.integratednbt.usage": "Utilisation",
   "info_book.integratednbt.usage.text1": "Pour commencer, placez une &lCarte de variable&r de type &3NBT&0 dans l'&oemplacement de gauche&r de l'&lExtracteur NBT&r. Le bloc lira la variable et affichera son contenu sous forme d'arbre repliable.",
   "info_book.integratednbt.usage.text2": "&oFaites un clic droit&r sur n'importe quelle balise composée ou entrée de liste dans l'arbre pour la développer ou la réduire. Continuez à descendre jusqu'à atteindre la valeur que vous souhaitez extraire.",
@@ -85,17 +66,12 @@
   "info_book.integratednbt.usage.text4": "Le &lMode de sortie&r détermine comment la valeur de sortie est créée. En &oMode référence&r, la variable de sortie conserve une référence en direct vers la valeur extraite et se met à jour à chaque changement de la variable NBT source. En &oMode opérateur&r, le chemin d'extraction est encodé sous la forme d'un &lOpérateur&r réutilisable qui accepte n'importe quelle entrée NBT et renvoie la sous-valeur. En &oMode valeur&r, la valeur actuelle est écrite dans la carte sous forme de constante fixe. En &oMode chemin NBT&r, le chemin lui-même est stocké sous forme d'une chaîne &lCyclopsCore NBT Path&r.",
   "info_book.integratednbt.usage.text5": "Pour la plupart des cas d'usage, le &oMode référence&r est le bon choix. Si vous souhaitez un instantané qui ne change pas, ou si vous comptez appliquer la même extraction à de nombreuses valeurs NBT différentes, envisagez respectivement le &oMode valeur&r ou le &oMode opérateur&r.",
   "info_book.integratednbt.usage.text6": "Le bouton &lActualisation automatique&r de l'interface détermine si l'arbre NBT affiché se met à jour automatiquement lorsque la variable source est modifiée. Désactivez-le pour figer la vue dans son état actuel, ce qui est utile pour inspecter des données changeant rapidement.",
-
   "info_book.integratednbt.section.tutorials": "Tutoriels NBT",
-
-  "info_book.integratednbt.tutorials.introduction": "Introduction",
   "info_book.integratednbt.tutorials.introduction.text1": "Cette section contient des tutoriels qui vous guident pas à pas dans l'utilisation d'&lIntegrated NBT&r. L'objectif est de mettre en place un affichage en direct d'une valeur spécifique au sein des données NBT d'une entité, puis de l'afficher à l'écran à l'aide d'un réseau &lIntegrated Dynamics&r.",
-
   "info_book.integratednbt.tutorials.entity_nbt_variable": "Balade dans l'arbre NBT de l'entité",
   "info_book.integratednbt.tutorials.entity_nbt_variable.text1": "Commencez par fixer un &lLecteur d'entité&r sur un &lCâble&r, orienté vers l'espace où se tiendra votre entité cible. Ouvrez le &lProgrammeur logique&r et écrivez l'aspect &oEntity&r dans une &lCarte de variable&r. Cette carte contient une référence en direct vers l'entité présente à cet endroit.",
   "info_book.integratednbt.tutorials.entity_nbt_variable.text2": "Ensuite, utilisez l'opérateur &lEntity NBT&r dans le &lProgrammeur logique&r pour convertir la valeur de l'entité en un compound NBT. Créez une variable &oOpérateur&r qui applique &lEntity NBT&r à votre carte &oEntity&r. La carte résultante contient l'intégralité des données NBT de l'entité sous forme de variable de type &3NBT&0.",
   "info_book.integratednbt.tutorials.entity_nbt_variable.text3": "Placez la &lCarte de variable&r &3NBT&0 dans l'emplacement de gauche de votre &lExtracteur NBT&r. Le bloc chargera et affichera l'arbre NBT complet de l'entité. Assurez-vous que le &oMode référence&r est actif, placez une &lCarte de variable&r vierge dans l'emplacement de droite, parcourez l'arbre, puis faites un clic gauche sur une valeur pour sélectionner son chemin d'extraction et écrire la référence extraite.",
-
   "info_book.integratednbt.tutorials.display_entity_position": "Filature discrète d'entité",
   "info_book.integratednbt.tutorials.display_entity_position.text1": "Avec la variable de référence NBT de l'entité obtenue à l'étape précédente, ouvrez à nouveau votre &lExtracteur NBT&r et placez une &lCarte de variable&r vierge dans l'emplacement de droite. Développez la liste &oPos&r, qui stocke les coordonnées X, Y et Z de l'entité sous forme de doubles. Faites un clic gauche sur l'entrée &o#0&r pour sélectionner la position X et écrire la valeur extraite.",
   "info_book.integratednbt.tutorials.display_entity_position.text2": "Placez un &lPanneau d'affichage&r sur un &lCâble&r du même réseau et insérez-y la &lCarte de variable&r contenant la position X extraite. Le panneau affichera la coordonnée X actuelle de l'entité en temps réel. Tant que l'&oActualisation automatique&r est activée sur l'&lExtracteur NBT&r, la valeur se met à jour à chaque déplacement de l'entité."
