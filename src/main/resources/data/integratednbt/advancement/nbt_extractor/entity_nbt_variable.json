@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "integratednbt:nbt_extractor"
+      "id": "integratednbt:nbt_extractor"
     },
     "title": {
       "translate": "advancement.integratednbt.entity_nbt_variable"
