@@ -21,6 +21,12 @@ Understanding this architecture is crucial when making changes:
 - **`loader-forge/`**: Forge-specific implementation and integration code (for older Minecraft versions).
 - **`loader-neoforge/`**: NeoForge-specific implementation and integration code (for newer Minecraft versions).
 
+For NeoForge, relevant jars can for example be found in the following locations:
+
+- Minecraft merged jar: `build/moddev/artifacts/minecraft-patched-26.1.1.1-beta-merged.jar`
+- NeoForge: `~/.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/26.1.1.1-beta/214ad5aa883deaf6d71298baf4232bb994305f36/neoforge-26.1.1.1-beta-universal.jar`
+- CyclopsCore source: `~/.m2/repository/org/cyclops/cyclopscore/cyclopscore-26.1.1-neoforge/1.25.5-DEV/cyclopscore-26.1.1-neoforge-1.25.5-DEV-sources.jar`
+
 ### Making Changes in Multi-loader Setups
 
 When adding features or fixing bugs:
@@ -207,6 +213,12 @@ Since primers can be quite large, download them first, and then use grep on the 
 The blogs of https://neoforged.net/ and https://fabricmc.net/blog/ may also contain useful porting help.
 
 After making all necessary changes, make sure the code fully compiles and the (game) tests pass.
+
+## Finding code in dependencies
+
+When searching for dependencies in `~/.gradle`, take into account that this directory may be very large,
+so make sure that lookups are as selective as possible (name, version, ...) to avoid slow lookups.
+When possible, lookup the relevant jar first, and only then look for specific classes within that jar.
 
 ## Visual testing
 
