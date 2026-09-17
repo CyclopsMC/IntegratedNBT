@@ -1,6 +1,7 @@
 package org.cyclops.integratednbt.evaluate.variable;
 
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.expression.VariableAdapter;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
@@ -10,14 +11,17 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt.ValueN
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
 import org.cyclops.integratednbt.evaluate.nbt.NbtValueConverter;
 
+import javax.annotation.Nullable;
+
 public class NbtExtractedVariable extends VariableAdapter<IValue> {
+    @Nullable
     private IVariable<ValueNbt> sourceNBTVariable;
     private SegmentedNbtPath extractionPath;
     private Tag cachedValue;
     private byte defaultNBTId;
 
     public NbtExtractedVariable(
-        IVariable<ValueNbt> sourceNBTVariable,
+        @Nullable IVariable<ValueNbt> sourceNBTVariable,
         SegmentedNbtPath extractionPath,
         byte defaultNBTId
     ) {
@@ -41,6 +45,11 @@ public class NbtExtractedVariable extends VariableAdapter<IValue> {
     }
 
     private void ensureCachedValue() throws EvaluationException {
+        if (this.sourceNBTVariable == null) {
+            // The source variable is not available anymore, e.g. after its network was broken up.
+            throw new EvaluationException(Component.translatable(
+                "integratednbt:nbt_extracted_variable.error.source_unavailable"));
+        }
         if (this.cachedValue == null) {
             this.sourceNBTVariable.addInvalidationListener(this);
             this.cachedValue =
