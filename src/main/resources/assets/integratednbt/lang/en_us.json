@@ -45,6 +45,7 @@
   "integratednbt:nbt_extracted_variable.tooltip.source_nbt_id": "§eExtract From: §r%s",
   "integratednbt:nbt_extracted_variable.tooltip.path": "§eExtraction Path: §r%s",
   "integratednbt:nbt_extracted_variable.tooltip.default_value": "§eDefault Value: §r%s",
+  "integratednbt:nbt_extracted_variable.error.source_unavailable": "The source NBT variable is not available",
   "integratednbt:nbt_extraction_operator": "Extraction",
   "integratednbt:nbt_extraction_operator.category_name": "NBT",
   "integratednbt:nbt_extraction_operator.full_name": "NBT Extraction",
