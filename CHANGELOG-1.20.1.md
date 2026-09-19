@@ -1,8 +1,15 @@
 # Changelog for Minecraft 1.20.1
 All notable changes to this project will be documented in this file.
 
+<a name="1.20.1-1.6.3"></a>
+## [1.20.1-1.6.3](/compare/1.20.1-1.6.2...1.20.1-1.6.3) - 2026-09-19 08:57:32
+
+
+### Fixed
+* Fix crash when the source NBT variable becomes unavailable (#6), Closes #4
+
 <a name="1.20.1-1.6.2"></a>
-## [1.20.1-1.6.2](/compare/1.20.1-1.6.1...1.20.1-1.6.2) - 2026-07-15 19:57:03
+## [1.20.1-1.6.2](/compare/1.20.1-1.6.1...1.20.1-1.6.2) - 2026-07-15 20:04:18 +0200
 
 
 ### Changed
