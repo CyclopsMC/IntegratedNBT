@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.sheep.Sheep;
@@ -14,6 +15,10 @@ import org.cyclops.cyclopscore.datastructure.Wrapper;
 import org.cyclops.cyclopscore.gametest.GameTest;
 import org.cyclops.integrateddynamics.api.evaluate.EvaluationException;
 import org.cyclops.integrateddynamics.api.evaluate.variable.IValue;
+import org.cyclops.integrateddynamics.api.evaluate.variable.IVariable;
+import org.cyclops.integrateddynamics.api.item.IVariableFacade;
+import org.cyclops.integrateddynamics.api.network.INetwork;
+import org.cyclops.integrateddynamics.api.network.IPartNetwork;
 import org.cyclops.integrateddynamics.api.part.PartPos;
 import org.cyclops.integrateddynamics.blockentity.BlockEntityVariablestore;
 import org.cyclops.integrateddynamics.core.evaluate.operator.Operators;
@@ -21,7 +26,9 @@ import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeDouble;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeNbt;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeOperator;
 import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeString;
+import org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypes;
 import org.cyclops.integrateddynamics.core.evaluate.variable.Variable;
+import org.cyclops.integrateddynamics.core.helper.NetworkHelpers;
 import org.cyclops.integrateddynamics.core.helper.PartHelpers;
 import org.cyclops.integrateddynamics.core.part.PartTypes;
 import org.cyclops.integrateddynamics.part.PartTypePanelDisplay;
@@ -31,7 +38,11 @@ import org.cyclops.integratednbt.blockentity.BlockEntityNbtExtractor;
 import org.cyclops.integratednbt.component.NbtExtractorRemoteBoundData;
 import org.cyclops.integratednbt.evaluate.NbtExtractorOutputMode;
 import org.cyclops.integratednbt.evaluate.nbt.path.SegmentedNbtPath;
+import org.cyclops.integratednbt.evaluate.variable.NbtExtractedVariableFacade;
 import org.cyclops.integratednbt.item.ItemNbtExtractorRemote;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.cyclops.integrateddynamics.gametest.GameTestHelpersIntegratedDynamics.assertValueEqual;
 import static org.cyclops.integrateddynamics.gametest.GameTestHelpersIntegratedDynamics.createVariableForOperator;
@@ -313,6 +324,72 @@ public class GameTestsNbtExtractor {
             assertValueEqual(helper,
                     partAndState.get().getRight().getDisplayValue(),
                     ValueTypeString.ValueString.of("$.Health"));
+        });
+    }
+
+    /**
+     * Tests that a REFERENCE-mode variable keeps working when its source NBT variable
+     * becomes unresolvable, e.g. after a logic cable between the extractor and the reader
+     * is broken.
+     *
+     * Regression test for https://github.com/CyclopsMC/IntegratedNBT/issues/4:
+     * the facade used to hand out a variable with a null source, which threw a
+     * NullPointerException and crashed the server as soon as it was evaluated.
+     */
+    @GameTest(template = TEMPLATE_EMPTY, timeoutTicks = TIMEOUT)
+    public void testNbtExtractorOutputModeReferenceSourceUnavailable(GameTestHelper helper) {
+        SegmentedNbtPath path = new SegmentedNbtPath();
+        path.pushKey("Health");
+
+        Pair<Sheep, BlockEntityNbtExtractor> setup = setupEntityReaderNetwork(
+                helper, NbtExtractorOutputMode.REFERENCE, path, DEFAULT_NBT_ID_FLOAT);
+        BlockEntityNbtExtractor nbtExtractor = setup.getRight();
+
+        Wrapper<ItemStack> outputVarCard = new Wrapper<>(ItemStack.EMPTY);
+        helper.runAfterDelay(5, () -> {
+            outputVarCard.set(nbtExtractor.getInventory()
+                    .getItem(BlockEntityNbtExtractor.VAR_OUT_SLOT).copy());
+
+            // Remove the entity variable from the network, so the source NBT operator
+            // variable of the extractor can not be resolved anymore.
+            // This is equivalent to breaking the logic cable towards the reader.
+            BlockEntityVariablestore variableStore = helper.getBlockEntity(POS.north(), BlockEntityVariablestore.class);
+            variableStore.getInventory().setItem(0, ItemStack.EMPTY);
+        });
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(!outputVarCard.get().isEmpty(),
+                    "Output variable card was not written yet");
+            helper.assertTrue(helper.getBlockEntity(POS.north(), BlockEntityVariablestore.class)
+                            .getInventory().getItem(0).isEmpty(),
+                    "Entity variable was not removed yet");
+
+            INetwork network = nbtExtractor.getNetwork();
+            helper.assertTrue(network != null, "Extractor is not part of a network");
+            IPartNetwork partNetwork = NetworkHelpers.getPartNetwork(network).orElse(null);
+            helper.assertTrue(partNetwork != null, "Extractor is not part of a part network");
+
+            IVariableFacade facade = getVariableFacade(helper.getLevel(), outputVarCard.get());
+            helper.assertTrue(facade instanceof NbtExtractedVariableFacade,
+                    "Output variable card is not an NBT extracted variable but: " + facade);
+
+            IVariable<?> variable = facade.getVariable(network, partNetwork);
+            if (variable != null) {
+                // Evaluating must not throw anything other than an EvaluationException
+                try {
+                    variable.getValue();
+                } catch (EvaluationException e) {
+                    // Expected when the source NBT variable is unavailable
+                }
+            }
+            helper.assertTrue(variable == null,
+                    "Expected no variable when the source NBT variable is unavailable");
+
+            // And the invalid source must be reported as a validation error
+            List<MutableComponent> errors = new ArrayList<>();
+            facade.validate(network, partNetwork, errors::add, ValueTypes.CATEGORY_ANY);
+            helper.assertTrue(!errors.isEmpty(),
+                    "Expected a validation error when the source NBT variable is unavailable");
         });
     }
 

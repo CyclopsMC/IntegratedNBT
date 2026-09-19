@@ -109,6 +109,7 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
             }
             IVariable<ValueNbt> sourceNbtVariable = sourceNbtVariableFacade.getVariable(network, partNetwork);
             if (sourceNbtVariable == null) {
+                // The source variable can not be resolved, e.g. because the network was broken up.
                 return null;
             }
             return (IVariable<V>) new NbtExtractedVariable(
@@ -145,8 +146,12 @@ public class NbtExtractedVariableFacade extends VariableFacadeBase {
                     throw new ProxyVariableFacade.VariableRecursionException("Detected infinite recursion for variable references.");
                 }
                 this.isValidatingVariable = true;
-                getVariable(network, partNetwork);
+                IVariable<?> sourceVariable = getVariable(network, partNetwork);
                 this.isValidatingVariable = false;
+                if (sourceVariable == null) {
+                    validator.addError(Component.translatable(
+                        "integratednbt:nbt_extracted_variable.error.source_unavailable"));
+                }
             }
         }
     }
