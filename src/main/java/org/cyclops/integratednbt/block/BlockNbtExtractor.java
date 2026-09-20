@@ -1,6 +1,5 @@
 package org.cyclops.integratednbt.block;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,7 +7,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -32,11 +30,6 @@ public class BlockNbtExtractor extends BlockWithEntityGuiCabled {
         super(properties, BlockEntityNbtExtractor::new);
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH));
-    }
-
-    @Override
-    public MapCodec<? extends BaseEntityBlock> codec() {
-        return simpleCodec(BlockNbtExtractor::new);
     }
 
     @Nullable
