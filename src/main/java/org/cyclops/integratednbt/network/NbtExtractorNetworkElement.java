@@ -62,7 +62,7 @@ public class NbtExtractorNetworkElement extends TileNetworkElement<BlockEntityNb
         return NetworkHelpers.getPartNetwork(network).map(partNetwork -> partNetwork
                 .addVariableContainer(DimPos.of(
                         blockEntity.getLevel(),
-                        blockEntity.worldPosition
+                        blockEntity.getBlockPos()
                 ))
         ).orElse(false);
     }
@@ -76,7 +76,7 @@ public class NbtExtractorNetworkElement extends TileNetworkElement<BlockEntityNb
         NetworkHelpers.getPartNetwork(network).ifPresent(partNetwork -> partNetwork
                 .removeVariableContainer(DimPos.of(
                         be.getLevel(),
-                        be.worldPosition
+                        be.getBlockPos()
                 ))
         );
     }
